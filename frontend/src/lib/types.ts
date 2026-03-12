@@ -1,0 +1,64 @@
+export type UserRole = "ADMIN" | "MANAGER" | "CUSTOMER";
+
+export type User = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  name?: string;
+  email: string;
+  phone?: string;
+  role: UserRole;
+  isActive: boolean;
+};
+
+export type Category = { id: number; name: string; slug: string };
+
+export type ProductImage = { id: number; imageUrl: string };
+export type ProductColor = { id: number; colorName: string; colorCode: string; stock?: number };
+
+export type Product = {
+  id: number;
+  name: string;
+  slug: string;
+  shortDescription?: string;
+  description?: string;
+  priceCents: number;
+  stock: number;
+  category: Category;
+  images: ProductImage[];
+  availableColors: ProductColor[];
+};
+
+export type Address = {
+  id: number;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isDefault: boolean;
+};
+
+export type OrderItem = {
+  id: number;
+  productId?: number;
+  productNameSnapshot: string;
+  productPriceSnapshotCents: number;
+  colorName?: string;
+  quantity: number;
+  subtotalCents: number;
+};
+
+export type Order = {
+  id: number;
+  totalAmountCents: number;
+  status: string;
+  paymentStatus: string;
+  createdAt: string;
+  user?: { id: number; name: string; email: string };
+  address: Address;
+  items: OrderItem[];
+};

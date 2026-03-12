@@ -1,0 +1,14 @@
+export { HeroSection } from './HeroSection';
+export { FeaturedCategories } from './FeaturedCategories';
+export { BestsellingProducts } from './BestsellingProducts';
+export { HomeProductCard } from './HomeProductCard';
+export { PromoBanner } from './PromoBanner';
+export { SplitPromoCards } from './SplitPromoCards';
+export { DealOfTheDay } from './DealOfTheDay';
+export { NewArrivalsSection } from './NewArrivalsSection';
+export { ProductColumnsStrip } from './ProductColumnsStrip';
+export { BrandBenefits } from './BrandBenefits';
+export { Testimonials } from './Testimonials';
+export { LatestArticles } from './LatestArticles';
+export { InstagramStrip } from './InstagramStrip';
+export { NewsletterSignup } from './NewsletterSignup';
