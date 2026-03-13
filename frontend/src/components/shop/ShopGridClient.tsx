@@ -2,10 +2,13 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
 import type { Product } from '@/lib/types';
 import { MOCK_PRODUCTS } from '@/lib/mock-products';
+import { useCartStore } from '@/store/cart-store';
+import { useWishlistStore } from '@/store/wishlist-store';
 
 type ProductsResponse = {
   data: Product[];
@@ -17,6 +20,10 @@ type ShopGridClientProps = {
 };
 
 export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClientProps) {
+  const router = useRouter();
+  const { items: cartItems, addToCart } = useCartStore();
+  const { items: wishlistItems, toggleWishlist } = useWishlistStore();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'default' | 'low' | 'high'>('default');
@@ -386,16 +393,90 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
               {paginatedProducts.map((product, index) => {
                 const imageUrl = product.images?.[0]?.imageUrl || '';
                 const isSale = (startIndex + index) % 3 === 0;
+                const inCart = cartItems.some((item) => item.productId === product.id);
+                const inWishlist = wishlistItems.some((item) => item.productId === product.id);
                 return (
-                  <article key={product.id} className="group rounded-md border border-[#e5ecf6] bg-white p-3">
-                    <Link href={`/products/${product.slug}`} className="relative block overflow-hidden rounded bg-[#f4f8ff]">
-                      <div className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105" style={{ backgroundImage: `url(${imageUrl})` }} />
-                      {isSale && (
-                        <span className="absolute right-2 top-2 rounded bg-[#ff5a72] px-2 py-0.5 text-[10px] font-semibold text-white">
-                          Out Of Stock
+                  <article key={product.id} className="group relative rounded-md border border-[#e5ecf6] bg-white p-3">
+                    <div className="relative overflow-hidden rounded bg-[#f4f8ff]">
+                      <Link href={`/products/${product.slug}`} className="block">
+                        <div className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105" style={{ backgroundImage: `url(${imageUrl})` }} />
+                        {isSale && (
+                          <span className="absolute right-2 top-2 rounded bg-[#ff5a72] px-2 py-0.5 text-[10px] font-semibold text-white">
+                            Out Of Stock
+                          </span>
+                        )}
+                      </Link>
+
+                      <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+                      <button
+                        type="button"
+                        title={inCart ? 'View Cart' : 'Add To Cart'}
+                        onClick={() => {
+                          if (inCart) {
+                            router.push('/cart');
+                            return;
+                          }
+                          addToCart({
+                            productId: product.id,
+                            slug: product.slug,
+                            name: product.name,
+                            priceCents: product.priceCents,
+                            imageUrl,
+                            colorName: product.availableColors?.[0]?.colorName,
+                            quantity: 1,
+                          });
+                        }}
+                        className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${
+                          inCart ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                        }`}
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2m0 0L7 13h10l1.6-8H5.4zM9 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z" />
+                        </svg>
+                        <span className="pointer-events-none absolute -left-[86px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                          {inCart ? 'View Cart' : 'Add To Cart'}
                         </span>
-                      )}
-                    </Link>
+                      </button>
+                      <button
+                        type="button"
+                        title="Quick View"
+                        onClick={() => router.push(`/products/${product.slug}`)}
+                        className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span className="pointer-events-none absolute -left-[76px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                          Quick View
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        title="Add to Wishlist"
+                        onClick={() =>
+                          toggleWishlist({
+                            productId: product.id,
+                            slug: product.slug,
+                            name: product.name,
+                            priceCents: product.priceCents,
+                            imageUrl,
+                          })
+                        }
+                        className={`group/item relative grid h-12 w-12 place-items-center transition ${
+                          inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                        }`}
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span className="pointer-events-none absolute -left-[104px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                          Add to Wishlist
+                        </span>
+                      </button>
+                    </div>
+                    </div>
+
                     <p className="mt-3 text-xs text-[#667085]">{product.category?.name || 'Uncategorized'}</p>
                     <h3 className="mt-1 text-sm font-semibold text-[#12213f]">
                       <Link href={`/products/${product.slug}`} className="hover:text-[#0989ff]">{product.name}</Link>

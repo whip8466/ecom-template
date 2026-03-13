@@ -7,6 +7,7 @@ import { apiRequest } from '@/lib/api';
 import type { Product } from '@/lib/types';
 import { formatMoney } from '@/lib/format';
 import { useCartStore } from '@/store/cart-store';
+import { useWishlistStore } from '@/store/wishlist-store';
 import { MOCK_PRODUCTS } from '@/lib/mock-products';
 
 type ProductsResponse = {
@@ -17,7 +18,8 @@ export default function ProductDetailsPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const slug = params.slug;
-  const addToCart = useCartStore((state) => state.addToCart);
+  const { items: cartItems, addToCart } = useCartStore();
+  const { items: wishlistItems, toggleWishlist } = useWishlistStore();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -317,13 +319,88 @@ export default function ProductDetailsPage() {
             <p className="col-span-full text-center text-sm text-[#7b8aa3]">No related products found.</p>
           ) : (
             relatedProducts.map((item) => (
-              <article key={item.id} className="group rounded-md border border-[#e4ebf5] bg-white p-3">
-                <Link href={`/products/${item.slug}`} className="block overflow-hidden rounded bg-[#f4f8ff]">
-                  <div
-                    className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${item.images?.[0]?.imageUrl || ''})` }}
-                  />
-                </Link>
+              <article key={item.id} className="group relative rounded-md border border-[#e4ebf5] bg-white p-3">
+                <div className="relative overflow-hidden rounded bg-[#f4f8ff]">
+                  <Link href={`/products/${item.slug}`} className="block">
+                    <div
+                      className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105"
+                      style={{ backgroundImage: `url(${item.images?.[0]?.imageUrl || ''})` }}
+                    />
+                  </Link>
+                  <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+                  <button
+                    type="button"
+                    title={cartItems.some((cartItem) => cartItem.productId === item.id) ? 'View Cart' : 'Add To Cart'}
+                    onClick={() => {
+                      const inCart = cartItems.some((cartItem) => cartItem.productId === item.id);
+                      if (inCart) {
+                        router.push('/cart');
+                        return;
+                      }
+                      addToCart({
+                        productId: item.id,
+                        slug: item.slug,
+                        name: item.name,
+                        priceCents: item.priceCents,
+                        imageUrl: item.images?.[0]?.imageUrl,
+                        colorName: item.availableColors?.[0]?.colorName,
+                        quantity: 1,
+                      });
+                    }}
+                    className={`group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] transition ${
+                      cartItems.some((cartItem) => cartItem.productId === item.id)
+                        ? 'bg-[#0989ff] text-white'
+                        : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                    }`}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2m0 0L7 13h10l1.6-8H5.4zM9 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z" />
+                    </svg>
+                    <span className="pointer-events-none absolute -left-[86px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                      {cartItems.some((cartItem) => cartItem.productId === item.id) ? 'View Cart' : 'Add To Cart'}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    title="Quick View"
+                    onClick={() => router.push(`/products/${item.slug}`)}
+                    className="group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span className="pointer-events-none absolute -left-[76px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                      Quick View
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    title="Add to Wishlist"
+                    onClick={() =>
+                      toggleWishlist({
+                        productId: item.id,
+                        slug: item.slug,
+                        name: item.name,
+                        priceCents: item.priceCents,
+                        imageUrl: item.images?.[0]?.imageUrl,
+                      })
+                    }
+                    className={`group/item relative grid h-11 w-11 place-items-center transition ${
+                      wishlistItems.some((wishlistItem) => wishlistItem.productId === item.id)
+                        ? 'bg-[#0989ff] text-white'
+                        : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                    }`}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span className="pointer-events-none absolute -left-[104px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                      Add to Wishlist
+                    </span>
+                  </button>
+                </div>
+                </div>
                 <p className="mt-3 text-[11px] uppercase tracking-wide text-[#7b8aa3]">{item.category?.name}</p>
                 <h3 className="mt-1 text-sm font-semibold text-[#0f1f40]">
                   <Link href={`/products/${item.slug}`} className="hover:text-[#0989ff]">{item.name}</Link>

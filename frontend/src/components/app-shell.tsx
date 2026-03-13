@@ -6,9 +6,11 @@ import { useState, type FormEvent } from 'react';
 import type { User } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
+import { useWishlistStore } from '@/store/wishlist-store';
 
 function StorefrontHeader({
   cartCount,
+  wishlistCount,
   user,
   isAdmin,
   pathname,
@@ -16,6 +18,7 @@ function StorefrontHeader({
   router,
 }: {
   cartCount: number;
+  wishlistCount: number;
   user: User | null;
   isAdmin: boolean;
   pathname: string;
@@ -102,7 +105,7 @@ function StorefrontHeader({
 
       {/* Sticky main nav */}
       <div className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)]">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
           <Link
             href="/"
             className="font-display text-xl font-semibold text-[var(--navy)] transition-premium hover:opacity-90"
@@ -122,7 +125,7 @@ function StorefrontHeader({
                 onChange={(e) => setSearchText(e.target.value)}
               />
               <div
-                className="relative h-10 w-[255px] border-l border-[#d9e4f3]"
+                className="relative h-10 w-[170px] border-l border-[#d9e4f3]"
                 onBlur={(e) => {
                   if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
                     setIsSearchCategoryOpen(false);
@@ -174,11 +177,25 @@ function StorefrontHeader({
             </form>
           </div>
 
-          <nav className="flex items-center gap-2 sm:gap-4">
+          <nav className="flex items-center gap-1.5 sm:gap-2.5">
             <span className="hidden text-xs text-[var(--muted)] md:block">Hello, Sign In</span>
             <Link
+              href="/wishlist"
+              className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
+            >
+              <span className="sr-only">Wishlist</span>
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {wishlistCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[10px] font-semibold text-white">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
+            </Link>
+            <Link
               href="/cart"
-              className="relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
+              className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
             >
               <span className="sr-only">Cart</span>
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -452,6 +469,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0));
+  const wishlistCount = useWishlistStore((state) => state.items.length);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'MANAGER';
   const isAdminRoute = pathname.startsWith('/admin');
@@ -516,6 +534,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-[var(--border)] bg-[var(--card-bg)]">
         <StorefrontHeader
           cartCount={cartCount}
+          wishlistCount={wishlistCount}
           user={user}
           isAdmin={isAdmin}
           pathname={pathname}

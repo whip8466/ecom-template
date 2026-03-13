@@ -40,7 +40,7 @@ export function PromoBanner() {
                 backgroundImage: 'url(https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80)',
               }}
             />
-            <div className="absolute -bottom-3 -right-3 h-20 w-20 rounded-xl bg-[var(--accent)]" />
+            <div className="absolute -bottom-2 -right-2 h-20 w-20 rounded-xl bg-[var(--accent)]" />
           </div>
         </div>
       </div>

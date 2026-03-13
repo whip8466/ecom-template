@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Product } from '@/lib/types';
 import { formatMoney } from '@/lib/format';
+import { useCartStore } from '@/store/cart-store';
+import { useWishlistStore } from '@/store/wishlist-store';
 
 type HomeProductCardProps = {
   product: Product;
@@ -23,15 +26,23 @@ function StarRating() {
 }
 
 export function HomeProductCard({ product, badge, discountPercent }: HomeProductCardProps) {
+  const router = useRouter();
+  const { items: cartItems, addToCart } = useCartStore();
+  const { items: wishlistItems, toggleWishlist } = useWishlistStore();
   const imageUrl = product.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80';
   const hasDiscount = discountPercent != null && discountPercent > 0;
   const discountedCents = hasDiscount
     ? Math.round(product.priceCents * (1 - discountPercent / 100))
     : product.priceCents;
+  const inCart = cartItems.some((item) => item.productId === product.id);
+  const inWishlist = wishlistItems.some((item) => item.productId === product.id);
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)] transition-premium hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
-      <Link href={`/products/${product.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-[var(--cream)]">
+      <div className="relative block aspect-[4/5] overflow-hidden bg-[var(--cream)]">
+        <Link href={`/products/${product.slug}`} className="absolute inset-0 z-0">
+          <span className="sr-only">View {product.name}</span>
+        </Link>
         <div
           className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
           style={{ backgroundImage: `url(${imageUrl})` }}
@@ -39,40 +50,93 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
         <div className="pointer-events-none absolute inset-x-4 bottom-4 translate-y-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <button
             type="button"
+            onClick={() => {
+              if (inCart) {
+                router.push('/cart');
+                return;
+              }
+              addToCart({
+                productId: product.id,
+                slug: product.slug,
+                name: product.name,
+                priceCents: product.priceCents,
+                imageUrl,
+                colorName: product.availableColors?.[0]?.colorName,
+                quantity: 1,
+              });
+            }}
             className="pointer-events-auto w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-premium hover:bg-[var(--accent-hover)]"
           >
-            Add to Cart
+            {inCart ? 'View Cart' : 'Add to Cart'}
           </button>
         </div>
 
-        <div className="absolute right-3 top-3 flex translate-x-2 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+        <div className="absolute bottom-2 right-2 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+          <button
+            type="button"
+            aria-label={inCart ? 'View cart' : 'Add to cart'}
+            onClick={() => {
+              if (inCart) {
+                router.push('/cart');
+                return;
+              }
+              addToCart({
+                productId: product.id,
+                slug: product.slug,
+                name: product.name,
+                priceCents: product.priceCents,
+                imageUrl,
+                colorName: product.availableColors?.[0]?.colorName,
+                quantity: 1,
+              });
+            }}
+            className={`relative h-11 w-11 border-b border-[#edf2f8] transition-premium ${
+              inCart ? 'bg-[var(--accent)] text-white' : 'bg-white text-[var(--navy)] hover:bg-[var(--accent)] hover:text-white'
+            }`}
+          >
+            <svg className="mx-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2m0 0L7 13h10l1.6-8H5.4zM9 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z" />
+            </svg>
+            <span className="pointer-events-none absolute -left-20 top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover:block">
+              {inCart ? 'View Cart' : 'Add to Cart'}
+            </span>
+          </button>
           <button
             type="button"
             aria-label="Quick view"
-            className="h-9 w-9 rounded-full bg-white text-[var(--navy)] shadow-md transition-premium hover:bg-[var(--accent)] hover:text-white"
+            onClick={() => router.push(`/products/${product.slug}`)}
+            className="relative h-11 w-11 border-b border-[#edf2f8] bg-white text-[var(--navy)] transition-premium hover:bg-[var(--accent)] hover:text-white"
           >
             <svg className="mx-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
+            <span className="pointer-events-none absolute -left-20 top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover:block">
+              Quick View
+            </span>
           </button>
           <button
             type="button"
             aria-label="Add to wishlist"
-            className="h-9 w-9 rounded-full bg-white text-[var(--navy)] shadow-md transition-premium hover:bg-[var(--accent)] hover:text-white"
+            onClick={() =>
+              toggleWishlist({
+                productId: product.id,
+                slug: product.slug,
+                name: product.name,
+                priceCents: product.priceCents,
+                imageUrl,
+              })
+            }
+            className={`relative h-11 w-11 transition-premium ${
+              inWishlist ? 'bg-[var(--accent)] text-white' : 'bg-white text-[var(--navy)] hover:bg-[var(--accent)] hover:text-white'
+            }`}
           >
             <svg className="mx-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-          </button>
-          <button
-            type="button"
-            aria-label="Compare"
-            className="h-9 w-9 rounded-full bg-white text-[var(--navy)] shadow-md transition-premium hover:bg-[var(--accent)] hover:text-white"
-          >
-            <svg className="mx-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l-4-4m4 4l4-4" />
-            </svg>
+            <span className="pointer-events-none absolute -left-28 top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover:block">
+              Add to Wishlist
+            </span>
           </button>
         </div>
 
@@ -85,7 +149,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
             {badge === 'sale' && discountPercent ? `-${discountPercent}%` : 'New'}
           </span>
         )}
-      </Link>
+      </div>
       <div className="flex flex-1 flex-col p-5">
         {product.category && (
           <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">

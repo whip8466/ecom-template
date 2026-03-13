@@ -1,10 +1,16 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCartStore } from '@/store/cart-store';
+import { useWishlistStore } from '@/store/wishlist-store';
 
 type ProductCardData = {
-  id: string;
+  id: number;
   slug: string;
   name: string;
   category: string;
+  priceCents: number;
   price: string;
   oldPrice?: string;
   badge?: string;
@@ -21,14 +27,14 @@ const categoryItems = [
 ];
 
 const productCards: ProductCardData[] = [
-  { id: '1', slug: 'headphones-wireless', name: 'Headphones Wireless', category: 'Headphone', price: '$249.00', oldPrice: '$289.00', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900&q=80', badge: '-15%' },
-  { id: '2', slug: 'gaming-headphone', name: 'Gaming Headphone', category: 'Audio', price: '$199.00', oldPrice: '$229.00', image: 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=900&q=80' },
-  { id: '3', slug: 'smart-watch-active', name: 'Smart Watch Active', category: 'Watch', price: '$399.00', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&q=80', badge: 'New' },
-  { id: '4', slug: 'cpu-air-cooler', name: 'CPU Air Cooler', category: 'Gaming', price: '$89.00', image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=900&q=80' },
-  { id: '5', slug: 'samsung-tab-pro', name: 'Samsung Tab Pro', category: 'Phone', price: '$999.00', oldPrice: '$1099.00', image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=900&q=80', badge: '-10%' },
-  { id: '6', slug: 'deepcool-air-cooler', name: 'DeepCool Air Cooler', category: 'Components', price: '$559.00', image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=900&q=80' },
-  { id: '7', slug: 'apple-ipad-air', name: 'Apple iPad Air', category: 'Tablet', price: '$699.00', oldPrice: '$749.00', image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=900&q=80' },
-  { id: '8', slug: 'bluetooth-earbuds', name: 'Bluetooth Earbuds', category: 'Gaming', price: '$89.00', image: 'https://images.unsplash.com/photo-1622297845775-5ff3fef71d13?w=900&q=80' },
+  { id: 10001, slug: 'headphones-wireless', name: 'Headphones Wireless', category: 'Headphone', priceCents: 24900, price: '$249.00', oldPrice: '$289.00', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900&q=80', badge: '-15%' },
+  { id: 10002, slug: 'gaming-headphone', name: 'Gaming Headphone', category: 'Audio', priceCents: 19900, price: '$199.00', oldPrice: '$229.00', image: 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=900&q=80' },
+  { id: 10008, slug: 'smart-watch-active', name: 'Smart Watch Active', category: 'Watch', priceCents: 39900, price: '$399.00', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&q=80', badge: 'New' },
+  { id: 10006, slug: 'cpu-air-cooler', name: 'CPU Air Cooler', category: 'Gaming', priceCents: 8900, price: '$89.00', image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=900&q=80' },
+  { id: 10005, slug: 'samsung-tab-pro', name: 'Samsung Tab Pro', category: 'Phone', priceCents: 99900, price: '$999.00', oldPrice: '$1099.00', image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=900&q=80', badge: '-10%' },
+  { id: 10007, slug: 'deepcool-air-cooler', name: 'DeepCool Air Cooler', category: 'Components', priceCents: 55900, price: '$559.00', image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=900&q=80' },
+  { id: 10004, slug: 'apple-ipad-air', name: 'Apple iPad Air', category: 'Tablet', priceCents: 69900, price: '$699.00', oldPrice: '$749.00', image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=900&q=80' },
+  { id: 10010, slug: 'bluetooth-earbuds', name: 'Bluetooth Earbuds', category: 'Gaming', priceCents: 8900, price: '$89.00', image: 'https://images.unsplash.com/photo-1622297845775-5ff3fef71d13?w=900&q=80' },
 ];
 
 const miniProducts = [
@@ -38,10 +44,16 @@ const miniProducts = [
 ];
 
 function ProductCard({ product }: { product: ProductCardData }) {
+  const router = useRouter();
+  const { items: cartItems, addToCart } = useCartStore();
+  const { items: wishlistItems, toggleWishlist } = useWishlistStore();
+  const inCart = cartItems.some((item) => item.productId === product.id);
+  const inWishlist = wishlistItems.some((item) => item.productId === product.id);
+
   return (
-    <article className="group rounded-md border border-[#e4ebf4] bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-md">
-      <Link href={`/products/${product.slug}`} className="block">
-        <div className="relative overflow-hidden rounded-md bg-[#f3f7ff]">
+    <article className="group relative rounded-md border border-[#e4ebf4] bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative overflow-hidden rounded-md bg-[#f3f7ff]">
+        <Link href={`/products/${product.slug}`} className="block">
           <div
             className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105"
             style={{ backgroundImage: `url(${product.image})` }}
@@ -51,8 +63,75 @@ function ProductCard({ product }: { product: ProductCardData }) {
               {product.badge}
             </span>
           )}
-        </div>
-      </Link>
+        </Link>
+        <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+        <button
+          type="button"
+          title={inCart ? 'View Cart' : 'Add To Cart'}
+          onClick={() => {
+            if (inCart) {
+              router.push('/cart');
+              return;
+            }
+            addToCart({
+              productId: product.id,
+              slug: product.slug,
+              name: product.name,
+              priceCents: product.priceCents,
+              imageUrl: product.image,
+              quantity: 1,
+            });
+          }}
+          className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${
+            inCart ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+          }`}
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2m0 0L7 13h10l1.6-8H5.4zM9 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z" />
+          </svg>
+          <span className="pointer-events-none absolute -left-[86px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+            {inCart ? 'View Cart' : 'Add To Cart'}
+          </span>
+        </button>
+        <button
+          type="button"
+          title="Quick View"
+          onClick={() => router.push(`/products/${product.slug}`)}
+          className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span className="pointer-events-none absolute -left-[76px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+            Quick View
+          </span>
+        </button>
+        <button
+          type="button"
+          title="Add to Wishlist"
+          onClick={() =>
+            toggleWishlist({
+              productId: product.id,
+              slug: product.slug,
+              name: product.name,
+              priceCents: product.priceCents,
+              imageUrl: product.image,
+            })
+          }
+          className={`group/item relative grid h-12 w-12 place-items-center transition ${
+            inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+          }`}
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span className="pointer-events-none absolute -left-[104px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+            Add to Wishlist
+          </span>
+        </button>
+      </div>
+      </div>
       <p className="mt-3 text-[11px] uppercase tracking-wide text-[#7c8ea6]">{product.category}</p>
       <h3 className="mt-1 text-sm font-semibold text-[#1b2a4e]">
         <Link href={`/products/${product.slug}`} className="hover:text-[#0989ff]">{product.name}</Link>
