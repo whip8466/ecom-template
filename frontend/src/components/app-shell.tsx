@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState, type FormEvent } from 'react';
 import type { User } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
@@ -21,6 +22,66 @@ function StorefrontHeader({
   logout: () => void;
   router: ReturnType<typeof useRouter>;
 }) {
+  const [activeMenu, setActiveMenu] = useState<'none' | 'categories' | 'shop' | 'blog'>('none');
+  const [activeCategory, setActiveCategory] = useState('mobile-tablets');
+  const searchCategories = ['Select Category', 'Electronics', 'Fashion', 'Beauty', 'Jewelry'];
+  const [selectedSearchCategory, setSelectedSearchCategory] = useState(searchCategories[0]);
+  const [isSearchCategoryOpen, setIsSearchCategoryOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+
+  const categoryItems = [
+    {
+      id: 'headphones',
+      name: 'Headphones',
+      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80',
+      submenu: ['Wireless', 'Gaming', 'Noise Cancelling'],
+    },
+    {
+      id: 'mobile-tablets',
+      name: 'Mobile Tablets',
+      image: 'https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=300&q=80',
+      submenu: ['Samsung', 'Apple'],
+    },
+    {
+      id: 'cpu-heat-pipes',
+      name: 'CPU Heat Pipes',
+      image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&q=80',
+      submenu: ['ARGB', 'Liquid', 'Tower'],
+    },
+    {
+      id: 'smart-watch',
+      name: 'Smart Watch',
+      image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=300&q=80',
+      submenu: ['Android', 'iOS', 'Sport'],
+    },
+    {
+      id: 'bluetooth',
+      name: 'Bluetooth',
+      image: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f37?w=300&q=80',
+      submenu: ['Earbuds', 'Headsets', 'Speakers'],
+    },
+  ];
+
+  const activeCategoryItem = categoryItems.find((item) => item.id === activeCategory) ?? categoryItems[0];
+  const activeCategoryIndex = Math.max(
+    0,
+    categoryItems.findIndex((item) => item.id === activeCategory),
+  );
+  const categoryRowHeight = 74;
+  const submenuTop = activeCategoryIndex * categoryRowHeight;
+  const handleSearchSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const query = searchText.trim();
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (selectedSearchCategory !== searchCategories[0]) {
+      params.set('category', selectedSearchCategory);
+    }
+    const queryString = params.toString();
+    router.push(queryString ? `/shop?${queryString}` : '/shop');
+    setIsSearchCategoryOpen(false);
+  };
+
   return (
     <>
       <div className="bg-[var(--accent)] text-white">
@@ -50,26 +111,67 @@ function StorefrontHeader({
           </Link>
 
           <div className="hidden flex-1 justify-center lg:flex">
-            <div className="flex w-full max-w-xl items-center overflow-hidden rounded-md border border-[var(--border)] bg-[var(--cream)]">
-              <select className="h-10 border-r border-[var(--border)] bg-white px-3 text-xs text-[var(--muted)] outline-none">
-                <option>Select Category</option>
-                <option>Electronics</option>
-                <option>Fashion</option>
-                <option>Beauty</option>
-              </select>
+            <form onSubmit={handleSearchSubmit} className="flex w-full max-w-xl items-center rounded-md border border-[#0989ff] bg-white">
               <input
                 type="search"
-                placeholder="Search products..."
-                className="h-10 w-full bg-transparent px-3 text-sm outline-none placeholder:text-[var(--muted)]"
+                placeholder="Search for Products..."
+                className="h-10 w-full bg-transparent px-4 text-sm outline-none placeholder:text-[#8c9db6]"
                 aria-label="Search"
+                onFocus={() => setIsSearchCategoryOpen(false)}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
               />
-              <button
-                type="button"
-                className="h-10 bg-[var(--accent)] px-4 text-xs font-medium text-white transition-premium hover:bg-[var(--accent-hover)]"
+              <div
+                className="relative h-10 w-[255px] border-l border-[#d9e4f3]"
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                    setIsSearchCategoryOpen(false);
+                  }
+                }}
               >
-                Search
+                <button
+                  type="button"
+                  onClick={() => setIsSearchCategoryOpen((open) => !open)}
+                  className="flex h-full w-full items-center justify-between px-4 text-sm font-semibold text-[#1f2f4e]"
+                >
+                  {selectedSearchCategory}
+                  <svg className="h-4 w-4 text-[#1f2f4e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isSearchCategoryOpen && (
+                  <div className="absolute left-0 top-full z-70 mt-1 w-full overflow-hidden rounded-sm border border-[#e6edf6] bg-white shadow-[0_10px_20px_rgba(16,24,40,0.12)]">
+                    {searchCategories.map((category, idx) => (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSearchCategory(category);
+                          setIsSearchCategoryOpen(false);
+                        }}
+                        className={`block w-full px-4 py-2.5 text-left text-sm transition ${
+                          idx === 0
+                            ? 'font-semibold text-[#111827]'
+                            : 'text-[#344054] hover:bg-[#f8fbff] hover:text-[#0989ff]'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
+                className="flex h-10 w-12 items-center justify-center bg-[#0989ff] text-white transition-premium hover:bg-[#0476df]"
+                aria-label="Search"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.1-4.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
+                </svg>
               </button>
-            </div>
+            </form>
           </div>
 
           <nav className="flex items-center gap-2 sm:gap-4">
@@ -104,26 +206,163 @@ function StorefrontHeader({
           </nav>
         </div>
 
-        {/* Secondary nav strip */}
-        <div className="border-t border-[var(--border)] bg-[#0f3b58]">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 sm:px-6 lg:px-8">
+        {/* Secondary nav strip with hover submenus */}
+        <div className="relative border-t border-[var(--border)] bg-white" onMouseLeave={() => setActiveMenu('none')}>
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-0 sm:px-6 lg:px-8">
             <button
               type="button"
-              className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-premium hover:bg-[var(--accent-hover)]"
+              onMouseEnter={() => setActiveMenu('categories')}
+              className="flex h-12 min-w-[230px] items-center justify-between bg-[#0989ff] px-4 text-sm font-semibold text-white"
             >
-              All Categories
+              <span className="flex items-center gap-3">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                All Categories
+              </span>
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div className="flex items-center gap-6 text-sm text-white/90">
-              <Link href="/" className="transition-premium hover:text-white">Home</Link>
-              <Link href="/" className="transition-premium hover:text-white">Shop</Link>
-              <Link href="/" className="transition-premium hover:text-white">Products</Link>
-              <Link href="/" className="transition-premium hover:text-white">Blog</Link>
-              <Link href="/" className="transition-premium hover:text-white">Contact</Link>
+
+            <nav className="flex flex-1 items-center gap-7 px-2 text-sm font-semibold text-[#101828]">
+              <Link href="/" onMouseEnter={() => setActiveMenu('none')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                Home
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Link>
+              <button type="button" onMouseEnter={() => setActiveMenu('shop')} className="flex items-center gap-1 py-3 text-[#0989ff]">
+                Shop
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                Products
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="py-3 hover:text-[#0989ff]">
+                Coupons
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('blog')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                Blog
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="py-3 hover:text-[#0989ff]">
+                Contact
+              </button>
+            </nav>
+
+            <div className="hidden items-center gap-2 text-xs text-[#101828] lg:flex" onMouseEnter={() => setActiveMenu('none')}>
+              <svg className="h-5 w-5 text-[#0989ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.95.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.129a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.209-.502l4.493 1.498a1 1 0 01.684.95V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <div className="leading-tight">
+                <p className="text-[11px] text-[#667085]">Hotline:</p>
+                <p className="font-semibold">+(402) 763 282 46</p>
+              </div>
             </div>
           </div>
+
+          {activeMenu === 'categories' && (
+            <div className="absolute left-0 right-0 top-full z-[70]">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="relative w-[300px] rounded-b-md bg-white shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                  {categoryItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onMouseEnter={() => setActiveCategory(item.id)}
+                      className={`flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
+                        activeCategory === item.id ? 'bg-[#f8fbff] text-[#0989ff]' : 'text-[#344054] hover:bg-[#f8fbff]'
+                      }`}
+                    >
+                      <div className="h-10 w-10 rounded bg-cover bg-center" style={{ backgroundImage: `url(${item.image})` }} />
+                      <span className="flex-1 text-sm font-semibold">{item.name}</span>
+                      <svg className="h-4 w-4 text-[#98a2b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  ))}
+
+                  <div
+                    className="absolute left-full min-h-[132px] w-[260px] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
+                    style={{ top: `${submenuTop}px` }}
+                  >
+                    <ul className="space-y-3">
+                      {activeCategoryItem.submenu.map((sub) => (
+                        <li key={sub}>
+                          <Link href="/" className="text-sm font-semibold text-[#344054] hover:text-[#0989ff]">
+                            {sub}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeMenu === 'shop' && (
+            <div className="absolute left-0 right-0 top-full z-[70]">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-5 gap-4 bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                  <div>
+                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Shop Pages</h4>
+                    <ul className="space-y-2 text-sm text-[#475467]">
+                      {['Grid Layout', 'Shop Categories', 'List Layout', 'Full width Layout', '1600px Layout', 'Left Sidebar', 'Right Sidebar', 'Hidden Sidebar'].map((item) => (
+                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Features</h4>
+                    <ul className="space-y-2 text-sm text-[#475467]">
+                      {['Filter Dropdown', 'Filters Offcanvas', 'Filters Sidebar', 'Load More button', '1600px Layout', 'Collections list', 'Hidden search', 'Search Full screen'].map((item) => (
+                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Hover Style</h4>
+                    <ul className="space-y-2 text-sm text-[#475467]">
+                      {['Hover Style 1', 'Hover Style 2', 'Hover Style 3', 'Hover Style 4'].map((item) => (
+                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded bg-[#f4f6fb] p-3">
+                    <div className="mb-3 aspect-[4/3] rounded bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=800&q=80)' }} />
+                    <Link href="/" className="inline-flex rounded bg-[#0989ff] px-4 py-2 text-xs font-semibold text-white">Phones</Link>
+                  </div>
+                  <div className="rounded bg-[#f4f6fb] p-3">
+                    <div className="mb-3 aspect-[4/3] rounded bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80)' }} />
+                    <Link href="/" className="inline-flex rounded bg-[#0989ff] px-4 py-2 text-xs font-semibold text-white">Headphones</Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeMenu === 'blog' && (
+            <div className="absolute left-0 right-0 top-full z-[70]">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="ml-[505px] w-[220px] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                  <ul className="space-y-3 text-sm text-[#475467]">
+                    {['Blog Standard', 'Blog Grid', 'Blog List', 'Blog Details Full Width', 'Blog Details'].map((item) => (
+                      <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>
