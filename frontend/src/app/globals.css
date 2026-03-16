@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f7ff;
+  --foreground: #152238;
+  --navy: #1d2e4b;
+  --navy-light: #2f446a;
+  --cream: #f8faff;
+  --accent: #0989ff;
+  --accent-hover: #0476df;
+  --muted: #67748a;
+  --muted-light: #8da0bd;
+  --border: #dce5f2;
+  --card-bg: #ffffff;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-serif: var(--font-playfair), Georgia, serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+/* Show pointer cursor for interactive elements */
+a[href],
+button,
+[role='button'],
+summary,
+select,
+label[for],
+input[type='button'],
+input[type='submit'],
+input[type='reset'] {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.font-display {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+/* Smooth scroll and focus styles */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Premium button and card hover transitions */
+@layer utilities {
+  .transition-premium {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.2s ease;
+  }
+}
+
+.price-range-input {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  width: 100%;
+  height: 8px;
+  transform: translateY(-50%);
+  background: transparent;
+  pointer-events: none;
+}
+
+.price-range-input::-webkit-slider-runnable-track {
+  background: transparent;
+  border: 0;
+  height: 8px;
+}
+
+.price-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  background: #0989ff;
+  box-shadow: 0 0 0 1px #0989ff;
+  margin-top: calc((8px - 20px) / 2);
+}
+
+.price-range-input::-moz-range-track {
+  background: transparent;
+  border: 0;
+  height: 8px;
+}
+
+.price-range-input::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  background: #0989ff;
+  box-shadow: 0 0 0 1px #0989ff;
+}

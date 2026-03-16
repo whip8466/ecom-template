@@ -1,0 +1,552 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, type FormEvent } from 'react';
+import type { User } from '@/lib/types';
+import { useAuthStore } from '@/store/auth-store';
+import { useCartStore } from '@/store/cart-store';
+import { useWishlistStore } from '@/store/wishlist-store';
+
+function StorefrontHeader({
+  cartCount,
+  wishlistCount,
+  user,
+  isAdmin,
+  pathname,
+  logout,
+  router,
+}: {
+  cartCount: number;
+  wishlistCount: number;
+  user: User | null;
+  isAdmin: boolean;
+  pathname: string;
+  logout: () => void;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const [activeMenu, setActiveMenu] = useState<'none' | 'categories' | 'shop' | 'blog'>('none');
+  const [activeCategory, setActiveCategory] = useState('mobile-tablets');
+  const searchCategories = ['Select Category', 'Electronics', 'Fashion', 'Beauty', 'Jewelry'];
+  const [selectedSearchCategory, setSelectedSearchCategory] = useState(searchCategories[0]);
+  const [isSearchCategoryOpen, setIsSearchCategoryOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+
+  const categoryItems = [
+    {
+      id: 'headphones',
+      name: 'Headphones',
+      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80',
+      submenu: ['Wireless', 'Gaming', 'Noise Cancelling'],
+    },
+    {
+      id: 'mobile-tablets',
+      name: 'Mobile Tablets',
+      image: 'https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=300&q=80',
+      submenu: ['Samsung', 'Apple'],
+    },
+    {
+      id: 'cpu-heat-pipes',
+      name: 'CPU Heat Pipes',
+      image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&q=80',
+      submenu: ['ARGB', 'Liquid', 'Tower'],
+    },
+    {
+      id: 'smart-watch',
+      name: 'Smart Watch',
+      image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=300&q=80',
+      submenu: ['Android', 'iOS', 'Sport'],
+    },
+    {
+      id: 'bluetooth',
+      name: 'Bluetooth',
+      image: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f37?w=300&q=80',
+      submenu: ['Earbuds', 'Headsets', 'Speakers'],
+    },
+  ];
+
+  const activeCategoryItem = categoryItems.find((item) => item.id === activeCategory) ?? categoryItems[0];
+  const activeCategoryIndex = Math.max(
+    0,
+    categoryItems.findIndex((item) => item.id === activeCategory),
+  );
+  const categoryRowHeight = 74;
+  const submenuTop = activeCategoryIndex * categoryRowHeight;
+  const handleSearchSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const query = searchText.trim();
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (selectedSearchCategory !== searchCategories[0]) {
+      params.set('category', selectedSearchCategory);
+    }
+    const queryString = params.toString();
+    router.push(queryString ? `/shop?${queryString}` : '/shop');
+    setIsSearchCategoryOpen(false);
+  };
+
+  return (
+    <>
+      <div className="bg-[var(--accent)] text-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs sm:px-6 lg:px-8">
+          <span>FREE Express Shipping On Orders $70+</span>
+          <span className="hidden sm:block">{user ? 'Setting • Wishlist • Cart' : 'Setting • Cart'}</span>
+        </div>
+      </div>
+
+      {/* Sticky main nav */}
+      <div className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)]">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
+          <Link
+            href="/"
+            className="font-display text-xl font-semibold text-[var(--navy)] transition-premium hover:opacity-90"
+          >
+            Lumina
+          </Link>
+
+          <div className="hidden flex-1 justify-center lg:flex">
+            <form onSubmit={handleSearchSubmit} className="flex w-full max-w-xl items-center rounded-none border border-[#0989ff] bg-white">
+              <input
+                type="search"
+                placeholder="Search for Products..."
+                className="h-10 w-full bg-transparent px-4 text-sm outline-none placeholder:text-[#8c9db6]"
+                aria-label="Search"
+                onFocus={() => setIsSearchCategoryOpen(false)}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <div
+                className="relative h-10 w-[180px] border-l border-[#d9e4f3]"
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                    setIsSearchCategoryOpen(false);
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsSearchCategoryOpen((open) => !open)}
+                  className="flex h-full w-full items-center justify-between whitespace-nowrap px-4 text-sm font-semibold text-[#1f2f4e]"
+                >
+                  {selectedSearchCategory}
+                  <svg className="h-4 w-4 text-[#1f2f4e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isSearchCategoryOpen && (
+                  <div className="absolute left-0 top-full z-70 mt-1 w-full overflow-hidden rounded-sm border border-[#e6edf6] bg-white shadow-[0_10px_20px_rgba(16,24,40,0.12)]">
+                    {searchCategories.map((category, idx) => (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSearchCategory(category);
+                          setIsSearchCategoryOpen(false);
+                        }}
+                        className={`block w-full px-4 py-2.5 text-left text-sm transition ${
+                          idx === 0
+                            ? 'font-semibold text-[#111827]'
+                            : 'text-[#344054] hover:bg-[#f8fbff] hover:text-[#0989ff]'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
+                className="flex h-10 w-16 items-center justify-center bg-[#0989ff] text-white transition-premium hover:bg-[#0476df]"
+                aria-label="Search"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.1-4.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <nav className="flex items-center gap-1.5 sm:gap-2.5">
+            {user && (
+              <span className="hidden text-xs text-[var(--muted)] md:block">
+                Hello, {user.name?.split(' ')[0] || 'Account'}
+              </span>
+            )}
+            {user && (
+              <Link
+                href="/wishlist"
+                className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
+              >
+                <span className="sr-only">Wishlist</span>
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[10px] font-semibold text-white">
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
+            <Link
+              href="/cart"
+              className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
+            >
+              <span className="sr-only">Cart</span>
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[10px] font-semibold text-white">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </Link>
+            {!user ? (
+              <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">Login</Link>
+            ) : (
+              <button type="button" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs" onClick={() => { logout(); if (pathname.startsWith('/admin') || pathname.startsWith('/account')) router.push('/'); }}>Logout</button>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="rounded-md border border-[var(--accent)] px-2.5 py-1.5 text-xs font-medium text-[var(--accent)] transition-premium hover:bg-[var(--accent)]/10"
+              >
+                Admin
+              </Link>
+            )}
+          </nav>
+        </div>
+
+        {/* Secondary nav strip with hover submenus */}
+        <div className="relative border-t border-[var(--border)] bg-white" onMouseLeave={() => setActiveMenu('none')}>
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-0 sm:px-6 lg:px-8">
+            <button
+              type="button"
+              onMouseEnter={() => setActiveMenu('categories')}
+              className="flex h-12 min-w-[230px] items-center justify-between bg-[#0989ff] px-4 text-sm font-semibold text-white"
+            >
+              <span className="flex items-center gap-3">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                All Categories
+              </span>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <nav className="flex flex-1 items-center gap-7 px-2 text-sm font-semibold text-[#101828]">
+              <Link href="/" onMouseEnter={() => setActiveMenu('none')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                Home
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Link>
+              <button type="button" onMouseEnter={() => setActiveMenu('shop')} className="flex items-center gap-1 py-3 text-[#0989ff]">
+                Shop
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                Products
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="py-3 hover:text-[#0989ff]">
+                Coupons
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('blog')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                Blog
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="py-3 hover:text-[#0989ff]">
+                Contact
+              </button>
+            </nav>
+
+            <div className="hidden items-center gap-2 text-xs text-[#101828] lg:flex" onMouseEnter={() => setActiveMenu('none')}>
+              <svg className="h-5 w-5 text-[#0989ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.95.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.129a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.209-.502l4.493 1.498a1 1 0 01.684.95V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <div className="leading-tight">
+                <p className="text-[11px] text-[#667085]">Hotline:</p>
+                <p className="font-semibold">+(402) 763 282 46</p>
+              </div>
+            </div>
+          </div>
+
+          {activeMenu === 'categories' && (
+            <div className="absolute left-0 right-0 top-full z-[70]">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="relative w-[300px] rounded-b-md bg-white shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                  {categoryItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onMouseEnter={() => setActiveCategory(item.id)}
+                      className={`flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
+                        activeCategory === item.id ? 'bg-[#f8fbff] text-[#0989ff]' : 'text-[#344054] hover:bg-[#f8fbff]'
+                      }`}
+                    >
+                      <div className="h-10 w-10 rounded bg-cover bg-center" style={{ backgroundImage: `url(${item.image})` }} />
+                      <span className="flex-1 text-sm font-semibold">{item.name}</span>
+                      <svg className="h-4 w-4 text-[#98a2b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  ))}
+
+                  <div
+                    className="absolute left-full min-h-[132px] w-[260px] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
+                    style={{ top: `${submenuTop}px` }}
+                  >
+                    <ul className="space-y-3">
+                      {activeCategoryItem.submenu.map((sub) => (
+                        <li key={sub}>
+                          <Link href="/" className="text-sm font-semibold text-[#344054] hover:text-[#0989ff]">
+                            {sub}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeMenu === 'shop' && (
+            <div className="absolute left-0 right-0 top-full z-[70]">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-5 gap-4 bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                  <div>
+                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Shop Pages</h4>
+                    <ul className="space-y-2 text-sm text-[#475467]">
+                      {['Grid Layout', 'Shop Categories', 'List Layout', 'Full width Layout', '1600px Layout', 'Left Sidebar', 'Right Sidebar', 'Hidden Sidebar'].map((item) => (
+                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Features</h4>
+                    <ul className="space-y-2 text-sm text-[#475467]">
+                      {['Filter Dropdown', 'Filters Offcanvas', 'Filters Sidebar', 'Load More button', '1600px Layout', 'Collections list', 'Hidden search', 'Search Full screen'].map((item) => (
+                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Hover Style</h4>
+                    <ul className="space-y-2 text-sm text-[#475467]">
+                      {['Hover Style 1', 'Hover Style 2', 'Hover Style 3', 'Hover Style 4'].map((item) => (
+                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded bg-[#f4f6fb] p-3">
+                    <div className="mb-3 aspect-[4/3] rounded bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=800&q=80)' }} />
+                    <Link href="/" className="inline-flex rounded bg-[#0989ff] px-4 py-2 text-xs font-semibold text-white">Phones</Link>
+                  </div>
+                  <div className="rounded bg-[#f4f6fb] p-3">
+                    <div className="mb-3 aspect-[4/3] rounded bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80)' }} />
+                    <Link href="/" className="inline-flex rounded bg-[#0989ff] px-4 py-2 text-xs font-semibold text-white">Headphones</Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeMenu === 'blog' && (
+            <div className="absolute left-0 right-0 top-full z-[70]">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="ml-[505px] w-[220px] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                  <ul className="space-y-3 text-sm text-[#475467]">
+                    {['Blog Standard', 'Blog Grid', 'Blog List', 'Blog Details Full Width', 'Blog Details'].map((item) => (
+                      <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function StorefrontFooter() {
+  return (
+    <footer className="mt-24 border-t border-[var(--border)] bg-[var(--cream)]">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+          <div className="lg:col-span-2">
+            <Link href="/" className="font-display text-2xl font-semibold text-[var(--navy)]">
+              Lumina
+            </Link>
+            <p className="mt-4 max-w-sm text-sm text-[var(--muted)]">
+              Curated fashion, beauty, and home decor for modern living. Quality you can trust, style that lasts.
+            </p>
+            <div className="mt-6 flex gap-4">
+              <a href="#" className="text-[var(--muted)] transition-premium hover:text-[var(--accent)]" aria-label="Facebook">
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              </a>
+              <a href="#" className="text-[var(--muted)] transition-premium hover:text-[var(--accent)]" aria-label="Instagram">
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              </a>
+              <a href="#" className="text-[var(--muted)] transition-premium hover:text-[var(--accent)]" aria-label="Pinterest">
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.372-12 12 0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.214 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.123.347 2.306.535 3.55.535 6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
+              </a>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Shop</h4>
+            <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">New Arrivals</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Best Sellers</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Collections</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Sale</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Support</h4>
+            <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Contact Us</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Shipping Info</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Returns</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">FAQ</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Company</h4>
+            <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">About Us</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Privacy Policy</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Terms of Service</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Careers</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[var(--border)] pt-8 sm:flex-row">
+          <p className="text-sm text-[var(--muted)]">© {new Date().getFullYear()} Lumina. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <div className="flex gap-6 text-sm text-[var(--muted)]">
+              <span>Visa</span>
+              <span>Mastercard</span>
+              <span>Amex</span>
+              <span>PayPal</span>
+            </div>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-premium hover:bg-[var(--cream)] hover:text-[var(--navy)]"
+              aria-label="Scroll to top"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
+  const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0));
+  const wishlistCount = useWishlistStore((state) => state.items.length);
+
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  if (isAdminRoute) {
+    return (
+      <div className="min-h-screen bg-slate-100 text-slate-900">
+        <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <aside className="hidden w-64 rounded-xl border border-slate-200 bg-white p-4 md:block">
+            <p className="text-lg font-bold">Admin Panel</p>
+            <p className="mt-1 text-xs text-slate-500">Management workspace</p>
+            <nav className="mt-4 space-y-1 text-sm">
+              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin">
+                Dashboard
+              </Link>
+              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin/products">
+                Products
+              </Link>
+              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin/categories">
+                Categories
+              </Link>
+              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin/orders">
+                Orders
+              </Link>
+            </nav>
+          </aside>
+
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
+            <header className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm text-slate-500">Admin area</p>
+                  <p className="font-semibold">{user?.name || user?.email || 'Signed in user'}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link className="rounded-md border border-slate-300 px-3 py-1.5 text-sm" href="/">
+                    Storefront
+                  </Link>
+                  <button
+                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                    onClick={() => {
+                      logout();
+                      router.push('/login');
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </header>
+            <main className="min-w-0">{children}</main>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const isHome = pathname === '/';
+
+  return (
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      <header className="border-b border-[var(--border)] bg-[var(--card-bg)]">
+        <StorefrontHeader
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
+          user={user}
+          isAdmin={isAdmin}
+          pathname={pathname}
+          logout={logout}
+          router={router}
+        />
+      </header>
+      <main className="min-h-screen">
+        {isHome ? children : (
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            {children}
+          </div>
+        )}
+      </main>
+      <StorefrontFooter />
+    </div>
+  );
+}

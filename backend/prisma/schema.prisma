@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  firstName    String    @map("first_name") @db.VarChar(120)
+  lastName     String    @map("last_name") @db.VarChar(120)
+  name         String?
+  email        String    @unique
+  phone        String?
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(CUSTOMER)
+  isActive     Boolean   @default(true) @map("is_active")
+  addresses    Address[]
+  orders       Order[]
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("users")
+}
+
+model Address {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName     String   @map("full_name")
+  phone        String
+  addressLine1 String   @map("address_line1")
+  addressLine2 String?  @map("address_line2")
+  city         String
+  state        String
+  postalCode   String   @map("postal_code")
+  country      String
+  isDefault    Boolean  @default(false) @map("is_default")
+  orders       Order[]
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("addresses")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("categories")
+}
+
+model Product {
+  id              Int            @id @default(autoincrement())
+  name            String
+  slug            String         @unique
+  shortDescription String?       @map("short_description")
+  description     String?
+  priceCents      Int            @map("price_cents")
+  stock           Int            @default(0)
+  categoryId      Int            @map("category_id")
+  category        Category       @relation(fields: [categoryId], references: [id])
+  images          ProductImage[]
+  availableColors ProductColor[]
+  orderItems      OrderItem[]
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("products")
+}
+
+model ProductImage {
+  id       Int     @id @default(autoincrement())
+  productId Int    @map("product_id")
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageUrl String  @map("image_url")
+
+  @@map("product_images")
+}
+
+model ProductColor {
+  id        Int     @id @default(autoincrement())
+  productId Int     @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  colorName String  @map("color_name")
+  colorCode String  @map("color_code")
+  stock     Int?
+
+  @@map("product_colors")
+}
+
+model Order {
+  id               Int           @id @default(autoincrement())
+  userId           Int           @map("user_id")
+  user             User          @relation(fields: [userId], references: [id])
+  addressId        Int           @map("address_id")
+  address          Address       @relation(fields: [addressId], references: [id])
+  totalAmountCents Int           @map("total_amount_cents")
+  status           OrderStatus   @default(PENDING)
+  paymentStatus    PaymentStatus @default(PENDING) @map("payment_status")
+  items            OrderItem[]
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                       Int     @id @default(autoincrement())
+  orderId                  Int     @map("order_id")
+  order                    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId                Int     @map("product_id")
+  product                  Product @relation(fields: [productId], references: [id])
+  productNameSnapshot      String  @map("product_name_snapshot")
+  productPriceSnapshotCents Int    @map("product_price_snapshot_cents")
+  colorName                String? @map("color_name")
+  quantity                 Int
+  subtotalCents            Int     @map("subtotal_cents")
+
+  @@map("order_items")
+}
