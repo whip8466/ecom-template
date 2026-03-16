@@ -93,15 +93,6 @@ function StorefrontHeader({
           <span className="hidden sm:block">{user ? 'Setting • Wishlist • Cart' : 'Setting • Cart'}</span>
         </div>
       </div>
-      <div className="border-b border-[var(--border)] bg-white text-[var(--muted)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <span>English</span>
-            <span>USD</span>
-          </div>
-          <span>Hotline: +(402) 763 282 46</span>
-        </div>
-      </div>
 
       {/* Sticky main nav */}
       <div className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)]">
