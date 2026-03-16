@@ -1,5 +1,5 @@
 const { z } = require('zod');
-const { UserRole, OrderStatus, PaymentStatus } = require('../../constants/enums');
+const { OrderStatus, PaymentStatus } = require('../../constants/enums');
 
 const checkoutSchema = z.object({
   addressId: z.number().int().positive().optional(),
@@ -25,11 +25,6 @@ const checkoutSchema = z.object({
       })
     )
     .min(1),
-});
-
-const updateStatusSchema = z.object({
-  status: z.enum(Object.values(OrderStatus)),
-  paymentStatus: z.enum(Object.values(PaymentStatus)).optional(),
 });
 
 function toOrderDto(order) {
@@ -198,55 +193,6 @@ async function ordersRoutes(fastify) {
     return { data: toOrderDto(order) };
   });
 
-  fastify.get(
-    '/admin/orders',
-    { preHandler: [fastify.requireAnyRole([UserRole.ADMIN, UserRole.MANAGER])] },
-    async () => {
-      const orders = await fastify.prisma.order.findMany({
-        include: { address: true, items: { include: { product: true } }, user: true },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      return { data: orders.map(toOrderDto) };
-    }
-  );
-
-  fastify.get(
-    '/admin/orders/:id',
-    { preHandler: [fastify.requireAnyRole([UserRole.ADMIN, UserRole.MANAGER])] },
-    async (request, reply) => {
-      const id = Number(request.params.id);
-      const order = await fastify.prisma.order.findUnique({
-        where: { id },
-        include: { address: true, items: { include: { product: true } }, user: true },
-      });
-
-      if (!order) return reply.code(404).send({ message: 'Order not found' });
-      return { data: toOrderDto(order) };
-    }
-  );
-
-  fastify.patch(
-    '/admin/orders/:id/status',
-    { preHandler: [fastify.requireAnyRole([UserRole.ADMIN, UserRole.MANAGER])] },
-    async (request, reply) => {
-      const input = updateStatusSchema.parse(request.body);
-      const id = Number(request.params.id);
-      const prisma = fastify.prisma;
-      const order = await prisma.order.findUnique({ where: { id } });
-      if (!order) return reply.code(404).send({ message: 'Order not found' });
-
-      const updated = await prisma.order.update({
-        where: { id },
-        data: {
-          status: input.status,
-          ...(input.paymentStatus ? { paymentStatus: input.paymentStatus } : {}),
-        },
-      });
-
-      return { data: updated };
-    }
-  );
 }
 
 module.exports = ordersRoutes;

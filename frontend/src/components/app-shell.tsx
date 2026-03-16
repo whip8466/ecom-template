@@ -12,7 +12,6 @@ function StorefrontHeader({
   cartCount,
   wishlistCount,
   user,
-  isAdmin,
   pathname,
   logout,
   router,
@@ -20,7 +19,6 @@ function StorefrontHeader({
   cartCount: number;
   wishlistCount: number;
   user: User | null;
-  isAdmin: boolean;
   pathname: string;
   logout: () => void;
   router: ReturnType<typeof useRouter>;
@@ -207,15 +205,7 @@ function StorefrontHeader({
             {!user ? (
               <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">Login</Link>
             ) : (
-              <button type="button" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs" onClick={() => { logout(); if (pathname.startsWith('/admin') || pathname.startsWith('/account')) router.push('/'); }}>Logout</button>
-            )}
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="rounded-md border border-[var(--accent)] px-2.5 py-1.5 text-xs font-medium text-[var(--accent)] transition-premium hover:bg-[var(--accent)]/10"
-              >
-                Admin
-              </Link>
+              <button type="button" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs" onClick={() => { logout(); if (pathname.startsWith('/account')) router.push('/'); }}>Logout</button>
             )}
           </nav>
         </div>
@@ -468,62 +458,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0));
   const wishlistCount = useWishlistStore((state) => state.items.length);
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MANAGER';
-  const isAdminRoute = pathname.startsWith('/admin');
-
-  if (isAdminRoute) {
-    return (
-      <div className="min-h-screen bg-slate-100 text-slate-900">
-        <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <aside className="hidden w-64 rounded-xl border border-slate-200 bg-white p-4 md:block">
-            <p className="text-lg font-bold">Admin Panel</p>
-            <p className="mt-1 text-xs text-slate-500">Management workspace</p>
-            <nav className="mt-4 space-y-1 text-sm">
-              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin">
-                Dashboard
-              </Link>
-              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin/products">
-                Products
-              </Link>
-              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin/categories">
-                Categories
-              </Link>
-              <Link className="block rounded-md px-3 py-2 hover:bg-slate-100" href="/admin/orders">
-                Orders
-              </Link>
-            </nav>
-          </aside>
-
-          <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <header className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm text-slate-500">Admin area</p>
-                  <p className="font-semibold">{user?.name || user?.email || 'Signed in user'}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Link className="rounded-md border border-slate-300 px-3 py-1.5 text-sm" href="/">
-                    Storefront
-                  </Link>
-                  <button
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                    onClick={() => {
-                      logout();
-                      router.push('/login');
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </header>
-            <main className="min-w-0">{children}</main>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const isHome = pathname === '/';
 
   return (
@@ -533,7 +467,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           cartCount={cartCount}
           wishlistCount={wishlistCount}
           user={user}
-          isAdmin={isAdmin}
           pathname={pathname}
           logout={logout}
           router={router}
