@@ -1,49 +1,59 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { apiRequest } from '@/lib/api';
-import { getSafePostLoginPath } from '@/lib/auth-redirect';
 import { useAuthStore } from '@/store/auth-store';
 import type { User } from '@/lib/types';
 
 const schema = z.object({
+  fullName: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email(),
   password: z.string().min(6),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const setSession = useAuthStore((state) => state.setSession);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
   async function onSubmit(values: FormValues) {
     try {
       setError('');
-      const loginRes = await apiRequest<{ token: string; user: User }>('/api/auth/login', {
+      const [firstName = 'New', ...rest] = values.fullName.trim().split(/\s+/);
+      const lastName = rest.join(' ') || 'User';
+
+      const registerPayload = {
+        firstName,
+        lastName,
+        email: values.email,
+        password: values.password,
+        phone: '0000000000',
+      };
+
+      const registerRes = await apiRequest<{ token: string; user: User }>('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify(values),
+        body: JSON.stringify(registerPayload),
       });
-      setSession(loginRes.token, loginRes.user);
-      const redirectParam =
-        typeof window === 'undefined'
-          ? null
-          : new URLSearchParams(window.location.search).get('redirect');
-      router.push(getSafePostLoginPath(redirectParam, '/'));
+      setSession(registerRes.token, registerRes.user);
+      router.push('/');
     } catch (e) {
-      setError((e as Error).message || 'Auth failed');
+      setError((e as Error).message || 'Registration failed');
     }
   }
 
@@ -57,11 +67,11 @@ export default function LoginPage() {
       </div>
 
       <div className="relative mx-auto max-w-md rounded-md border border-[#e5ecf6] bg-white p-8 shadow-[0_12px_30px_rgba(16,24,40,0.08)]">
-        <h2 className="text-4xl font-semibold text-[#0f1f40]">Login to Lumina.</h2>
+        <h2 className="text-4xl font-semibold text-[#0f1f40]">Sign Up Lumina.</h2>
         <p className="mt-2 text-sm text-[#667085]">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-[#0989ff] hover:underline">
-            Create a free account
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-[#0989ff] hover:underline">
+            Sign in
           </Link>
         </p>
 
@@ -84,9 +94,19 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <p className="mt-4 text-center text-xs text-[#98a2b3]">or Sign in with Email</p>
+        <p className="mt-4 text-center text-xs text-[#98a2b3]">or Sign up with Email</p>
 
         <form className="mt-4 space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#111827]">Your Name</label>
+            <input
+              className="h-11 w-full rounded border border-[#d7e4f6] px-3 text-sm outline-none focus:border-[#0989ff]"
+              placeholder="John Doe"
+              {...register('fullName')}
+            />
+            {errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>}
+          </div>
+
           <div>
             <label className="mb-1 block text-sm font-medium text-[#111827]">Your Email</label>
             <input
@@ -129,27 +149,13 @@ export default function LoginPage() {
             {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-[#475467]">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              Remember me
-            </label>
-            <button type="button" className="text-[#0989ff] hover:underline">
-              Forgot Password?
-            </button>
-          </div>
-
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             disabled={isSubmitting}
             className="h-11 w-full rounded bg-[#0f1f40] px-4 text-sm font-semibold text-white hover:bg-[#102b57] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Please wait...' : 'Login'}
+            {isSubmitting ? 'Please wait...' : 'Sign Up'}
           </button>
         </form>
       </div>

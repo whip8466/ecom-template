@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { useAuthStore } from '@/store/auth-store';
 
 export default function AdminDashboardPage() {
@@ -11,7 +12,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref('/admin'));
       return;
     }
     if (user && user.role === 'CUSTOMER') {

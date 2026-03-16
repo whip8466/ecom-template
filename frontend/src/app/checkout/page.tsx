@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
 import type { Address } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
@@ -43,7 +44,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref('/checkout'));
       return;
     }
     apiRequest<{ data: Address[] }>('/api/user/addresses', { token })
@@ -56,7 +57,7 @@ export default function CheckoutPage() {
 
   async function placeOrder() {
     if (!token || !user) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref('/checkout'));
       return;
     }
 
@@ -129,7 +130,7 @@ export default function CheckoutPage() {
           <div className="mt-6 space-y-2 text-sm">
             <div className="border-y border-[#e8edf6] py-3 text-[#475467]">
               Returning customer?{' '}
-              <Link href="/login" className="font-medium text-[#0989ff] hover:underline">Click here to login</Link>
+              <Link href="/login?redirect=%2Fcheckout" className="font-medium text-[#0989ff] hover:underline">Click here to login</Link>
             </div>
             <div className="border-b border-[#e8edf6] py-3 text-[#475467]">
               Have a coupon?{' '}

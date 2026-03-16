@@ -90,7 +90,7 @@ function StorefrontHeader({
       <div className="bg-[var(--accent)] text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs sm:px-6 lg:px-8">
           <span>FREE Express Shipping On Orders $70+</span>
-          <span className="hidden sm:block">Setting • Wishlist • Cart</span>
+          <span className="hidden sm:block">{user ? 'Setting • Wishlist • Cart' : 'Setting • Cart'}</span>
         </div>
       </div>
       <div className="border-b border-[var(--border)] bg-white text-[var(--muted)]">
@@ -114,7 +114,7 @@ function StorefrontHeader({
           </Link>
 
           <div className="hidden flex-1 justify-center lg:flex">
-            <form onSubmit={handleSearchSubmit} className="flex w-full max-w-xl items-center rounded-md border border-[#0989ff] bg-white">
+            <form onSubmit={handleSearchSubmit} className="flex w-full max-w-xl items-center rounded-none border border-[#0989ff] bg-white">
               <input
                 type="search"
                 placeholder="Search for Products..."
@@ -125,7 +125,7 @@ function StorefrontHeader({
                 onChange={(e) => setSearchText(e.target.value)}
               />
               <div
-                className="relative h-10 w-[170px] border-l border-[#d9e4f3]"
+                className="relative h-10 w-[180px] border-l border-[#d9e4f3]"
                 onBlur={(e) => {
                   if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
                     setIsSearchCategoryOpen(false);
@@ -135,7 +135,7 @@ function StorefrontHeader({
                 <button
                   type="button"
                   onClick={() => setIsSearchCategoryOpen((open) => !open)}
-                  className="flex h-full w-full items-center justify-between px-4 text-sm font-semibold text-[#1f2f4e]"
+                  className="flex h-full w-full items-center justify-between whitespace-nowrap px-4 text-sm font-semibold text-[#1f2f4e]"
                 >
                   {selectedSearchCategory}
                   <svg className="h-4 w-4 text-[#1f2f4e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,10 +167,10 @@ function StorefrontHeader({
               </div>
               <button
                 type="submit"
-                className="flex h-10 w-12 items-center justify-center bg-[#0989ff] text-white transition-premium hover:bg-[#0476df]"
+                className="flex h-10 w-16 items-center justify-center bg-[#0989ff] text-white transition-premium hover:bg-[#0476df]"
                 aria-label="Search"
               >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.1-4.4a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
                 </svg>
               </button>
@@ -178,21 +178,27 @@ function StorefrontHeader({
           </div>
 
           <nav className="flex items-center gap-1.5 sm:gap-2.5">
-            <span className="hidden text-xs text-[var(--muted)] md:block">Hello, Sign In</span>
-            <Link
-              href="/wishlist"
-              className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
-            >
-              <span className="sr-only">Wishlist</span>
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              {wishlistCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[10px] font-semibold text-white">
-                  {wishlistCount > 99 ? '99+' : wishlistCount}
-                </span>
-              )}
-            </Link>
+            {user && (
+              <span className="hidden text-xs text-[var(--muted)] md:block">
+                Hello, {user.name?.split(' ')[0] || 'Account'}
+              </span>
+            )}
+            {user && (
+              <Link
+                href="/wishlist"
+                className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
+              >
+                <span className="sr-only">Wishlist</span>
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[10px] font-semibold text-white">
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
             <Link
               href="/cart"
               className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
@@ -208,7 +214,7 @@ function StorefrontHeader({
               )}
             </Link>
             {!user ? (
-              <Link href="/login" className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">Login</Link>
+              <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">Login</Link>
             ) : (
               <button type="button" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs" onClick={() => { logout(); if (pathname.startsWith('/admin') || pathname.startsWith('/account')) router.push('/'); }}>Logout</button>
             )}

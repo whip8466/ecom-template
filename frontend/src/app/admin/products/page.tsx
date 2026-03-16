@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import type { Category, Product } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 import { formatMoney } from '@/lib/format';
@@ -54,7 +55,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref('/admin/products'));
       return;
     }
     if (user?.role === 'CUSTOMER') {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { useAuthStore } from '@/store/auth-store';
 import type { Category } from '@/lib/types';
 
@@ -21,7 +22,7 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref('/admin/categories'));
       return;
     }
     if (user?.role === 'CUSTOMER') {

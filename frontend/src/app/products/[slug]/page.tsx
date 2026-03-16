@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import type { Product } from '@/lib/types';
 import { formatMoney } from '@/lib/format';
+import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { MOCK_PRODUCTS } from '@/lib/mock-products';
@@ -18,6 +20,7 @@ export default function ProductDetailsPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const slug = params.slug;
+  const user = useAuthStore((state) => state.user);
   const { items: cartItems, addToCart } = useCartStore();
   const { items: wishlistItems, toggleWishlist } = useWishlistStore();
 
@@ -108,6 +111,38 @@ export default function ProductDetailsPage() {
       ];
 
   const shouldShowOutOfStock = product.stock <= 0;
+  const isCurrentProductInWishlist = wishlistItems.some((item) => item.productId === product.id);
+  const handleWishlistToggle = (item: Product) => {
+    if (!user) {
+      router.push(buildLoginRedirectHref(`/products/${slug}`));
+      return;
+    }
+    toggleWishlist({
+      productId: item.id,
+      slug: item.slug,
+      name: item.name,
+      priceCents: item.priceCents,
+      imageUrl: item.images?.[0]?.imageUrl,
+    });
+  };
+  const handleMainWishlistClick = () => {
+    if (!user) {
+      router.push(buildLoginRedirectHref(`/products/${slug}`));
+      return;
+    }
+    if (isCurrentProductInWishlist) {
+      router.push('/wishlist');
+      return;
+    }
+    toggleWishlist({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      priceCents: product.priceCents,
+      imageUrl: mainImage.imageUrl,
+    });
+    setMessage('Added to wishlist');
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -232,7 +267,9 @@ export default function ProductDetailsPage() {
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-[#475467]">
             <button type="button" className="hover:text-[#0989ff]">Compare</button>
-            <button type="button" className="hover:text-[#0989ff]">Add Wishlist</button>
+            <button type="button" onClick={handleMainWishlistClick} className="hover:text-[#0989ff]">
+              {isCurrentProductInWishlist ? 'View Wishlist' : 'Add Wishlist'}
+            </button>
             <button type="button" className="hover:text-[#0989ff]">Ask a Question</button>
           </div>
 
@@ -377,15 +414,7 @@ export default function ProductDetailsPage() {
                   <button
                     type="button"
                     title="Add to Wishlist"
-                    onClick={() =>
-                      toggleWishlist({
-                        productId: item.id,
-                        slug: item.slug,
-                        name: item.name,
-                        priceCents: item.priceCents,
-                        imageUrl: item.images?.[0]?.imageUrl,
-                      })
-                    }
+                    onClick={() => handleWishlistToggle(item)}
                     className={`group/item relative grid h-11 w-11 place-items-center transition ${
                       wishlistItems.some((wishlistItem) => wishlistItem.productId === item.id)
                         ? 'bg-[#0989ff] text-white'

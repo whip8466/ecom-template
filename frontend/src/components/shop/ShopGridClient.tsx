@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
 import type { Product } from '@/lib/types';
 import { MOCK_PRODUCTS } from '@/lib/mock-products';
+import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 
@@ -21,6 +23,7 @@ type ShopGridClientProps = {
 
 export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClientProps) {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const { items: cartItems, addToCart } = useCartStore();
   const { items: wishlistItems, toggleWishlist } = useWishlistStore();
 
@@ -148,6 +151,19 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
   const safeMaxPrice = Math.max(maxPrice, 1);
   const minPercent = (minPrice / safeMaxPrice) * 100;
   const maxPercent = (priceLimit / safeMaxPrice) * 100;
+  const handleWishlistToggle = (product: Product, imageUrl: string) => {
+    if (!user) {
+      router.push(buildLoginRedirectHref('/shop'));
+      return;
+    }
+    toggleWishlist({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      priceCents: product.priceCents,
+      imageUrl,
+    });
+  };
 
   useEffect(() => {
     setCurrentPage(1);
@@ -454,15 +470,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                       <button
                         type="button"
                         title="Add to Wishlist"
-                        onClick={() =>
-                          toggleWishlist({
-                            productId: product.id,
-                            slug: product.slug,
-                            name: product.name,
-                            priceCents: product.priceCents,
-                            imageUrl,
-                          })
-                        }
+                        onClick={() => handleWishlistToggle(product, imageUrl)}
                         className={`group/item relative grid h-12 w-12 place-items-center transition ${
                           inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
                         }`}

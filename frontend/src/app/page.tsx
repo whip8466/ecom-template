@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
+import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 
@@ -45,10 +47,24 @@ const miniProducts = [
 
 function ProductCard({ product }: { product: ProductCardData }) {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const { items: cartItems, addToCart } = useCartStore();
   const { items: wishlistItems, toggleWishlist } = useWishlistStore();
   const inCart = cartItems.some((item) => item.productId === product.id);
   const inWishlist = wishlistItems.some((item) => item.productId === product.id);
+  const handleWishlistToggle = () => {
+    if (!user) {
+      router.push(buildLoginRedirectHref('/'));
+      return;
+    }
+    toggleWishlist({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      priceCents: product.priceCents,
+      imageUrl: product.image,
+    });
+  };
 
   return (
     <article className="group relative rounded-md border border-[#e4ebf4] bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-md">
@@ -110,15 +126,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
         <button
           type="button"
           title="Add to Wishlist"
-          onClick={() =>
-            toggleWishlist({
-              productId: product.id,
-              slug: product.slug,
-              name: product.name,
-              priceCents: product.priceCents,
-              imageUrl: product.image,
-            })
-          }
+          onClick={handleWishlistToggle}
           className={`group/item relative grid h-12 w-12 place-items-center transition ${
             inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
           }`}

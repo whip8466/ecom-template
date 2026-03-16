@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { useAuthStore } from '@/store/auth-store';
 import type { Order } from '@/lib/types';
 import { formatMoney } from '@/lib/format';
@@ -25,7 +26,7 @@ export default function AdminOrderDetailsPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref(`/admin/orders/${params.id}`));
       return;
     }
     if (user?.role === 'CUSTOMER') {

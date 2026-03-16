@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { useAuthStore } from '@/store/auth-store';
 import type { Order } from '@/lib/types';
 import { formatMoney } from '@/lib/format';
@@ -15,7 +16,7 @@ export default function MyOrderDetailsPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref(`/account/orders/${params.id}`));
       return;
     }
 

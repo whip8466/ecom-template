@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/lib/types';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
+import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 
@@ -27,6 +29,7 @@ function StarRating() {
 
 export function HomeProductCard({ product, badge, discountPercent }: HomeProductCardProps) {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const { items: cartItems, addToCart } = useCartStore();
   const { items: wishlistItems, toggleWishlist } = useWishlistStore();
   const imageUrl = product.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80';
@@ -36,6 +39,19 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
     : product.priceCents;
   const inCart = cartItems.some((item) => item.productId === product.id);
   const inWishlist = wishlistItems.some((item) => item.productId === product.id);
+  const handleWishlistToggle = () => {
+    if (!user) {
+      router.push(buildLoginRedirectHref('/'));
+      return;
+    }
+    toggleWishlist({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      priceCents: product.priceCents,
+      imageUrl,
+    });
+  };
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)] transition-premium hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
@@ -118,15 +134,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
           <button
             type="button"
             aria-label="Add to wishlist"
-            onClick={() =>
-              toggleWishlist({
-                productId: product.id,
-                slug: product.slug,
-                name: product.name,
-                priceCents: product.priceCents,
-                imageUrl,
-              })
-            }
+            onClick={handleWishlistToggle}
             className={`relative h-11 w-11 transition-premium ${
               inWishlist ? 'bg-[var(--accent)] text-white' : 'bg-white text-[var(--navy)] hover:bg-[var(--accent)] hover:text-white'
             }`}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { useAuthStore } from '@/store/auth-store';
 import type { Address } from '@/lib/types';
 
@@ -34,7 +35,7 @@ export default function AddressesPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      router.push(buildLoginRedirectHref('/account/addresses'));
       return;
     }
 
