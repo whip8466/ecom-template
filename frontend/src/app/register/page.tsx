@@ -6,13 +6,14 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { apiRequest } from '@/lib/api';
+import { registerUser } from '@/lib/auth-api';
 import { useAuthStore } from '@/store/auth-store';
-import type { User } from '@/lib/types';
 
 const schema = z.object({
-  fullName: z.string().min(2, 'Name must be at least 2 characters'),
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email(),
+  phone: z.string().min(6).optional().or(z.literal('')),
   password: z.string().min(6),
 });
 
@@ -35,20 +36,12 @@ export default function RegisterPage() {
   async function onSubmit(values: FormValues) {
     try {
       setError('');
-      const [firstName = 'New', ...rest] = values.fullName.trim().split(/\s+/);
-      const lastName = rest.join(' ') || 'User';
-
-      const registerPayload = {
-        firstName,
-        lastName,
+      const registerRes = await registerUser({
+        firstName: values.firstName,
+        lastName: values.lastName,
         email: values.email,
         password: values.password,
-        phone: '0000000000',
-      };
-
-      const registerRes = await apiRequest<{ token: string; user: User }>('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(registerPayload),
+        phone: values.phone?.trim() ? values.phone.trim() : undefined,
       });
       setSession(registerRes.token, registerRes.user);
       router.push('/');
@@ -98,13 +91,23 @@ export default function RegisterPage() {
 
         <form className="mt-4 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#111827]">Your Name</label>
+            <label className="mb-1 block text-sm font-medium text-[#111827]">First Name</label>
             <input
               className="h-11 w-full rounded border border-[#d7e4f6] px-3 text-sm outline-none focus:border-[#0989ff]"
-              placeholder="John Doe"
-              {...register('fullName')}
+              placeholder="John"
+              {...register('firstName')}
             />
-            {errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>}
+            {errors.firstName && <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#111827]">Last Name</label>
+            <input
+              className="h-11 w-full rounded border border-[#d7e4f6] px-3 text-sm outline-none focus:border-[#0989ff]"
+              placeholder="Doe"
+              {...register('lastName')}
+            />
+            {errors.lastName && <p className="mt-1 text-xs text-red-600">{errors.lastName.message}</p>}
           </div>
 
           <div>
@@ -115,6 +118,16 @@ export default function RegisterPage() {
               {...register('email')}
             />
             {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#111827]">Phone (optional)</label>
+            <input
+              className="h-11 w-full rounded border border-[#d7e4f6] px-3 text-sm outline-none focus:border-[#0989ff]"
+              placeholder="9999999999"
+              {...register('phone')}
+            />
+            {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>}
           </div>
 
           <div>

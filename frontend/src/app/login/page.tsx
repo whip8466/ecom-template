@@ -6,10 +6,9 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { apiRequest } from '@/lib/api';
+import { loginUser } from '@/lib/auth-api';
 import { getSafePostLoginPath } from '@/lib/auth-redirect';
 import { useAuthStore } from '@/store/auth-store';
-import type { User } from '@/lib/types';
 
 const schema = z.object({
   email: z.string().email(),
@@ -32,10 +31,7 @@ export default function LoginPage() {
   async function onSubmit(values: FormValues) {
     try {
       setError('');
-      const loginRes = await apiRequest<{ token: string; user: User }>('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(values),
-      });
+      const loginRes = await loginUser(values);
       setSession(loginRes.token, loginRes.user);
       const redirectParam =
         typeof window === 'undefined'

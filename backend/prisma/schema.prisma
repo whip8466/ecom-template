@@ -7,27 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  MANAGER
-  CUSTOMER
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-}
-
 model User {
   id           Int       @id @default(autoincrement())
   firstName    String    @map("first_name") @db.VarChar(120)
@@ -36,7 +15,7 @@ model User {
   email        String    @unique
   phone        String?
   passwordHash String    @map("password_hash")
-  role         UserRole  @default(CUSTOMER)
+  role         String    @default("CUSTOMER") @db.VarChar(30)
   isActive     Boolean   @default(true) @map("is_active")
   addresses    Address[]
   orders       Order[]
@@ -123,8 +102,8 @@ model Order {
   addressId        Int           @map("address_id")
   address          Address       @relation(fields: [addressId], references: [id])
   totalAmountCents Int           @map("total_amount_cents")
-  status           OrderStatus   @default(PENDING)
-  paymentStatus    PaymentStatus @default(PENDING) @map("payment_status")
+  status           String        @default("PENDING") @db.VarChar(30)
+  paymentStatus    String        @default("PENDING") @map("payment_status") @db.VarChar(30)
   items            OrderItem[]
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)

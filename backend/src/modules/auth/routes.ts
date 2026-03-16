@@ -39,13 +39,15 @@ async function authRoutes(fastify) {
       return reply.code(409).send({ message: 'Email already exists' });
     }
 
+    const { password, ...safeInput } = input;
+
     const user = await prisma.user.create({
       data: {
-        ...input,
-        email: input.email.toLowerCase(),
-        passwordHash: await hashPassword(input.password),
+        ...safeInput,
+        email: safeInput.email.toLowerCase(),
+        passwordHash: await hashPassword(password),
         role: UserRole.CUSTOMER,
-        name: `${input.firstName} ${input.lastName}`,
+        name: `${safeInput.firstName} ${safeInput.lastName}`,
       },
     });
 
