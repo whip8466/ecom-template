@@ -7,6 +7,9 @@ import type { User } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
+import { AdminLayout } from '@/components/admin-layout';
+
+const isAdminRole = (user: User | null) => user && (user.role === 'ADMIN' || user.role === 'MANAGER');
 
 function StorefrontHeader({
   cartCount,
@@ -202,10 +205,13 @@ function StorefrontHeader({
                 </span>
               )}
             </Link>
+            {isAdminRole(user) && (
+              <Link href="/admin" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--cream)]">Admin</Link>
+            )}
             {!user ? (
               <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">Login</Link>
             ) : (
-              <button type="button" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs" onClick={() => { logout(); if (pathname.startsWith('/account')) router.push('/'); }}>Logout</button>
+              <button type="button" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs" onClick={() => { logout(); if (pathname.startsWith('/account') || pathname.startsWith('/admin')) router.push('/'); }}>Logout</button>
             )}
           </nav>
         </div>
@@ -458,6 +464,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0));
   const wishlistCount = useWishlistStore((state) => state.items.length);
 
+  if (pathname?.startsWith('/admin')) {
+    return <AdminLayout>{children}</AdminLayout>;
+  }
+
   const isHome = pathname === '/';
 
   return (
@@ -467,7 +477,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           cartCount={cartCount}
           wishlistCount={wishlistCount}
           user={user}
-          pathname={pathname}
+          pathname={pathname ?? ''}
           logout={logout}
           router={router}
         />

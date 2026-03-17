@@ -37,7 +37,8 @@ export default function LoginPage() {
         typeof window === 'undefined'
           ? null
           : new URLSearchParams(window.location.search).get('redirect');
-      router.push(getSafePostLoginPath(redirectParam, '/'));
+      const defaultPath = (loginRes.user.role === 'ADMIN' || loginRes.user.role === 'MANAGER') ? '/admin' : '/';
+      router.push(getSafePostLoginPath(redirectParam, defaultPath));
     } catch (e) {
       setError((e as Error).message || 'Auth failed');
     }
