@@ -1,7 +1,7 @@
 const UserRole = Object.freeze({
-  ADMIN: 'ADMIN',
-  MANAGER: 'MANAGER',
   CUSTOMER: 'CUSTOMER',
+  MANAGER: 'MANAGER',
+  ADMIN: 'ADMIN',
 });
 
 const OrderStatus = Object.freeze({
