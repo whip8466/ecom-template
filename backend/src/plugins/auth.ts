@@ -1,5 +1,6 @@
 const fp = require('fastify-plugin');
 const { verifyAccessToken } = require('../utils/jwt');
+const { UserRole } = require('../constants/enums');
 
 module.exports = fp(async function authPlugin(fastify) {
   fastify.decorate('authenticate', async function authenticate(request, reply) {
@@ -28,4 +29,15 @@ module.exports = fp(async function authPlugin(fastify) {
     };
   });
 
+  fastify.decorate('requireAnyRole', function requireAnyRole(roles) {
+    return async function roleGuard(request, reply) {
+      await fastify.authenticate(request, reply);
+      if (reply.sent) return;
+      if (!roles.includes(request.authUser.role)) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+    };
+  });
+
+  fastify.decorate('roles', UserRole);
 });

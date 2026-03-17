@@ -27,6 +27,30 @@ async function seed() {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      firstName: 'Admin',
+      lastName: 'User',
+      name: 'Admin User',
+      email: 'admin@example.com',
+      phone: '9999999998',
+      passwordHash: await hashPassword('password123'),
+      role: UserRole.ADMIN,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      firstName: 'Manager',
+      lastName: 'User',
+      name: 'Manager User',
+      email: 'manager@example.com',
+      phone: '9999999999',
+      passwordHash: await hashPassword('password123'),
+      role: UserRole.MANAGER,
+    },
+  });
+
   const categoryNames = ['Fashion', 'Electronics', 'Home Decor'];
   const categories = [];
   for (const name of categoryNames) {

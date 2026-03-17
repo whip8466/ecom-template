@@ -1,5 +1,7 @@
 const { z } = require('zod');
-const { OrderStatus, PaymentStatus } = require('../../constants/enums');
+const { OrderStatus, PaymentStatus, UserRole } = require('../../constants/enums');
+
+const adminGuard = (fastify) => [fastify.authenticate, fastify.requireAnyRole([UserRole.ADMIN, UserRole.MANAGER])];
 
 const checkoutSchema = z.object({
   addressId: z.number().int().positive().optional(),
@@ -193,6 +195,59 @@ async function ordersRoutes(fastify) {
     return { data: toOrderDto(order) };
   });
 
+  // --- Admin: orders list, get, update ---
+  const adminOrderQuerySchema = z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+    status: z.string().optional(),
+    paymentStatus: z.string().optional(),
+  });
+  const adminOrderUpdateSchema = z.object({
+    status: z.enum([OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED, OrderStatus.CANCELLED]).optional(),
+    paymentStatus: z.enum([PaymentStatus.PENDING, PaymentStatus.PAID, PaymentStatus.FAILED]).optional(),
+  }).refine((d) => Object.keys(d).length > 0, { message: 'Provide at least one of status or paymentStatus' });
+
+  fastify.get('/admin/orders', { preHandler: adminGuard(fastify) }, async (request) => {
+    const query = adminOrderQuerySchema.parse(request.query || {});
+    const where: { status?: string; paymentStatus?: string } = {};
+    if (query.status) where.status = query.status;
+    if (query.paymentStatus) where.paymentStatus = query.paymentStatus;
+    const [orders, total] = await Promise.all([
+      fastify.prisma.order.findMany({
+        where,
+        include: { address: true, items: { include: { product: true } }, user: true },
+        orderBy: { createdAt: 'desc' },
+        take: query.limit,
+        skip: (query.page - 1) * query.limit,
+      }),
+      fastify.prisma.order.count({ where }),
+    ]);
+    return {
+      data: orders.map(toOrderDto),
+      pagination: { page: query.page, limit: query.limit, total, totalPages: Math.ceil(total / query.limit) || 1 },
+    };
+  });
+
+  fastify.get('/admin/orders/:id', { preHandler: adminGuard(fastify) }, async (request, reply) => {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const order = await fastify.prisma.order.findUnique({
+      where: { id },
+      include: { address: true, items: { include: { product: true } }, user: true },
+    });
+    if (!order) return reply.code(404).send({ message: 'Order not found' });
+    return { data: toOrderDto(order) };
+  });
+
+  fastify.patch('/admin/orders/:id', { preHandler: adminGuard(fastify) }, async (request, reply) => {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const body = adminOrderUpdateSchema.parse(request.body);
+    const order = await fastify.prisma.order.update({
+      where: { id },
+      data: body,
+      include: { address: true, items: { include: { product: true } }, user: true },
+    });
+    return { data: toOrderDto(order) };
+  });
 }
 
 module.exports = ordersRoutes;

@@ -1,4 +1,6 @@
 const UserRole = Object.freeze({
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
   CUSTOMER: 'CUSTOMER',
 });
 
