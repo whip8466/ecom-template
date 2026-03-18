@@ -8,10 +8,17 @@ async function seed() {
 
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.productVariantOptionValue.deleteMany();
+  await prisma.productVariant.deleteMany();
   await prisma.productColor.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.productOptionValue.deleteMany();
+  await prisma.productOptionType.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.tag.deleteMany();
+  await prisma.collection.deleteMany();
+  await prisma.vendor.deleteMany();
   await prisma.address.deleteMany();
   await prisma.user.deleteMany();
 
@@ -59,6 +66,66 @@ async function seed() {
     });
     categories.push(category);
   }
+
+  const vendorNames = ['Nike', 'Samsung', 'IKEA', 'Generic Brands'];
+  const vendors = [];
+  for (const name of vendorNames) {
+    const vendor = await prisma.vendor.create({
+      data: { name, slug: slugify(name, { lower: true, strict: true }) },
+    });
+    vendors.push(vendor);
+  }
+
+  const collectionNames = ['New Arrivals', 'Best Sellers', 'Summer 2025', 'Winter Collection'];
+  const collections = [];
+  for (const name of collectionNames) {
+    const collection = await prisma.collection.create({
+      data: { name, slug: slugify(name, { lower: true, strict: true }) },
+    });
+    collections.push(collection);
+  }
+
+  const tagNames = ['Sale', 'Eco-Friendly', 'Limited Edition', 'Unisex', 'Premium', 'Trending'];
+  const tags = [];
+  for (const name of tagNames) {
+    const tag = await prisma.tag.create({
+      data: { name, slug: slugify(name, { lower: true, strict: true }) },
+    });
+    tags.push(tag);
+  }
+
+  const sizeType = await prisma.productOptionType.create({
+    data: {
+      name: 'Size',
+      slug: 'size',
+      values: {
+        create: [
+          { value: 's', label: 'S', sortOrder: 0 },
+          { value: 'm', label: 'M', sortOrder: 1 },
+          { value: 'l', label: 'L', sortOrder: 2 },
+          { value: 'xl', label: 'XL', sortOrder: 3 },
+        ],
+      },
+    },
+    include: { values: true },
+  });
+
+  const colorType = await prisma.productOptionType.create({
+    data: {
+      name: 'Color',
+      slug: 'color',
+      values: {
+        create: [
+          { value: 'black', label: 'Black', sortOrder: 0 },
+          { value: 'white', label: 'White', sortOrder: 1 },
+          { value: 'blue', label: 'Blue', sortOrder: 2 },
+          { value: 'red', label: 'Red', sortOrder: 3 },
+          { value: 'grey', label: 'Grey', sortOrder: 4 },
+        ],
+      },
+    },
+    include: { values: true },
+  });
 
   const products = [
     {
@@ -127,6 +194,29 @@ async function seed() {
           colorName: color.colorName,
           colorCode: color.colorCode,
           stock: color.stock,
+        },
+      });
+    }
+  }
+
+  const sizeValues = sizeType.values;
+  const colorValues = colorType.values;
+  const sneaker = createdProducts[0];
+  for (let si = 0; si < sizeValues.length; si++) {
+    for (let ci = 0; ci < 2; ci++) {
+      const sizeVal = sizeValues[si];
+      const colorVal = colorValues[ci];
+      const variant = await prisma.productVariant.create({
+        data: {
+          productId: sneaker.id,
+          sku: `SNEAK-${sizeVal.value}-${colorVal.value}-${si * 5 + ci + 1}`,
+          stock: 10 + si + ci,
+          optionValues: {
+            create: [
+              { optionValueId: sizeVal.id },
+              { optionValueId: colorVal.id },
+            ],
+          },
         },
       });
     }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
+import { apiRequest } from '@/lib/api';
 
 type Category = { id: number; name: string; slug: string };
 type Vendor = { id: number; name: string; slug: string };
@@ -17,6 +18,9 @@ const INVENTORY_TABS: { id: InventoryTabId; label: string; icon: string }[] = [
   { id: 'Shipping', label: 'Shipping', icon: 'M8 17h8M8 17a2 2 0 104 0M8 17a2 2 0 114 0m5-13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2m4 0h2a2 2 0 002-2v-4m0-4l-4-4m0 0L8 12v4' },
   { id: 'Advanced', label: 'Advanced', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm6-5V7a2 2 0 11-4 0v5h4z' },
 ];
+
+type VariantOptionValue = { id: number; value: string; label: string };
+type VariantOptionType = { id: number; name: string; slug: string; values: VariantOptionValue[] };
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -51,7 +55,11 @@ export default function AddProductPage() {
   const [tagsError, setTagsError] = useState('');
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false);
-  const [variants, setVariants] = useState([{ option: 'Size' }, { option: 'Size' }]);
+  const [variantOptionTypes, setVariantOptionTypes] = useState<VariantOptionType[]>([]);
+  const [variantOptionTypesLoading, setVariantOptionTypesLoading] = useState(true);
+  const [variantOptionTypesError, setVariantOptionTypesError] = useState('');
+  const [variants, setVariants] = useState<{ optionTypeId: number; values: string[] }[]>([]);
+  const [variantValueDropdownOpen, setVariantValueDropdownOpen] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -141,6 +149,25 @@ export default function AddProductPage() {
       .finally(() => setTagsLoading(false));
   }, []);
 
+  // Load variant option types and values from database (GET /api/product-option-types)
+  useEffect(() => {
+    setVariantOptionTypesLoading(true);
+    setVariantOptionTypesError('');
+    apiRequest<{ data?: VariantOptionType[] }>('/api/product-option-types')
+      .then((data) => {
+        const types = Array.isArray(data.data) ? data.data : [];
+        setVariantOptionTypes(types);
+        if (types.length > 0) {
+          setVariants((prev) => (prev.length === 0 ? [{ optionTypeId: types[0].id, values: [] }] : prev));
+        }
+      })
+      .catch((e) => {
+        setVariantOptionTypesError((e as Error).message || 'Failed to load option types');
+        setVariantOptionTypes([]);
+      })
+      .finally(() => setVariantOptionTypesLoading(false));
+  }, []);
+
   const addImageUrl = () => {
     const url = newImageUrl.trim();
     if (url) {
@@ -153,8 +180,31 @@ export default function AddProductPage() {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const addVariant = () => setVariants((prev) => [...prev, { option: 'Size' }]);
-  const removeVariant = (index: number) => setVariants((prev) => prev.filter((_, i) => i !== index));
+  const addVariant = () => {
+    const firstTypeId = variantOptionTypes[0]?.id;
+    if (firstTypeId != null) setVariants((prev) => [...prev, { optionTypeId: firstTypeId, values: [] }]);
+  };
+  const removeVariant = (index: number) => {
+    setVariants((prev) => prev.filter((_, i) => i !== index));
+    setVariantValueDropdownOpen(null);
+  };
+  const updateVariantOption = (index: number, optionTypeId: number) => {
+    setVariants((prev) => prev.map((x, j) => (j === index ? { optionTypeId, values: [] } : x)));
+    setVariantValueDropdownOpen(null);
+  };
+  const toggleVariantValue = (index: number, value: string) => {
+    setVariants((prev) =>
+      prev.map((x, j) =>
+        j === index
+          ? x.values.includes(value)
+            ? { ...x, values: x.values.filter((v) => v !== value) }
+            : { ...x, values: [...x.values, value] }
+          : x
+      )
+    );
+  };
+  const getVariantOptionValues = (optionTypeId: number): VariantOptionValue[] =>
+    variantOptionTypes.find((t) => t.id === optionTypeId)?.values ?? [];
 
   const openAddCategoryModal = () => {
     setNewCategoryName('');
@@ -814,7 +864,7 @@ export default function AddProductPage() {
                             )}
                           </div>
                           <div
-                            className="fixed inset-0 z-[9]"
+                            className="fixed inset-0 z-9"
                             aria-hidden
                             onClick={() => setTagsDropdownOpen(false)}
                           />
@@ -826,25 +876,103 @@ export default function AddProductPage() {
               </div>
             </div>
 
-            <div className="rounded border border-[#e5ebf5] bg-white p-5 shadow-sm">
-              <label className="block text-sm font-medium text-[#1c2740]">Variants</label>
-              <div className="mt-4 space-y-4">
-                {variants.map((v, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <select
-                      value={v.option}
-                      onChange={(e) => setVariants((prev) => prev.map((x, j) => (j === i ? { ...x, option: e.target.value } : x)))}
-                      className="flex-1 rounded border border-[#e5ebf5] bg-[#f9fbff] px-4 py-2 text-sm focus:border-[#246bfd] focus:outline-none"
+            <div className="rounded-sm border border-[#e5ebf5] bg-white p-5">
+              <h3 className="text-sm font-bold text-[#1c2740]">Variants</h3>
+              <div className="mt-4">
+                {variantOptionTypesLoading ? (
+                  <p className="text-sm text-[#64748b]">Loading variant options...</p>
+                ) : variantOptionTypesError ? (
+                  <p className="text-sm text-red-600">{variantOptionTypesError}</p>
+                ) : variantOptionTypes.length === 0 ? (
+                  <p className="text-sm text-[#64748b]">No option types in database. Add option types (e.g. Size, Color) to enable variants.</p>
+                ) : (
+                  <>
+                    {variants.map((v, i) => (
+                      <div key={i}>
+                        {i > 0 && (
+                          <div className="mb-4 border-b border-dashed border-[#e5ebf5]" />
+                        )}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-[#1c2740]">Option {i + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeVariant(i)}
+                              className="text-sm font-medium text-[#246bfd] hover:underline"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <div>
+                            <label className="sr-only">Option name</label>
+                            <select
+                              value={v.optionTypeId}
+                              onChange={(e) => updateVariantOption(i, Number(e.target.value))}
+                              className="w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+                            >
+                              {variantOptionTypes.map((t) => (
+                                <option key={t.id} value={t.id}>{t.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="relative">
+                            <label className="sr-only">Option values</label>
+                            <button
+                              type="button"
+                              onClick={() => setVariantValueDropdownOpen((open) => (open === i ? null : i))}
+                              className="flex w-full items-center justify-between rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-left text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+                            >
+                              <span className={v.values.length === 0 ? 'text-[#94a3b8]' : ''}>
+                                {v.values.length === 0
+                                  ? 'Select values...'
+                                  : getVariantOptionValues(v.optionTypeId)
+                                      .filter((opt) => v.values.includes(opt.value))
+                                      .map((opt) => opt.label)
+                                      .join(', ')}
+                              </span>
+                              <svg className={`h-4 w-4 shrink-0 text-[#64748b] transition-transform ${variantValueDropdownOpen === i ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                            {variantValueDropdownOpen === i && (
+                              <>
+                                <div className="absolute left-0 right-0 top-full z-10 mt-0.5 max-h-48 overflow-y-auto rounded-sm border border-[#e5ebf5] bg-white py-1 shadow-lg">
+                                  {getVariantOptionValues(v.optionTypeId).map((opt) => (
+                                    <label
+                                      key={opt.id}
+                                      className="flex cursor-pointer items-center gap-2 px-4 py-2 text-sm text-[#1c2740] hover:bg-[#f8fafc]"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={v.values.includes(opt.value)}
+                                        onChange={() => toggleVariantValue(i, opt.value)}
+                                        className="h-4 w-4 rounded-sm border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
+                                      />
+                                      <span>{opt.label}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                                <div
+                                  className="fixed inset-0 z-9"
+                                  aria-hidden
+                                  onClick={() => setVariantValueDropdownOpen(null)}
+                                />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addVariant}
+                      disabled={variantOptionTypes.length === 0}
+                      className="mt-4 w-full rounded-sm border border-[#bfdbfe] bg-[#eff6ff] py-2.5 text-sm font-medium text-[#246bfd] hover:bg-[#dbeafe] disabled:opacity-50"
                     >
-                      <option>Size</option>
-                      <option>Color</option>
-                    </select>
-                    <button type="button" onClick={() => removeVariant(i)} className="text-sm text-red-500 hover:underline">Remove</button>
-                  </div>
-                ))}
-                <button type="button" onClick={addVariant} className="text-sm font-medium text-[#246bfd] hover:underline">
-                  Add another option
-                </button>
+                      Add another option
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

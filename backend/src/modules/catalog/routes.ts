@@ -10,6 +10,7 @@ function mapProduct(product) {
     description: product.description,
     priceCents: product.priceCents,
     stock: product.stock,
+    createdAt: product.createdAt,
     category: product.category
       ? { id: product.category.id, name: product.category.name, slug: product.category.slug }
       : null,
@@ -224,6 +225,28 @@ async function catalogRoutes(fastify) {
       return reply.code(201).send({ data: tag });
     }
   );
+
+  fastify.get('/product-option-types', async (request, reply) => {
+    try {
+      const types = await fastify.prisma.productOptionType.findMany({
+        include: {
+          values: { orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] },
+        },
+        orderBy: { name: 'asc' },
+      });
+      const data = types.map((t) => ({
+        id: t.id,
+        name: t.name,
+        slug: t.slug,
+        values: (t.values || []).map((v) => ({ id: v.id, value: v.value, label: v.label })),
+      }));
+      return { data };
+    } catch (err) {
+      request.log.error(err);
+      const msg = (err && typeof err === 'object' && 'message' in err && err.message) || 'Failed to load option types';
+      return reply.code(500).send({ message: String(msg) });
+    }
+  });
 
   const createProductSchema = z.object({
     name: z.string().min(1),
