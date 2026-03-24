@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { apiRequest } from '@/lib/api';
@@ -22,8 +22,105 @@ const INVENTORY_TABS: { id: InventoryTabId; label: string; icon: string }[] = [
 type VariantOptionValue = { id: number; value: string; label: string };
 type VariantOptionType = { id: number; name: string; slug: string; values: VariantOptionValue[] };
 
+type ApiProductDetail = {
+  id: number;
+  name: string;
+  status: string;
+  priceCents: number;
+  salePriceCents: number | null;
+  stock: number;
+  shortDescription?: string | null;
+  description?: string | null;
+  fulfillmentType?: string | null;
+  externalProductIdType?: string | null;
+  externalProductId?: string | null;
+  category: { id: number } | null;
+  images: { imageUrl: string }[];
+  vendor: { id: number } | null;
+  collection: { id: number } | null;
+  tags: { id: number }[];
+  variants: {
+    optionValues: { value: string; optionTypeId?: number }[];
+  }[];
+};
+
+/** Client-side validation for publish — keep rules aligned with backend create product schema. */
+function validateProductPublish(input: {
+  token: string | null;
+  title: string;
+  categoryId: string;
+  regularPrice: string;
+  salePrice: string;
+  imageUrls: string[];
+}): { ok: true; priceCents: number; salePriceCents: number | null } | { ok: false; message: string } {
+  if (!input.token?.trim()) {
+    return { ok: false, message: 'You must be signed in to publish a product.' };
+  }
+  const name = input.title.trim();
+  if (!name) {
+    return { ok: false, message: 'Product title is required.' };
+  }
+  if (!input.categoryId) {
+    return { ok: false, message: 'Please select a category.' };
+  }
+  if (input.regularPrice.trim() === '') {
+    return { ok: false, message: 'Regular price is required.' };
+  }
+  const regular = parseFloat(input.regularPrice);
+  if (Number.isNaN(regular) || regular < 0) {
+    return { ok: false, message: 'Regular price must be a valid non-negative number.' };
+  }
+  const priceCents = Math.round(regular * 100);
+  if (priceCents < 1) {
+    return { ok: false, message: 'Regular price must be at least $0.01.' };
+  }
+  let salePriceCents: number | null = null;
+  if (input.salePrice.trim() !== '') {
+    const sale = parseFloat(input.salePrice);
+    if (Number.isNaN(sale) || sale < 0) {
+      return { ok: false, message: 'Sale price must be a valid non-negative number.' };
+    }
+    salePriceCents = Math.round(sale * 100);
+    if (salePriceCents > priceCents) {
+      return { ok: false, message: 'Sale price cannot be greater than regular price.' };
+    }
+  }
+  const urls = input.imageUrls.filter(Boolean);
+  if (urls.length === 0) {
+    return { ok: false, message: 'Add at least one product image URL.' };
+  }
+  for (const url of urls) {
+    let valid = false;
+    try {
+      const u = new URL(url);
+      valid = u.protocol === 'http:' || u.protocol === 'https:';
+    } catch {
+      valid = false;
+    }
+    if (!valid) {
+      return { ok: false, message: `Invalid image URL: ${url.slice(0, 80)}${url.length > 80 ? '…' : ''}` };
+    }
+  }
+  return { ok: true, priceCents, salePriceCents };
+}
+
+function validateProductDraft(input: { token: string | null }): { ok: true } | { ok: false; message: string } {
+  if (!input.token?.trim()) {
+    return { ok: false, message: 'You must be signed in to save a draft.' };
+  }
+  return { ok: true };
+}
+
+function parsePriceToCents(s: string, allowEmptyAsZero: boolean): number {
+  if (allowEmptyAsZero && (!s || s.trim() === '')) return 0;
+  const n = parseFloat(s || '0');
+  if (Number.isNaN(n) || n < 0) return 0;
+  return Math.round(n * 100);
+}
+
 export default function AddProductPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const token = useAuthStore((s) => s.token);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -60,6 +157,9 @@ export default function AddProductPage() {
   const [variantOptionTypesError, setVariantOptionTypesError] = useState('');
   const [variants, setVariants] = useState<{ optionTypeId: number; values: string[] }[]>([]);
   const [variantValueDropdownOpen, setVariantValueDropdownOpen] = useState<number | null>(null);
+  const [savedProductId, setSavedProductId] = useState<number | null>(null);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -157,7 +257,7 @@ export default function AddProductPage() {
       .then((data) => {
         const types = Array.isArray(data.data) ? data.data : [];
         setVariantOptionTypes(types);
-        if (types.length > 0) {
+        if (types.length > 0 && !searchParams.get('id')) {
           setVariants((prev) => (prev.length === 0 ? [{ optionTypeId: types[0].id, values: [] }] : prev));
         }
       })
@@ -166,7 +266,74 @@ export default function AddProductPage() {
         setVariantOptionTypes([]);
       })
       .finally(() => setVariantOptionTypesLoading(false));
-  }, []);
+  }, [searchParams]);
+
+  // Load draft when ?id= (saved product)
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (!id || !token) {
+      setDraftLoaded(true);
+      return;
+    }
+    const numId = Number(id);
+    if (!Number.isInteger(numId) || numId < 1) {
+      setDraftLoaded(true);
+      return;
+    }
+    setDraftLoaded(false);
+    setError('');
+    apiRequest<{ data: ApiProductDetail }>(`/api/products/id/${numId}`, { token })
+      .then((res) => {
+        const p = res.data;
+        if (p.status !== 'DRAFT') {
+          setError('This product is already published. Open it from the product list to edit.');
+          router.replace('/admin/products/new');
+          setDraftLoaded(true);
+          return;
+        }
+        setSavedProductId(p.id);
+        setTitle(p.name);
+        setDescription((p.description ?? p.shortDescription) || '');
+        setImageUrls((p.images || []).map((i) => i.imageUrl));
+        setRegularPrice((p.priceCents / 100).toFixed(2));
+        setSalePrice(p.salePriceCents != null ? (p.salePriceCents / 100).toFixed(2) : '');
+        setStock(String(p.stock ?? 0));
+        setRestockQuantity('');
+        setShippingType((p.fulfillmentType as 'seller' | 'phoenix') || 'phoenix');
+        setProductIdType(p.externalProductIdType || 'ISBN');
+        setProductId(p.externalProductId || '');
+        setCategoryId(p.category ? String(p.category.id) : '');
+        setVendorId(p.vendor ? String(p.vendor.id) : '');
+        setCollectionId(p.collection ? String(p.collection.id) : '');
+        setTagIds((p.tags || []).map((t) => String(t.id)));
+        const typeToValues = new Map<number, Set<string>>();
+        for (const pv of p.variants || []) {
+          for (const ov of pv.optionValues || []) {
+            const tid = ov.optionTypeId;
+            if (tid == null) continue;
+            if (!typeToValues.has(tid)) typeToValues.set(tid, new Set());
+            typeToValues.get(tid)!.add(ov.value);
+          }
+        }
+        const rows = [...typeToValues.entries()].map(([optionTypeId, set]) => ({
+          optionTypeId,
+          values: [...set],
+        }));
+        setVariants(rows.length > 0 ? rows : []);
+      })
+      .catch((e) => setError((e as Error).message || 'Failed to load product'))
+      .finally(() => setDraftLoaded(true));
+  }, [searchParams, token]);
+
+  // After loading a draft, ensure one variant row when option types are ready and variants still empty
+  useEffect(() => {
+    if (!draftLoaded || !searchParams.get('id')) return;
+    setVariants((prev) => {
+      if (prev.length > 0) return prev;
+      const first = variantOptionTypes[0]?.id;
+      return first != null ? [{ optionTypeId: first, values: [] }] : prev;
+    });
+  }, [draftLoaded, searchParams, variantOptionTypes]);
 
   const addImageUrl = () => {
     const url = newImageUrl.trim();
@@ -376,6 +543,80 @@ export default function AddProductPage() {
     }
   };
 
+  const parseApiError = (data: unknown): string => {
+    const d = data as { message?: string; errors?: Record<string, string[] | string> };
+    if (d.errors && typeof d.errors === 'object') {
+      const parts: string[] = [];
+      for (const [key, val] of Object.entries(d.errors)) {
+        const msg = Array.isArray(val) ? val.join(', ') : String(val);
+        if (msg) parts.push(`${key}: ${msg}`);
+      }
+      if (parts.length) return parts.join(' ');
+    }
+    return d.message || 'Request failed';
+  };
+
+  const buildDraftPayload = () => {
+    const stockNum = parseInt(stock || '0', 10) || 0;
+    const restockNum = parseInt(restockQuantity || '0', 10) || 0;
+    let salePriceCents: number | null = null;
+    if (salePrice.trim() !== '') {
+      const s = parseFloat(salePrice);
+      if (!Number.isNaN(s) && s >= 0) salePriceCents = Math.round(s * 100);
+    }
+    const validImageUrls = imageUrls.filter(Boolean).filter((url) => {
+      try {
+        const u = new URL(url);
+        return u.protocol === 'http:' || u.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    });
+    return {
+      status: 'draft' as const,
+      name: title.trim(),
+      shortDescription: description.trim().slice(0, 255) || undefined,
+      description: description.trim() || undefined,
+      priceCents: parsePriceToCents(regularPrice, true),
+      salePriceCents,
+      stock: stockNum,
+      restockQuantity: restockNum,
+      fulfillmentType: shippingType,
+      externalProductIdType: productIdType || null,
+      externalProductId: productId.trim() || null,
+      categoryId: categoryId ? Number(categoryId) : null,
+      vendorId: vendorId ? Number(vendorId) : null,
+      collectionId: collectionId ? Number(collectionId) : null,
+      tagIds: tagIds.map((id) => Number(id)),
+      imageUrls: validImageUrls,
+      variants: variants.map((v) => ({ optionTypeId: v.optionTypeId, values: v.values })),
+    };
+  };
+
+  const buildPublishPayload = (priceCents: number, salePriceCents: number | null) => {
+    const stockNum = parseInt(stock || '0', 10) || 0;
+    const restockNum = parseInt(restockQuantity || '0', 10) || 0;
+    return {
+      status: 'published' as const,
+      name: title.trim(),
+      shortDescription: description.trim().slice(0, 255) || undefined,
+      description: description.trim() || undefined,
+      priceCents,
+      salePriceCents,
+      stock: stockNum,
+      restockQuantity: restockNum,
+      fulfillmentType: shippingType,
+      externalProductIdType: productIdType || null,
+      externalProductId: productId.trim() || null,
+      categoryId: Number(categoryId),
+      vendorId: vendorId ? Number(vendorId) : null,
+      collectionId: collectionId ? Number(collectionId) : null,
+      tagIds: tagIds.map((id) => Number(id)),
+      imageUrls: imageUrls.filter(Boolean),
+      variants: variants.map((v) => ({ optionTypeId: v.optionTypeId, values: v.values })),
+    };
+  };
+
   const handleDiscard = () => {
     if (confirm('Discard changes?')) {
       setTitle('');
@@ -384,53 +625,93 @@ export default function AddProductPage() {
       setRegularPrice('');
       setSalePrice('');
       setStock('');
+      setRestockQuantity('');
+      setShippingType('phoenix');
+      setProductIdType('ISBN');
+      setProductId('');
       setCategoryId('');
       setVendorId('');
       setCollectionId('');
       setTagIds([]);
+      setSavedProductId(null);
+      const firstTypeId = variantOptionTypes[0]?.id;
+      setVariants(firstTypeId != null ? [{ optionTypeId: firstTypeId, values: [] }] : []);
+      router.replace('/admin/products/new');
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    setError('');
+    const check = validateProductDraft({ token });
+    if (!check.ok) {
+      setError(check.message);
+      return;
+    }
+    setIsSavingDraft(true);
+    try {
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+      const payload = buildDraftPayload();
+      const id = savedProductId ?? (searchParams.get('id') ? Number(searchParams.get('id')) : null);
+      const url = id && Number.isInteger(id) ? `${base}/api/products/${id}` : `${base}/api/products`;
+      const method = id && Number.isInteger(id) ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(parseApiError(data));
+      const created = data as { data?: { id: number } };
+      const newId = created.data?.id;
+      if (newId != null) {
+        setSavedProductId(newId);
+        router.replace(`/admin/products/new?id=${newId}`);
+      }
+    } catch (e) {
+      setError((e as Error).message || 'Failed to save draft');
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
   const handlePublish = async () => {
     setError('');
-    const price = Math.round(parseFloat(regularPrice || '0') * 100);
-    const stockNum = parseInt(stock || '0', 10) || 0;
-    if (!title.trim()) {
-      setError('Product title is required');
+    const validated = validateProductPublish({
+      token,
+      title,
+      categoryId,
+      regularPrice,
+      salePrice,
+      imageUrls,
+    });
+    if (!validated.ok) {
+      setError(validated.message);
       return;
     }
-    if (!categoryId) {
-      setError('Please select a category');
-      return;
-    }
-    if (price < 0) {
-      setError('Regular price must be valid');
-      return;
-    }
+    const { priceCents, salePriceCents } = validated;
+    const payload = buildPublishPayload(priceCents, salePriceCents);
     setIsSubmitting(true);
     try {
       const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
-      const res = await fetch(`${base}/api/products`, {
-        method: 'POST',
+      const id = savedProductId ?? (searchParams.get('id') ? Number(searchParams.get('id')) : null);
+      const url = id && Number.isInteger(id) ? `${base}/api/products/${id}` : `${base}/api/products`;
+      const method = id && Number.isInteger(id) ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: token ? `Bearer ${token}` : '',
         },
-        body: JSON.stringify({
-          name: title.trim(),
-          shortDescription: description.trim().slice(0, 255) || undefined,
-          description: description.trim() || undefined,
-          priceCents: price,
-          stock: stockNum,
-          categoryId: Number(categoryId),
-          imageUrls: imageUrls.filter(Boolean),
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { message?: string }).message || 'Failed to create product');
-      router.push('/admin');
+      if (!res.ok) throw new Error(parseApiError(data));
+      router.push('/admin/products');
     } catch (e) {
-      setError((e as Error).message || 'Failed to create product');
+      setError((e as Error).message || 'Failed to publish product');
     } finally {
       setIsSubmitting(false);
     }
@@ -462,14 +743,16 @@ export default function AddProductPage() {
             </button>
             <button
               type="button"
-              className="rounded border border-[#246bfd] bg-white px-4 py-2 text-sm font-medium text-[#246bfd] hover:bg-[#eef4ff]"
+              onClick={handleSaveDraft}
+              disabled={!draftLoaded || isSavingDraft || isSubmitting}
+              className="rounded border border-[#246bfd] bg-white px-4 py-2 text-sm font-medium text-[#246bfd] hover:bg-[#eef4ff] disabled:opacity-60"
             >
-              Save draft
+              {isSavingDraft ? 'Saving…' : 'Save draft'}
             </button>
             <button
               type="button"
               onClick={handlePublish}
-              disabled={isSubmitting}
+              disabled={!draftLoaded || isSubmitting || isSavingDraft}
               className="rounded bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
             >
               {isSubmitting ? 'Publishing…' : 'Publish product'}

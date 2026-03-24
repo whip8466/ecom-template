@@ -177,6 +177,7 @@ async function seed() {
         stock: input.stock,
         slug: slugify(input.name, { lower: true, strict: true }),
         categoryId: input.category.id,
+        status: 'PUBLISHED',
       },
     });
     createdProducts.push(product);

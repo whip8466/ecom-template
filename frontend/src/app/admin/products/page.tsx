@@ -71,6 +71,7 @@ export default function AdminProductsPage() {
       params.set('limit', String(limit));
       if (search) params.set('q', search);
       if (categorySlug) params.set('category', categorySlug);
+      if (token) params.set('status', 'all');
       const res = await fetch(`${API_BASE}/api/products?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });

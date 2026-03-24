@@ -1,0 +1,4 @@
+ALTER TABLE "products" ADD COLUMN "status" VARCHAR(20) NOT NULL DEFAULT 'PUBLISHED';
+UPDATE "products" SET "status" = 'PUBLISHED';
+ALTER TABLE "products" ALTER COLUMN "status" SET DEFAULT 'DRAFT';
+ALTER TABLE "products" ALTER COLUMN "category_id" DROP NOT NULL;

@@ -60,6 +60,7 @@ model Vendor {
   id        Int       @id @default(autoincrement())
   name      String
   slug      String    @unique
+  products  Product[]
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -70,6 +71,7 @@ model Collection {
   id        Int       @id @default(autoincrement())
   name      String
   slug      String    @unique
+  products  Product[]
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -77,13 +79,25 @@ model Collection {
 }
 
 model Tag {
-  id        Int       @id @default(autoincrement())
-  name      String
-  slug      String    @unique
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id           Int          @id @default(autoincrement())
+  name         String
+  slug         String       @unique
+  productTags  ProductTag[]
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("tags")
+}
+
+model ProductTag {
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tagId     Int      @map("tag_id")
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tagId])
+  @@map("product_tags")
 }
 
 model ProductOptionType {
@@ -140,12 +154,22 @@ model Product {
   id              Int            @id @default(autoincrement())
   name            String
   slug            String         @unique
+  status          String         @default("DRAFT") @db.VarChar(20)
   shortDescription String?       @map("short_description")
   description     String?
   priceCents      Int            @map("price_cents")
+  salePriceCents  Int?           @map("sale_price_cents")
   stock           Int            @default(0)
-  categoryId      Int            @map("category_id")
-  category        Category       @relation(fields: [categoryId], references: [id])
+  fulfillmentType String?        @map("fulfillment_type") @db.VarChar(32)
+  externalProductIdType String?  @map("external_product_id_type") @db.VarChar(20)
+  externalProductId String?      @map("external_product_id") @db.VarChar(120)
+  categoryId      Int?           @map("category_id")
+  category        Category?      @relation(fields: [categoryId], references: [id])
+  vendorId        Int?           @map("vendor_id")
+  vendor          Vendor?       @relation(fields: [vendorId], references: [id])
+  collectionId    Int?           @map("collection_id")
+  collection      Collection?    @relation(fields: [collectionId], references: [id])
+  productTags     ProductTag[]
   images          ProductImage[]
   availableColors ProductColor[]
   variants        ProductVariant[]
