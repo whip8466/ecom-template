@@ -128,7 +128,15 @@ async function catalogRoutes(fastify) {
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        include: { category: true, vendor: true, images: true, availableColors: true },
+        include: {
+          category: true,
+          vendor: true,
+          images: true,
+          availableColors: true,
+          variants: {
+            select: { id: true, sku: true, priceCents: true, stock: true },
+          },
+        },
         orderBy: { createdAt: 'desc' },
         take: query.limit,
         skip: (query.page - 1) * query.limit,

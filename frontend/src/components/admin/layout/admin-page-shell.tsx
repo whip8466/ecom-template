@@ -8,7 +8,7 @@ export type AdminBreadcrumbItem = {
 type Props = {
   breadcrumbs: AdminBreadcrumbItem[];
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   actions?: React.ReactNode;
   children: React.ReactNode;
   /** Optional wrapper for page content (e.g. max width) */
@@ -37,7 +37,7 @@ export function AdminPageShell({ breadcrumbs, title, description, actions, child
       <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-[#1c2740]">{title}</h1>
-          {description ? <p className="mt-1 text-sm text-[#60759b]">{description}</p> : null}
+          {description ? <div className="mt-1 text-sm text-[#60759b]">{description}</div> : null}
         </div>
         {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
       </div>

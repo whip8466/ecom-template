@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { effectiveAvailableStockForLine } from '@/lib/inventory';
 import type { Product } from '@/lib/types';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
@@ -39,6 +40,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
     : product.priceCents;
   const inCart = cartItems.some((item) => item.productId === product.id);
   const inWishlist = wishlistItems.some((item) => item.productId === product.id);
+  const cardAvailable = effectiveAvailableStockForLine(product, null);
   const handleWishlistToggle = () => {
     if (!user) {
       router.push(buildLoginRedirectHref('/'));
@@ -71,6 +73,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
                 router.push('/cart');
                 return;
               }
+              if (cardAvailable < 1) return;
               addToCart({
                 productId: product.id,
                 slug: product.slug,
@@ -79,6 +82,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
                 imageUrl,
                 colorName: product.availableColors?.[0]?.colorName,
                 quantity: 1,
+                availableStock: cardAvailable,
               });
             }}
             className="pointer-events-auto w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-premium hover:bg-[var(--accent-hover)]"
@@ -96,6 +100,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
                 router.push('/cart');
                 return;
               }
+              if (cardAvailable < 1) return;
               addToCart({
                 productId: product.id,
                 slug: product.slug,
@@ -104,6 +109,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
                 imageUrl,
                 colorName: product.availableColors?.[0]?.colorName,
                 quantity: 1,
+                availableStock: cardAvailable,
               });
             }}
             className={`relative h-11 w-11 border-b border-[#edf2f8] transition-premium ${

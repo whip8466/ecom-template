@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
+import { effectiveAvailableStockForLine } from '@/lib/inventory';
 import type { Product } from '@/lib/types';
-import { MOCK_PRODUCTS } from '@/lib/mock-products';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
@@ -56,30 +56,20 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
         const res = await apiRequest<ProductsResponse>('/api/products?limit=200');
         if (cancelled) return;
         const apiProducts = res.data ?? [];
-        const nextProducts = [
-          ...apiProducts,
-          ...MOCK_PRODUCTS.filter(
-            (dummyProduct) => !apiProducts.some((apiProduct) => apiProduct.slug === dummyProduct.slug),
-          ),
-        ];
-        const computedMaxPrice = nextProducts.reduce(
+        const computedMaxPrice = apiProducts.reduce(
           (max, product) => Math.max(max, product.priceCents),
           0,
         );
-        setProducts(nextProducts);
+        setProducts(apiProducts);
         setMaxPrice(computedMaxPrice);
         setMinPrice(0);
         setPriceLimit(computedMaxPrice);
       } catch {
         if (!cancelled) {
-          const computedMaxPrice = MOCK_PRODUCTS.reduce(
-            (max, product) => Math.max(max, product.priceCents),
-            0,
-          );
-          setProducts(MOCK_PRODUCTS);
-          setMaxPrice(computedMaxPrice);
+          setProducts([]);
+          setMaxPrice(0);
           setMinPrice(0);
-          setPriceLimit(computedMaxPrice);
+          setPriceLimit(0);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -409,6 +399,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
               {paginatedProducts.map((product, index) => {
                 const imageUrl = product.images?.[0]?.imageUrl || '';
                 const isSale = (startIndex + index) % 3 === 0;
+                const cardAvailable = effectiveAvailableStockForLine(product, null);
                 const inCart = cartItems.some((item) => item.productId === product.id);
                 const inWishlist = wishlistItems.some((item) => item.productId === product.id);
                 return (
@@ -432,6 +423,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                             router.push('/cart');
                             return;
                           }
+                          if (cardAvailable < 1) return;
                           addToCart({
                             productId: product.id,
                             slug: product.slug,
@@ -440,6 +432,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                             imageUrl,
                             colorName: product.availableColors?.[0]?.colorName,
                             quantity: 1,
+                            availableStock: cardAvailable,
                           });
                         }}
                         className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${

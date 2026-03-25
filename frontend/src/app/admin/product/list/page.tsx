@@ -281,7 +281,7 @@ export default function AdminProductsPage() {
       title="Products"
     >
       {/* Tabs */}
-      <div className="mt-6 flex gap-6 border-b border-[#e5ebf5]">
+      <div className="mt-6 flex flex-wrap gap-x-[1.333rem] gap-y-2 border-b border-[#e5ebf5]">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -290,10 +290,10 @@ export default function AdminProductsPage() {
               setActiveTab(tab.id);
               setPage(1);
             }}
-            className={`pb-3 text-sm font-medium transition ${
+            className={`whitespace-nowrap px-1 pb-3 text-sm font-medium transition ${
               activeTab === tab.id
                 ? 'border-b-2 border-[#246bfd] text-[#246bfd]'
-                : 'text-[#64748b] hover:text-[#1c2740]'
+                : 'border-b-2 border-transparent text-[#64748b] hover:text-[#1c2740]'
             }`}
           >
             {tab.id === 'all' ? `${tab.label} (${total})` : tab.label}

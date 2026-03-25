@@ -2,7 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { apiRequest } from '@/lib/api';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
+import { formatMoney } from '@/lib/format';
+import { effectiveAvailableStockForLine } from '@/lib/inventory';
+import type { Product } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
@@ -17,7 +22,38 @@ type ProductCardData = {
   oldPrice?: string;
   badge?: string;
   image: string;
+  availableStock?: number;
 };
+
+function mapProductToCard(p: Product): ProductCardData {
+  const hasSale = p.salePriceCents != null && p.salePriceCents < p.priceCents;
+  const lineCents = hasSale ? p.salePriceCents! : p.priceCents;
+  return {
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    category: p.category?.name ?? 'Shop',
+    priceCents: lineCents,
+    price: formatMoney(lineCents),
+    oldPrice: hasSale ? formatMoney(p.priceCents) : undefined,
+    badge: hasSale ? 'Sale' : undefined,
+    image: p.images?.[0]?.imageUrl || '',
+    availableStock: effectiveAvailableStockForLine(p, null),
+  };
+}
+
+type MiniListItem = { name: string; slug: string; price: string; image: string };
+
+function productToMiniItem(p: Product): MiniListItem {
+  const hasSale = p.salePriceCents != null && p.salePriceCents < p.priceCents;
+  const lineCents = hasSale ? p.salePriceCents! : p.priceCents;
+  return {
+    name: p.name,
+    slug: p.slug,
+    price: formatMoney(lineCents),
+    image: p.images?.[0]?.imageUrl || '',
+  };
+}
 
 const categoryItems = [
   { name: 'Headphones', count: '12 item', iconLabel: 'HP' },
@@ -26,23 +62,6 @@ const categoryItems = [
   { name: 'Mouse', count: '09 item', iconLabel: 'MS' },
   { name: 'Phones', count: '22 item', iconLabel: 'PH' },
   { name: 'Cameras', count: '05 item', iconLabel: 'CM' },
-];
-
-const productCards: ProductCardData[] = [
-  { id: 10001, slug: 'headphones-wireless', name: 'Headphones Wireless', category: 'Headphone', priceCents: 24900, price: '$249.00', oldPrice: '$289.00', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900&q=80', badge: '-15%' },
-  { id: 10002, slug: 'gaming-headphone', name: 'Gaming Headphone', category: 'Audio', priceCents: 19900, price: '$199.00', oldPrice: '$229.00', image: 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=900&q=80' },
-  { id: 10008, slug: 'smart-watch-active', name: 'Smart Watch Active', category: 'Watch', priceCents: 39900, price: '$399.00', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&q=80', badge: 'New' },
-  { id: 10006, slug: 'cpu-air-cooler', name: 'CPU Air Cooler', category: 'Gaming', priceCents: 8900, price: '$89.00', image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=900&q=80' },
-  { id: 10005, slug: 'samsung-tab-pro', name: 'Samsung Tab Pro', category: 'Phone', priceCents: 99900, price: '$999.00', oldPrice: '$1099.00', image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=900&q=80', badge: '-10%' },
-  { id: 10007, slug: 'deepcool-air-cooler', name: 'DeepCool Air Cooler', category: 'Components', priceCents: 55900, price: '$559.00', image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=900&q=80' },
-  { id: 10004, slug: 'apple-ipad-air', name: 'Apple iPad Air', category: 'Tablet', priceCents: 69900, price: '$699.00', oldPrice: '$749.00', image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=900&q=80' },
-  { id: 10010, slug: 'bluetooth-earbuds', name: 'Bluetooth Earbuds', category: 'Gaming', priceCents: 8900, price: '$89.00', image: 'https://images.unsplash.com/photo-1622297845775-5ff3fef71d13?w=900&q=80' },
-];
-
-const miniProducts = [
-  { name: 'Headphone with Mic', slug: 'headphone-with-mic', price: '$99.00', image: 'https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?w=500&q=80' },
-  { name: 'Apple iPad Air', slug: 'apple-ipad-air', price: '$899.00', image: 'https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=500&q=80' },
-  { name: 'Gaming Headphones', slug: 'gaming-headphone', price: '$129.00', image: 'https://images.unsplash.com/photo-1612444530582-fc66183b16f7?w=500&q=80' },
 ];
 
 function ProductCard({ product }: { product: ProductCardData }) {
@@ -89,6 +108,8 @@ function ProductCard({ product }: { product: ProductCardData }) {
               router.push('/cart');
               return;
             }
+            const cap = product.availableStock ?? 999;
+            if (cap < 1) return;
             addToCart({
               productId: product.id,
               slug: product.slug,
@@ -96,6 +117,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
               priceCents: product.priceCents,
               imageUrl: product.image,
               quantity: 1,
+              availableStock: cap,
             });
           }}
           className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${
@@ -153,13 +175,21 @@ function ProductCard({ product }: { product: ProductCardData }) {
   );
 }
 
-function SmallListCard({ title }: { title: string }) {
+function SmallListCard({ title, items }: { title: string; items: MiniListItem[] }) {
+  if (items.length === 0) {
+    return (
+      <article className="rounded-md border border-[#e4ebf4] bg-white p-4">
+        <h3 className="text-base font-semibold text-[#1b2a4e]">{title}</h3>
+        <p className="mt-4 text-xs text-[#7c8ea6]">No products to show.</p>
+      </article>
+    );
+  }
   return (
     <article className="rounded-md border border-[#e4ebf4] bg-white p-4">
       <h3 className="text-base font-semibold text-[#1b2a4e]">{title}</h3>
       <div className="mt-4 space-y-3">
-        {miniProducts.map((item) => (
-          <Link key={`${title}-${item.name}`} href={`/products/${item.slug}`} className="flex items-center gap-3 rounded-md border border-[#edf2f8] p-2 transition hover:bg-[#f7fbff]">
+        {items.map((item) => (
+          <Link key={`${title}-${item.slug}`} href={`/products/${item.slug}`} className="flex items-center gap-3 rounded-md border border-[#edf2f8] p-2 transition hover:bg-[#f7fbff]">
             <div
               className="h-14 w-14 flex-none rounded bg-cover bg-center"
               style={{ backgroundImage: `url(${item.image})` }}
@@ -175,7 +205,55 @@ function SmallListCard({ title }: { title: string }) {
   );
 }
 
+function HomeProductGrid({
+  loading,
+  emptyMessage,
+  cards,
+  keyPrefix,
+}: {
+  loading: boolean;
+  emptyMessage: string;
+  cards: ProductCardData[];
+  keyPrefix: string;
+}) {
+  if (loading) {
+    return <p className="text-sm text-[#7c8ea6]">Loading products…</p>;
+  }
+  if (cards.length === 0) {
+    return <p className="text-sm text-[#7c8ea6]">{emptyMessage}</p>;
+  }
+  return (
+    <>
+      {cards.map((product) => (
+        <ProductCard key={`${keyPrefix}-${product.id}`} product={product} />
+      ))}
+    </>
+  );
+}
+
 export default function HomePage() {
+  const [homeProducts, setHomeProducts] = useState<Product[]>([]);
+  const [homeLoading, setHomeLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: Product[] }>('/api/products?limit=12')
+      .then((res) => {
+        if (!cancelled) setHomeProducts(res.data ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setHomeProducts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setHomeLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const productCards = useMemo(() => homeProducts.map(mapProductToCard), [homeProducts]);
+
   return (
     <div className="bg-white">
       <section className="bg-[#0f6f8f]">
@@ -226,9 +304,12 @@ export default function HomePage() {
             </div>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {productCards.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            <HomeProductGrid
+              loading={homeLoading}
+              emptyMessage="No products in the catalog yet."
+              cards={productCards}
+              keyPrefix="trending"
+            />
           </div>
         </div>
       </section>
@@ -255,9 +336,12 @@ export default function HomePage() {
             <Link href="/" className="text-sm font-semibold text-[#0989ff]">View All</Link>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {productCards.slice(0, 4).map((product) => (
-              <ProductCard key={`deal-${product.id}`} product={product} />
-            ))}
+            <HomeProductGrid
+              loading={homeLoading}
+              emptyMessage="No products in the catalog yet."
+              cards={productCards.slice(0, 4)}
+              keyPrefix="deal"
+            />
           </div>
         </div>
       </section>
@@ -276,18 +360,21 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-semibold text-[#1b2a4e]">Popular Products</h2>
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {productCards.map((product) => (
-              <ProductCard key={`popular-${product.id}`} product={product} />
-            ))}
+            <HomeProductGrid
+              loading={homeLoading}
+              emptyMessage="No products in the catalog yet."
+              cards={productCards}
+              keyPrefix="popular"
+            />
           </div>
         </div>
       </section>
 
       <section className="bg-[#f7fbff] py-10">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 md:grid-cols-3 sm:px-6 lg:px-8">
-          <SmallListCard title="Discount Products" />
-          <SmallListCard title="Featured Products" />
-          <SmallListCard title="Selling Products" />
+          <SmallListCard title="Discount Products" items={homeProducts.slice(0, 3).map(productToMiniItem)} />
+          <SmallListCard title="Featured Products" items={homeProducts.slice(3, 6).map(productToMiniItem)} />
+          <SmallListCard title="Selling Products" items={homeProducts.slice(6, 9).map(productToMiniItem)} />
         </div>
       </section>
 

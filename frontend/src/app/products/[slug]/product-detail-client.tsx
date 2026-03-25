@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import type { Product } from '@/lib/types';
 import { effectivePriceCents, effectiveVariantUnitPriceCents, formatMoney } from '@/lib/format';
 import { resolveSwatchColor } from '@/lib/swatch-color';
+import { effectiveAvailableStockForLine } from '@/lib/inventory';
 import {
   availableValuesForOptionType,
   buildVariantOptionGroups,
@@ -112,18 +113,20 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
   const mainImage = galleryImages[Math.min(activeImageIndex, galleryImages.length - 1)];
   const colorOptions = product.availableColors?.length ? product.availableColors : [];
 
-  /**
-   * Variant rows are often created with stock 0 while `product.stock` holds the real total.
-   * If any variant has stock > 0, treat inventory as per-variant; otherwise use product-level stock.
-   */
-  const effectiveAvailableStock = useMemo(() => {
-    if (!variants.length) return Math.max(0, product.stock ?? 0);
-    const anyVariantHasStock = variants.some((v) => (v.stock ?? 0) > 0);
-    if (anyVariantHasStock) return Math.max(0, matchedVariant?.stock ?? 0);
-    return Math.max(0, product.stock ?? 0);
-  }, [variants, product.stock, matchedVariant]);
+  const effectiveAvailableStock = useMemo(
+    () => effectiveAvailableStockForLine(product, matchedVariant),
+    [product, matchedVariant],
+  );
 
   const shouldShowOutOfStock = effectiveAvailableStock <= 0;
+
+  useEffect(() => {
+    setQuantity((q) => {
+      const cap = Math.max(0, effectiveAvailableStock);
+      if (cap < 1) return q;
+      return Math.min(q, cap);
+    });
+  }, [effectiveAvailableStock]);
 
   function handleOptionSelect(optionTypeId: number, optionValueId: number) {
     if (!variants.length) return;
@@ -314,16 +317,21 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
               <span className="w-10 text-center text-sm font-semibold text-[#0f1f40]">{quantity}</span>
               <button
                 type="button"
-                onClick={() => setQuantity((q) => q + 1)}
-                className="h-full w-9 text-[#0f1f40]"
+                disabled={quantity >= effectiveAvailableStock}
+                onClick={() =>
+                  setQuantity((q) => Math.min(effectiveAvailableStock, Math.max(1, q + 1)))
+                }
+                className="h-full w-9 text-[#0f1f40] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 +
               </button>
             </div>
 
             <button
-              className="h-10 rounded bg-[#0f1f40] px-6 text-sm font-semibold text-white hover:bg-[#102b57]"
+              disabled={shouldShowOutOfStock || effectiveAvailableStock < 1}
+              className="h-10 rounded bg-[#0f1f40] px-6 text-sm font-semibold text-white hover:bg-[#102b57] disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => {
+                if (shouldShowOutOfStock || effectiveAvailableStock < 1) return;
                 const variantLabel = matchedVariant
                   ? formatVariantLabel(matchedVariant.optionValues || [])
                   : undefined;
@@ -336,7 +344,8 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
                   colorName: variantLabel || selectedColor || colorOptions[0]?.colorName,
                   variantId: matchedVariant?.id,
                   variantLabel,
-                  quantity,
+                  quantity: Math.min(quantity, effectiveAvailableStock),
+                  availableStock: effectiveAvailableStock,
                 });
                 setMessage('Added to cart');
               }}
@@ -460,6 +469,9 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
           ) : (
             relatedProducts.map((item) => {
               const itemPrice = effectivePriceCents(item);
+              const relVariants = item.variants ?? [];
+              const relVariant = pickInitialVariant(relVariants);
+              const relAvailable = effectiveAvailableStockForLine(item, relVariant);
               return (
                 <article key={item.id} className="group relative rounded-md border border-[#e4ebf5] bg-white p-3">
                   <div className="relative overflow-hidden rounded bg-[#f4f8ff]">
@@ -483,6 +495,7 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
                             router.push('/cart');
                             return;
                           }
+                          if (relAvailable < 1) return;
                           addToCart({
                             productId: item.id,
                             slug: item.slug,
@@ -490,7 +503,12 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
                             priceCents: itemPrice,
                             imageUrl: item.images?.[0]?.imageUrl,
                             colorName: item.availableColors?.[0]?.colorName,
+                            variantId: relVariant?.id,
+                            variantLabel: relVariant
+                              ? formatVariantLabel(relVariant.optionValues || [])
+                              : undefined,
                             quantity: 1,
+                            availableStock: relAvailable,
                           });
                         }}
                         className={`group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] transition ${

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import { messageFromApiErrorPayload } from '@/lib/api-error';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
 import type { Address } from '@/lib/types';
@@ -66,6 +67,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (items.length === 0) {
+      setError('Your cart is empty');
+      return;
+    }
+
     if (!useNewAddress && !selectedAddressId) {
       setError('Please select a saved address or add a new one');
       return;
@@ -102,11 +108,20 @@ export default function CheckoutPage() {
         })),
       };
 
-      const response = await apiRequest<{ data: { id: number } }>('/api/orders', {
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+      const res = await fetch(`${base}/api/orders`, {
         method: 'POST',
-        token,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(payload),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(messageFromApiErrorPayload(data));
+      }
+      const response = data as { data: { id: number } };
 
       clearCart();
       router.push(`/order-success/${response.data.id}`);

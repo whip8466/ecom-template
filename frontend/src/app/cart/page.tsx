@@ -68,22 +68,33 @@ export default function CartPage() {
                   </div>
                   <p className="text-sm font-medium text-[#0f1f40]">{formatMoney(item.priceCents)}</p>
 
-                  <div className="flex h-9 w-fit items-center rounded-full border border-[#d7e4f6]">
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(index, item.quantity - 1)}
-                      className="h-full w-9 text-[#0f1f40]"
-                    >
-                      -
-                    </button>
-                    <span className="w-8 text-center text-sm font-semibold text-[#0f1f40]">{item.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(index, item.quantity + 1)}
-                      className="h-full w-9 text-[#0f1f40]"
-                    >
-                      +
-                    </button>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex h-9 w-fit items-center rounded-full border border-[#d7e4f6]">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(index, item.quantity - 1)}
+                        className="h-full w-9 text-[#0f1f40]"
+                      >
+                        -
+                      </button>
+                      <span className="w-8 text-center text-sm font-semibold text-[#0f1f40]">{item.quantity}</span>
+                      <button
+                        type="button"
+                        disabled={
+                          item.availableStock != null &&
+                          item.quantity >= item.availableStock
+                        }
+                        onClick={() => updateQuantity(index, item.quantity + 1)}
+                        className="h-full w-9 text-[#0f1f40] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        +
+                      </button>
+                    </div>
+                    {item.availableStock != null && item.availableStock >= 0 && (
+                      <span className="text-xs text-[#94a3b8]">
+                        Max {item.availableStock} in stock
+                      </span>
+                    )}
                   </div>
 
                   <button

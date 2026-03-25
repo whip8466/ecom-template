@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
+import { messageFromApiErrorPayload } from '@/lib/api-error';
 import { apiRequest } from '@/lib/api';
 import { AdminPageShell } from '@/components/admin-shell';
 
@@ -579,29 +580,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
     }
   };
 
-  const parseApiError = (data: unknown): string => {
-    const d = data as {
-      message?: string;
-      errors?: Record<string, string[] | string>;
-      formErrors?: string[];
-    };
-    if (d.formErrors?.length) {
-      return [d.message, ...d.formErrors].filter(Boolean).join(' ');
-    }
-    if (d.errors && typeof d.errors === 'object') {
-      const parts: string[] = [];
-      for (const [key, val] of Object.entries(d.errors)) {
-        if (key === '_errors' && Array.isArray(val)) {
-          parts.push(...val.filter(Boolean).map(String));
-          continue;
-        }
-        const msg = Array.isArray(val) ? val.join(', ') : String(val);
-        if (msg) parts.push(`${key}: ${msg}`);
-      }
-      if (parts.length) return parts.join(' ');
-    }
-    return d.message || 'Request failed';
-  };
+  const parseApiError = messageFromApiErrorPayload;
 
   const handleRestockConfirm = async () => {
     setRestockSuccess('');

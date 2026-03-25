@@ -14,6 +14,8 @@ type CartItem = {
   variantId?: number;
   variantLabel?: string;
   quantity: number;
+  /** Max purchasable qty when added (aligned with product / variant stock); caps quantity in cart. */
+  availableStock?: number;
 };
 
 function isSameCartLine(a: CartItem, b: CartItem): boolean {
@@ -38,20 +40,40 @@ export const useCartStore = create<CartState>()(
       items: [],
       addToCart: (item) =>
         set((state) => {
+          if (item.availableStock === 0) return state;
+
+          const cap = item.availableStock;
+          const applyCap = (q: number) => {
+            const n = Math.max(1, q);
+            if (cap != null && Number.isFinite(cap) && cap > 0) return Math.min(n, cap);
+            return n;
+          };
+
           const existingIndex = state.items.findIndex((x) => isSameCartLine(x, item));
           if (existingIndex > -1) {
             const next = [...state.items];
-            next[existingIndex].quantity += item.quantity;
+            const mergedQty = next[existingIndex].quantity + item.quantity;
+            next[existingIndex].quantity = applyCap(mergedQty);
+            if (item.availableStock != null) {
+              next[existingIndex].availableStock = item.availableStock;
+            }
             return { items: next };
           }
-          return { items: [...state.items, item] };
+          return { items: [...state.items, { ...item, quantity: applyCap(item.quantity) }] };
         }),
       removeFromCart: (index) =>
         set((state) => ({ items: state.items.filter((_, i) => i !== index) })),
       updateQuantity: (index, quantity) =>
         set((state) => {
           const next = [...state.items];
-          next[index].quantity = Math.max(1, quantity);
+          const row = next[index];
+          if (!row) return state;
+          let q = Math.max(1, quantity);
+          const cap = row.availableStock;
+          if (cap != null && Number.isFinite(cap) && cap > 0) {
+            q = Math.min(q, cap);
+          }
+          next[index].quantity = q;
           return { items: next };
         }),
       clearCart: () => set({ items: [] }),
