@@ -42,7 +42,7 @@ export function AdminShell({ children, mainClassName }: AdminShellProps) {
 
   if (!isReady) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f2f5fb]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f9fafb]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#246bfd] border-t-transparent" />
       </div>
     );
@@ -54,11 +54,11 @@ export function AdminShell({ children, mainClassName }: AdminShellProps) {
   const mainClasses = mainClassName ?? 'flex-1 overflow-auto p-6';
 
   return (
-    <div className="flex min-h-screen bg-[#f2f5fb] text-[#1c2740]">
+    <div className="flex min-h-screen bg-[#f9fafb] text-[#31374a]">
       <AdminSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminTopBar user={user} />
-        <main className={mainClasses}>{children}</main>
+        <main className={`admin-app-main ${mainClasses}`}>{children}</main>
       </div>
     </div>
   );

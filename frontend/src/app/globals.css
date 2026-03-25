@@ -118,3 +118,20 @@ html {
   background: #0989ff;
   box-shadow: 0 0 0 1px #0989ff;
 }
+
+/* Admin order invoice: hide chrome when printing */
+@media print {
+  body[data-invoice-print='1'] .admin-app-sidebar,
+  body[data-invoice-print='1'] .admin-app-topbar {
+    display: none !important;
+  }
+
+  body[data-invoice-print='1'] {
+    background: #fff !important;
+  }
+
+  body[data-invoice-print='1'] .admin-app-main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}

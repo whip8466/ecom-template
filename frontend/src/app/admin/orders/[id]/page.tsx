@@ -329,6 +329,15 @@ export default function AdminOrderDetailPage() {
 
   const shellActions = (
     <div className="flex flex-wrap items-center gap-2">
+      <Link
+        href={`/admin/orders/${order.id}/invoice`}
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+      >
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Invoice
+      </Link>
       <button
         type="button"
         onClick={() => window.print()}
@@ -366,6 +375,13 @@ export default function AdminOrderDetailPage() {
             role="menu"
             className="absolute right-0 z-20 mt-1 min-w-[180px] rounded-md border border-[#e5ebf5] bg-white py-1 shadow-lg"
           >
+            <Link
+              href={`/admin/orders/${order.id}/invoice`}
+              className="block px-3 py-2 text-sm text-[#1c2740] hover:bg-[#f8fafc]"
+              onClick={() => setMoreOpen(false)}
+            >
+              View invoice
+            </Link>
             <Link
               href="/admin/orders"
               className="block px-3 py-2 text-sm text-[#1c2740] hover:bg-[#f8fafc]"
