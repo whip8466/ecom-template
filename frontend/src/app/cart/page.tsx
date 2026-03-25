@@ -45,7 +45,7 @@ export default function CartPage() {
 
               {items.map((item, index) => (
                 <div
-                  key={`${item.productId}-${item.colorName}-${index}`}
+                  key={`${item.productId}-${item.variantId ?? item.colorName ?? 'default'}-${index}`}
                   className="grid grid-cols-[minmax(0,1fr)_120px_160px_120px] items-center gap-2 border-t border-[#edf2f8] px-5 py-5"
                 >
                   <div className="flex items-center gap-4">
@@ -57,7 +57,13 @@ export default function CartPage() {
                       <Link href={`/products/${item.slug}`} className="font-medium text-[#0f1f40] hover:text-[#0989ff]">
                         {item.name}
                       </Link>
-                      <p className="mt-1 text-xs text-[#7c8ea6]">Color: {item.colorName || 'Default'}</p>
+                      {(item.variantLabel || item.colorName) && (
+                        <p className="mt-1 text-xs text-[#7c8ea6]">
+                          {item.variantLabel
+                            ? `Options: ${item.variantLabel}`
+                            : `Color: ${item.colorName}`}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <p className="text-sm font-medium text-[#0f1f40]">{formatMoney(item.priceCents)}</p>

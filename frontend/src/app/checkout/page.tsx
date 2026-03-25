@@ -98,6 +98,7 @@ export default function CheckoutPage() {
           productId: item.productId,
           quantity: item.quantity,
           colorName: item.colorName,
+          variantId: item.variantId,
         })),
       };
 

@@ -9,9 +9,20 @@ type CartItem = {
   name: string;
   priceCents: number;
   imageUrl?: string;
+  /** Legacy simple color; also used as a human-readable option summary when variants are not used. */
   colorName?: string;
+  variantId?: number;
+  variantLabel?: string;
   quantity: number;
 };
+
+function isSameCartLine(a: CartItem, b: CartItem): boolean {
+  if (a.productId !== b.productId) return false;
+  if (a.variantId != null || b.variantId != null) {
+    return a.variantId === b.variantId;
+  }
+  return (a.colorName ?? '') === (b.colorName ?? '');
+}
 
 type CartState = {
   items: CartItem[];
@@ -27,9 +38,7 @@ export const useCartStore = create<CartState>()(
       items: [],
       addToCart: (item) =>
         set((state) => {
-          const existingIndex = state.items.findIndex(
-            (x) => x.productId === item.productId && x.colorName === item.colorName
-          );
+          const existingIndex = state.items.findIndex((x) => isSameCartLine(x, item));
           if (existingIndex > -1) {
             const next = [...state.items];
             next[existingIndex].quantity += item.quantity;

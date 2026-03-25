@@ -16,6 +16,26 @@ export type Category = { id: number; name: string; slug: string };
 export type ProductImage = { id: number; imageUrl: string };
 export type ProductColor = { id: number; colorName: string; colorCode: string; stock?: number };
 
+export type ProductTag = { id: number; name: string; slug: string };
+
+export type ProductOptionType = { id: number; name: string; slug: string };
+
+export type ProductVariantOptionValue = {
+  id: number;
+  value: string;
+  label: string;
+  optionTypeId: number;
+  optionType: ProductOptionType | null;
+};
+
+export type ProductVariant = {
+  id: number;
+  sku: string | null;
+  priceCents: number | null;
+  stock: number;
+  optionValues: ProductVariantOptionValue[];
+};
+
 export type Product = {
   id: number;
   name: string;
@@ -23,8 +43,15 @@ export type Product = {
   shortDescription?: string;
   description?: string;
   priceCents: number;
+  salePriceCents?: number | null;
   stock: number;
-  category: Category;
+  status?: string;
+  fulfillmentType?: string | null;
+  category: Category | null;
+  vendor?: { id: number; name: string; slug: string } | null;
+  collection?: { id: number; name: string; slug: string } | null;
+  tags?: ProductTag[];
+  variants?: ProductVariant[];
   images: ProductImage[];
   availableColors: ProductColor[];
 };

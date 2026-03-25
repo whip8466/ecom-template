@@ -22,6 +22,7 @@ const checkoutSchema = z.object({
         productId: z.number().int().positive(),
         quantity: z.number().int().positive(),
         colorName: z.string().optional(),
+        variantId: z.number().int().positive().optional(),
       })
     )
     .min(1),
@@ -58,6 +59,24 @@ function createHttpError(statusCode, message) {
   const error = new Error(message) as Error & { statusCode: number };
   error.statusCode = statusCode;
   return error;
+}
+
+function effectiveProductPriceCents(product) {
+  const sale = product.salePriceCents;
+  if (sale != null && sale >= 0 && sale < product.priceCents) {
+    return sale;
+  }
+  return product.priceCents;
+}
+
+function effectiveLineUnitCents(product, variant) {
+  if (variant) {
+    if (variant.priceCents != null) {
+      return variant.priceCents;
+    }
+    return effectiveProductPriceCents(product);
+  }
+  return effectiveProductPriceCents(product);
 }
 
 async function resolveAddress(tx, authUser, input) {
@@ -123,6 +142,50 @@ async function ordersRoutes(fastify) {
             throw createHttpError(404, `Product ${inputItem.productId} not found`);
           }
 
+          if (inputItem.variantId) {
+            const variant = await tx.productVariant.findFirst({
+              where: { id: inputItem.variantId, productId: product.id },
+              include: {
+                optionValues: { include: { optionValue: true } },
+              },
+            });
+
+            if (!variant) {
+              throw createHttpError(400, `Invalid variant for ${product.name}`);
+            }
+
+            if (variant.stock < inputItem.quantity) {
+              throw createHttpError(400, `Insufficient stock for selected options on ${product.name}`);
+            }
+
+            const unitPrice = effectiveLineUnitCents(product, variant);
+            const subtotal = unitPrice * inputItem.quantity;
+            total += subtotal;
+
+            await tx.productVariant.update({
+              where: { id: variant.id },
+              data: { stock: { decrement: inputItem.quantity } },
+            });
+
+            const optionLabel = (variant.optionValues || [])
+              .map((pvo) => (pvo.optionValue ? pvo.optionValue.label || pvo.optionValue.value : null))
+              .filter(Boolean)
+              .join(' · ');
+
+            await tx.orderItem.create({
+              data: {
+                orderId: order.id,
+                productId: product.id,
+                productNameSnapshot: product.name,
+                productPriceSnapshotCents: unitPrice,
+                colorName: optionLabel || inputItem.colorName || null,
+                quantity: inputItem.quantity,
+                subtotalCents: subtotal,
+              },
+            });
+            continue;
+          }
+
           if (product.stock < inputItem.quantity) {
             throw createHttpError(400, `Insufficient stock for ${product.name}`);
           }
@@ -134,7 +197,8 @@ async function ordersRoutes(fastify) {
             }
           }
 
-          const subtotal = product.priceCents * inputItem.quantity;
+          const unitPrice = effectiveProductPriceCents(product);
+          const subtotal = unitPrice * inputItem.quantity;
           total += subtotal;
 
           await tx.product.update({
@@ -147,7 +211,7 @@ async function ordersRoutes(fastify) {
               orderId: order.id,
               productId: product.id,
               productNameSnapshot: product.name,
-              productPriceSnapshotCents: product.priceCents,
+              productPriceSnapshotCents: unitPrice,
               colorName: inputItem.colorName,
               quantity: inputItem.quantity,
               subtotalCents: subtotal,

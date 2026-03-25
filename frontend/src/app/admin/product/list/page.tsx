@@ -436,8 +436,17 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="p-4">
                         <Link
-                          href={`/admin/product/edit/${product.id}`}
+                          href={
+                            product.status === 'PUBLISHED' && product.slug
+                              ? `/products/${encodeURIComponent(product.slug)}`
+                              : `/admin/product/edit/${product.id}`
+                          }
                           className="font-medium text-[#246bfd] hover:underline"
+                          title={
+                            product.status === 'PUBLISHED'
+                              ? 'View product page'
+                              : 'Edit draft (not on store)'
+                          }
                         >
                           {product.name}
                         </Link>

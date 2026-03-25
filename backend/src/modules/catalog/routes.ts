@@ -45,6 +45,13 @@ function mapProduct(product) {
               value: pvo.optionValue.value,
               label: pvo.optionValue.label,
               optionTypeId: pvo.optionValue.optionTypeId,
+              optionType: pvo.optionValue.optionType
+                ? {
+                    id: pvo.optionValue.optionType.id,
+                    name: pvo.optionValue.optionType.name,
+                    slug: pvo.optionValue.optionType.slug,
+                  }
+                : null,
             }
           : null
       ).filter(Boolean),
@@ -155,7 +162,11 @@ async function catalogRoutes(fastify) {
           category: true,
           images: true,
           availableColors: true,
-          variants: { include: { optionValues: { include: { optionValue: true } } } },
+          variants: {
+            include: {
+              optionValues: { include: { optionValue: { include: { optionType: true } } } },
+            },
+          },
           vendor: true,
           collection: true,
           productTags: { include: { tag: true } },
@@ -172,7 +183,19 @@ async function catalogRoutes(fastify) {
     const { slug } = request.params;
     const product = await fastify.prisma.product.findFirst({
       where: { slug, status: PRODUCT_STATUS.PUBLISHED },
-      include: { category: true, images: true, availableColors: true },
+      include: {
+        category: true,
+        images: true,
+        availableColors: true,
+        vendor: true,
+        collection: true,
+        productTags: { include: { tag: true } },
+        variants: {
+          include: {
+            optionValues: { include: { optionValue: { include: { optionType: true } } } },
+          },
+        },
+      },
     });
 
     if (!product) {
@@ -508,7 +531,11 @@ async function catalogRoutes(fastify) {
         category: true,
         images: true,
         availableColors: true,
-        variants: { include: { optionValues: { include: { optionValue: true } } } },
+        variants: {
+          include: {
+            optionValues: { include: { optionValue: { include: { optionType: true } } } },
+          },
+        },
         vendor: true,
         collection: true,
         productTags: { include: { tag: true } },
