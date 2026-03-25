@@ -15,6 +15,9 @@ function mapProduct(product) {
     priceCents: product.priceCents,
     salePriceCents: product.salePriceCents ?? null,
     stock: product.stock,
+    stockInTransit: product.stockInTransit ?? 0,
+    lastRestockedAt: product.lastRestockedAt ? product.lastRestockedAt.toISOString() : null,
+    totalStockLifetime: product.totalStockLifetime ?? 0,
     fulfillmentType: product.fulfillmentType ?? null,
     externalProductIdType: product.externalProductIdType ?? null,
     externalProductId: product.externalProductId ?? null,
@@ -388,6 +391,8 @@ async function catalogRoutes(fastify) {
       salePriceCents: z.number().int().nonnegative().optional().nullable(),
       stock: z.number().int().nonnegative().default(0),
       restockQuantity: z.number().int().nonnegative().optional().default(0),
+      stockInTransit: z.number().int().nonnegative().optional(),
+      totalStockLifetime: z.number().int().nonnegative().optional(),
       fulfillmentType: z.enum(['seller', 'phoenix']).optional().nullable(),
       externalProductIdType: z.string().max(20).optional().nullable(),
       externalProductId: z.string().max(120).optional().nullable(),
@@ -423,6 +428,8 @@ async function catalogRoutes(fastify) {
       salePriceCents: z.number().int().nonnegative().optional().nullable(),
       stock: z.number().int().nonnegative().default(0),
       restockQuantity: z.number().int().nonnegative().optional().default(0),
+      stockInTransit: z.number().int().nonnegative().optional(),
+      totalStockLifetime: z.number().int().nonnegative().optional(),
       fulfillmentType: z.enum(['seller', 'phoenix']).optional().nullable(),
       externalProductIdType: z.string().max(20).optional().nullable(),
       externalProductId: z.string().max(120).optional().nullable(),
@@ -593,6 +600,9 @@ async function catalogRoutes(fastify) {
       }
 
       const totalStock = body.stock + (body.restockQuantity ?? 0);
+      const stockInTransit = body.stockInTransit ?? 0;
+      const totalStockLifetime =
+        body.totalStockLifetime !== undefined ? body.totalStockLifetime : totalStock;
 
       const product = await prisma.product.create({
         data: {
@@ -605,6 +615,9 @@ async function catalogRoutes(fastify) {
           priceCents: body.priceCents,
           salePriceCents: body.salePriceCents ?? null,
           stock: totalStock,
+          stockInTransit,
+          totalStockLifetime,
+          lastRestockedAt: null,
           fulfillmentType: body.fulfillmentType ?? null,
           externalProductIdType: body.externalProductIdType?.trim() || null,
           externalProductId: body.externalProductId?.trim() || null,
@@ -619,6 +632,67 @@ async function catalogRoutes(fastify) {
 
       const withRelations = await loadProductWithRelations(prisma, product.id);
       return reply.code(201).send({ data: mapProduct(withRelations) });
+    }
+  );
+
+  const restockStockSchema = z.object({
+    restockQuantity: z.coerce
+      .number({ invalid_type_error: 'Quantity must be a number' })
+      .int()
+      .positive({ message: 'Quantity must be at least 1' }),
+  });
+
+  /** Register before PATCH /products/:id so paths like /products/5/stock are not captured by :id. */
+  fastify.patch(
+    '/products/:id/stock',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid product id' });
+      }
+
+      const parsed = restockStockSchema.safeParse(request.body || {});
+      if (!parsed.success) {
+        const flat = parsed.error.flatten();
+        return reply.code(400).send({
+          message: 'Validation failed',
+          errors: flat.fieldErrors,
+          formErrors: flat.formErrors,
+        });
+      }
+      const { restockQuantity } = parsed.data;
+
+      const prisma = fastify.prisma;
+      const existing = await prisma.product.findUnique({ where: { id } });
+      if (!existing) {
+        return reply.code(404).send({ message: 'Product not found' });
+      }
+
+      try {
+        await prisma.product.update({
+          where: { id },
+          data: {
+            stock: { increment: restockQuantity },
+            totalStockLifetime: { increment: restockQuantity },
+            lastRestockedAt: new Date(),
+          },
+        });
+      } catch (err) {
+        request.log.warn({ err }, 'restock: full inventory update failed; retrying stock-only');
+        await prisma.product.update({
+          where: { id },
+          data: { stock: { increment: restockQuantity } },
+        });
+      }
+
+      const withRelations = await loadProductWithRelations(prisma, id);
+      return reply.code(200).send({ data: mapProduct(withRelations) });
     }
   );
 
@@ -679,6 +753,12 @@ async function catalogRoutes(fastify) {
 
       const totalStock = body.stock + (body.restockQuantity ?? 0);
       const nextStatus = isDraft ? PRODUCT_STATUS.DRAFT : PRODUCT_STATUS.PUBLISHED;
+      const stockInTransit =
+        body.stockInTransit !== undefined ? body.stockInTransit : existingProduct.stockInTransit ?? 0;
+      const totalStockLifetime =
+        body.totalStockLifetime !== undefined
+          ? body.totalStockLifetime
+          : existingProduct.totalStockLifetime ?? 0;
 
       const updateData = {
         name: displayName,
@@ -689,6 +769,8 @@ async function catalogRoutes(fastify) {
         priceCents: body.priceCents,
         salePriceCents: body.salePriceCents ?? null,
         stock: totalStock,
+        stockInTransit,
+        totalStockLifetime,
         fulfillmentType: body.fulfillmentType ?? null,
         externalProductIdType: body.externalProductIdType?.trim() || null,
         externalProductId: body.externalProductId?.trim() || null,

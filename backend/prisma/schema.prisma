@@ -160,6 +160,11 @@ model Product {
   priceCents      Int            @map("price_cents")
   salePriceCents  Int?           @map("sale_price_cents")
   stock           Int            @default(0)
+  /// Units ordered / in shipment but not yet received at warehouse.
+  stockInTransit  Int            @default(0) @map("stock_in_transit")
+  lastRestockedAt DateTime?      @map("last_restocked_at") @db.Timestamptz(6)
+  /// Cumulative units received into inventory (increments on restock; seed on create).
+  totalStockLifetime Int       @default(0) @map("total_stock_lifetime")
   fulfillmentType String?        @map("fulfillment_type") @db.VarChar(32)
   externalProductIdType String?  @map("external_product_id_type") @db.VarChar(20)
   externalProductId String?      @map("external_product_id") @db.VarChar(120)

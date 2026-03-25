@@ -45,6 +45,9 @@ export type Product = {
   priceCents: number;
   salePriceCents?: number | null;
   stock: number;
+  stockInTransit?: number;
+  lastRestockedAt?: string | null;
+  totalStockLifetime?: number;
   status?: string;
   fulfillmentType?: string | null;
   category: Category | null;

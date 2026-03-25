@@ -29,6 +29,9 @@ type ApiProductDetail = {
   priceCents: number;
   salePriceCents: number | null;
   stock: number;
+  stockInTransit?: number;
+  lastRestockedAt?: string | null;
+  totalStockLifetime?: number;
   shortDescription?: string | null;
   description?: string | null;
   fulfillmentType?: string | null;
@@ -43,6 +46,24 @@ type ApiProductDetail = {
     optionValues: { value: string; optionTypeId?: number }[];
   }[];
 };
+
+/** Non-negative integers only (strips letters/symbols; empty allowed while editing). */
+function sanitizeQuantityDigits(raw: string): string {
+  const d = raw.replace(/\D/g, '');
+  if (d === '') return '';
+  return String(parseInt(d, 10));
+}
+
+function formatLastRestockedLabel(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  } catch {
+    return '—';
+  }
+}
 
 /** Client-side validation for publish — keep rules aligned with backend create product schema. */
 function validateProductPublish(input: {
@@ -146,7 +167,14 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
   const [regularPrice, setRegularPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
   const [stock, setStock] = useState('');
-  const [restockQuantity, setRestockQuantity] = useState('');
+  /** Units to add in the Restock tab (separate from current stock on hand). */
+  const [restockAdd, setRestockAdd] = useState('');
+  const [isRestocking, setIsRestocking] = useState(false);
+  const [restockSuccess, setRestockSuccess] = useState('');
+  const [restockFormError, setRestockFormError] = useState('');
+  const [stockInTransit, setStockInTransit] = useState('');
+  const [totalStockLifetime, setTotalStockLifetime] = useState('');
+  const [lastRestockedAt, setLastRestockedAt] = useState<string | null>(null);
   const [shippingType, setShippingType] = useState<'seller' | 'phoenix'>('phoenix');
   const [productIdType, setProductIdType] = useState('ISBN');
   const [productId, setProductId] = useState('');
@@ -304,7 +332,9 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         setRegularPrice((p.priceCents / 100).toFixed(2));
         setSalePrice(p.salePriceCents != null ? (p.salePriceCents / 100).toFixed(2) : '');
         setStock(String(p.stock ?? 0));
-        setRestockQuantity('');
+        setStockInTransit(String(p.stockInTransit ?? 0));
+        setTotalStockLifetime(String(p.totalStockLifetime ?? p.stock ?? 0));
+        setLastRestockedAt(p.lastRestockedAt ?? null);
         setShippingType((p.fulfillmentType as 'seller' | 'phoenix') || 'phoenix');
         setProductIdType(p.externalProductIdType || 'ISBN');
         setProductId(p.externalProductId || '');
@@ -550,10 +580,21 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
   };
 
   const parseApiError = (data: unknown): string => {
-    const d = data as { message?: string; errors?: Record<string, string[] | string> };
+    const d = data as {
+      message?: string;
+      errors?: Record<string, string[] | string>;
+      formErrors?: string[];
+    };
+    if (d.formErrors?.length) {
+      return [d.message, ...d.formErrors].filter(Boolean).join(' ');
+    }
     if (d.errors && typeof d.errors === 'object') {
       const parts: string[] = [];
       for (const [key, val] of Object.entries(d.errors)) {
+        if (key === '_errors' && Array.isArray(val)) {
+          parts.push(...val.filter(Boolean).map(String));
+          continue;
+        }
         const msg = Array.isArray(val) ? val.join(', ') : String(val);
         if (msg) parts.push(`${key}: ${msg}`);
       }
@@ -562,9 +603,88 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
     return d.message || 'Request failed';
   };
 
+  const handleRestockConfirm = async () => {
+    setRestockSuccess('');
+    setRestockFormError('');
+    const add = parseInt(restockAdd || '0', 10) || 0;
+    if (add < 1) {
+      setRestockFormError('Enter a quantity of at least 1.');
+      return;
+    }
+    const prev = parseInt(stock || '0', 10) || 0;
+    const pid = savedProductId ?? (editIdParam ? Number(editIdParam) : null);
+    if (!pid || !Number.isInteger(pid)) {
+      setStock(String(prev + add));
+      const prevLife = parseInt(totalStockLifetime || '0', 10) || 0;
+      setTotalStockLifetime(String(prevLife + add));
+      setLastRestockedAt(new Date().toISOString());
+      setRestockAdd('');
+      setRestockSuccess(`Stock will be ${prev + add}. Save draft or publish to persist to the server.`);
+      return;
+    }
+    if (!token?.trim()) {
+      setRestockFormError('You must be signed in to update stock.');
+      return;
+    }
+    setIsRestocking(true);
+    try {
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+      const res = await fetch(`${base}/api/products/${pid}/stock`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ restockQuantity: Number(add) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(parseApiError(data));
+      const payload = (data as { data?: ApiProductDetail }).data;
+      if (payload) {
+        if (typeof payload.stock === 'number') setStock(String(payload.stock));
+        if (typeof payload.totalStockLifetime === 'number')
+          setTotalStockLifetime(String(payload.totalStockLifetime));
+        if (payload.lastRestockedAt != null) setLastRestockedAt(payload.lastRestockedAt);
+      }
+      setRestockAdd('');
+      setRestockSuccess(`Stock updated to ${payload?.stock ?? prev + add}.`);
+    } catch (e) {
+      setRestockFormError((e as Error).message || 'Failed to update stock');
+    } finally {
+      setIsRestocking(false);
+    }
+  };
+
+  const handleRestockRefresh = async () => {
+    setRestockSuccess('');
+    setRestockFormError('');
+    const pid = savedProductId ?? (editIdParam ? Number(editIdParam) : null);
+    if (!pid || !Number.isInteger(pid)) {
+      setRestockFormError('Save the product first to refresh inventory from the server.');
+      return;
+    }
+    if (!token?.trim()) {
+      setRestockFormError('You must be signed in to refresh.');
+      return;
+    }
+    setIsRestocking(true);
+    try {
+      const res = await apiRequest<{ data: ApiProductDetail }>(`/api/products/id/${pid}`, { token });
+      setStock(String(res.data.stock ?? 0));
+      setStockInTransit(String(res.data.stockInTransit ?? 0));
+      setTotalStockLifetime(String(res.data.totalStockLifetime ?? 0));
+      setLastRestockedAt(res.data.lastRestockedAt ?? null);
+      setRestockSuccess('Inventory refreshed from server.');
+    } catch (e) {
+      setRestockFormError((e as Error).message || 'Failed to refresh');
+    } finally {
+      setIsRestocking(false);
+    }
+  };
+
   const buildDraftPayload = () => {
     const stockNum = parseInt(stock || '0', 10) || 0;
-    const restockNum = parseInt(restockQuantity || '0', 10) || 0;
+    const restockNum = 0;
     let salePriceCents: number | null = null;
     if (salePrice.trim() !== '') {
       const s = parseFloat(salePrice);
@@ -601,7 +721,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
 
   const buildPublishPayload = (priceCents: number, salePriceCents: number | null) => {
     const stockNum = parseInt(stock || '0', 10) || 0;
-    const restockNum = parseInt(restockQuantity || '0', 10) || 0;
+    const restockNum = 0;
     return {
       status: 'published' as const,
       name: title.trim(),
@@ -631,7 +751,12 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
       setRegularPrice('');
       setSalePrice('');
       setStock('');
-      setRestockQuantity('');
+      setRestockAdd('');
+      setRestockSuccess('');
+      setRestockFormError('');
+      setStockInTransit('');
+      setTotalStockLifetime('');
+      setLastRestockedAt(null);
       setShippingType('phoenix');
       setProductIdType('ISBN');
       setProductId('');
@@ -670,11 +795,17 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(parseApiError(data));
-      const created = data as { data?: { id: number } };
-      const newId = created.data?.id;
-      if (newId != null) {
-        setSavedProductId(newId);
-        router.replace(`/admin/product/edit/${newId}`);
+      const created = data as { data?: ApiProductDetail };
+      const d = created.data;
+      if (d) {
+        if (typeof d.stock === 'number') setStock(String(d.stock));
+        if (typeof d.stockInTransit === 'number') setStockInTransit(String(d.stockInTransit));
+        if (typeof d.totalStockLifetime === 'number') setTotalStockLifetime(String(d.totalStockLifetime));
+        if (d.lastRestockedAt !== undefined) setLastRestockedAt(d.lastRestockedAt ?? null);
+        if (d.id != null) {
+          setSavedProductId(d.id);
+          if (!editIdParam) router.replace(`/admin/product/edit/${d.id}`);
+        }
       }
     } catch (e) {
       setError((e as Error).message || 'Failed to save draft');
@@ -910,39 +1041,96 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                       <div className="w-40">
                         <label className="sr-only">Quantity</label>
                         <input
-                          type="number"
-                          min={0}
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="off"
                           placeholder="Quantity"
-                          value={restockQuantity}
-                          onChange={(e) => setRestockQuantity(e.target.value)}
-                          className="w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          value={restockAdd}
+                          onChange={(e) => setRestockAdd(sanitizeQuantityDigits(e.target.value))}
+                          disabled={isRestocking}
+                          className="w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-60"
                         />
                       </div>
-                      <button type="button" className="flex items-center gap-2 rounded-sm bg-[#246bfd] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1e5ae0]">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                        Confirm
+                      <button
+                        type="button"
+                        onClick={handleRestockConfirm}
+                        disabled={isRestocking || !draftLoaded}
+                        className="flex items-center gap-2 rounded-sm bg-[#246bfd] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {isRestocking ? 'Updating…' : 'Confirm'}
                       </button>
                     </div>
+                    {(restockFormError || restockSuccess) && (
+                      <p
+                        className={
+                          restockFormError ? 'text-sm text-red-600' : 'text-sm text-green-700'
+                        }
+                      >
+                        {restockFormError || restockSuccess}
+                      </p>
+                    )}
                     <div className="rounded-sm border border-[#e5ebf5] bg-[#f8fafc] p-3">
-                      <label className="block text-xs font-medium text-[#64748b]">Initial stock (for new product)</label>
+                      <label className="block text-xs font-medium text-[#64748b]">
+                        {editIdParam ? 'Stock on hand' : 'Initial stock (for new product)'}
+                      </label>
                       <input
-                        type="number"
-                        min={0}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
                         value={stock}
-                        onChange={(e) => setStock(e.target.value)}
-                        className="mt-1 w-32 rounded-sm border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+                        onChange={(e) => setStock(sanitizeQuantityDigits(e.target.value))}
+                        className="mt-1 w-32 rounded-sm border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       />
                     </div>
                     <div className="space-y-2 border-t border-[#e5ebf5] pt-4 text-sm text-[#475569]">
-                      <p className="flex items-center gap-2">
-                        Product in stock now: <span className="font-medium text-[#1c2740]">$1,090</span>
-                        <button type="button" className="text-[#64748b] hover:text-[#246bfd]" aria-label="Refresh">
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      <p className="flex flex-wrap items-center gap-2">
+                        Product in stock now:{' '}
+                        <span className="font-medium text-[#1c2740]">
+                          {(parseInt(stock || '0', 10) || 0).toLocaleString()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleRestockRefresh}
+                          disabled={isRestocking || !draftLoaded}
+                          className="text-[#64748b] hover:text-[#246bfd] disabled:opacity-50"
+                          aria-label="Refresh"
+                          title="Refresh from server"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                          </svg>
                         </button>
                       </p>
-                      <p>Product in transit: 5,000</p>
-                      <p>Last time restocked: 30th June, 2021</p>
-                      <p>Total stock over lifetime: 20,000</p>
+                      <p>
+                        Product in transit:{' '}
+                        <span className="font-medium text-[#1c2740]">
+                          {(parseInt(stockInTransit || '0', 10) || 0).toLocaleString()}
+                        </span>
+                      </p>
+                      <p>
+                        Last time restocked:{' '}
+                        <span className="font-medium text-[#1c2740]">
+                          {formatLastRestockedLabel(lastRestockedAt)}
+                        </span>
+                      </p>
+                      <p>
+                        Total stock over lifetime:{' '}
+                        <span className="font-medium text-[#1c2740]">
+                          {(parseInt(totalStockLifetime || '0', 10) || 0).toLocaleString()}
+                        </span>
+                      </p>
+                      <p className="text-xs text-[#94a3b8]">
+                        Confirm restock (saved products) updates stock, lifetime total, and last restocked on the
+                        server. Refresh reloads these values.
+                      </p>
                     </div>
                   </div>
                 )}

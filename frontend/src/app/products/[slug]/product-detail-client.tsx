@@ -42,16 +42,6 @@ function buildAdditionalRows(product: Product): { label: string; value: string }
   if (product.fulfillmentType) {
     rows.push({ label: 'Fulfillment', value: product.fulfillmentType });
   }
-  rows.push({ label: 'Stock', value: String(product.stock) });
-  if (product.variants && product.variants.length > 0) {
-    product.variants.forEach((v, i) => {
-      const parts = (v.optionValues || []).map((ov) => `${ov.label}: ${ov.value}`);
-      const detail = [v.sku || '—', parts.length ? parts.join(', ') : null, `stock ${v.stock}`]
-        .filter(Boolean)
-        .join(' · ');
-      rows.push({ label: `Option ${i + 1}`, value: detail });
-    });
-  }
   return rows;
 }
 
@@ -122,9 +112,18 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
   const mainImage = galleryImages[Math.min(activeImageIndex, galleryImages.length - 1)];
   const colorOptions = product.availableColors?.length ? product.availableColors : [];
 
-  const shouldShowOutOfStock = hasVariants
-    ? (matchedVariant?.stock ?? 0) <= 0
-    : product.stock <= 0;
+  /**
+   * Variant rows are often created with stock 0 while `product.stock` holds the real total.
+   * If any variant has stock > 0, treat inventory as per-variant; otherwise use product-level stock.
+   */
+  const effectiveAvailableStock = useMemo(() => {
+    if (!variants.length) return Math.max(0, product.stock ?? 0);
+    const anyVariantHasStock = variants.some((v) => (v.stock ?? 0) > 0);
+    if (anyVariantHasStock) return Math.max(0, matchedVariant?.stock ?? 0);
+    return Math.max(0, product.stock ?? 0);
+  }, [variants, product.stock, matchedVariant]);
+
+  const shouldShowOutOfStock = effectiveAvailableStock <= 0;
 
   function handleOptionSelect(optionTypeId: number, optionValueId: number) {
     if (!variants.length) return;
