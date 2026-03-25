@@ -19,6 +19,7 @@ function mapProduct(product) {
     externalProductIdType: product.externalProductIdType ?? null,
     externalProductId: product.externalProductId ?? null,
     createdAt: product.createdAt,
+    publishedAt: product.publishedAt ?? null,
     category: product.category
       ? { id: product.category.id, name: product.category.name, slug: product.category.slug }
       : null,
@@ -76,9 +77,11 @@ async function catalogRoutes(fastify) {
       .object({
         q: z.string().optional(),
         category: z.string().optional(),
+        vendor: z.string().optional(),
         page: z.coerce.number().int().positive().default(1),
         limit: z.coerce.number().int().positive().max(50).default(12),
         status: z.enum(['all', 'draft', 'published']).optional(),
+        discount: z.enum(['1', 'true']).optional(),
       })
       .parse(request.query || {});
 
@@ -104,10 +107,18 @@ async function catalogRoutes(fastify) {
       where.category = { is: { slug: query.category } };
     }
 
+    if (query.vendor) {
+      where.vendor = { is: { slug: query.vendor } };
+    }
+
+    if (query.discount) {
+      where.salePriceCents = { not: null };
+    }
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        include: { category: true, images: true, availableColors: true },
+        include: { category: true, vendor: true, images: true, availableColors: true },
         orderBy: { createdAt: 'desc' },
         take: query.limit,
         skip: (query.page - 1) * query.limit,
@@ -379,7 +390,10 @@ async function catalogRoutes(fastify) {
 
   const draftProductSchema = z
     .object({
-      name: z.string().optional().default(''),
+      name: z.preprocess(
+        (val) => (typeof val === 'string' ? val.trim() : ''),
+        z.string().min(1, 'Product title is required')
+      ),
       shortDescription: z.string().optional(),
       description: z.string().optional(),
       priceCents: z.number().int().nonnegative().default(0),
@@ -535,7 +549,7 @@ async function catalogRoutes(fastify) {
       let productStatus;
 
       if (isDraft) {
-        displayName = (body.name || '').trim() || 'Untitled product';
+        displayName = body.name;
         slug = `draft-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
         productStatus = PRODUCT_STATUS.DRAFT;
       } else {
@@ -558,6 +572,7 @@ async function catalogRoutes(fastify) {
           name: displayName,
           slug,
           status: productStatus,
+          publishedAt: productStatus === PRODUCT_STATUS.PUBLISHED ? new Date() : null,
           shortDescription: body.shortDescription ?? null,
           description: body.description ?? null,
           priceCents: body.priceCents,
@@ -619,7 +634,7 @@ async function catalogRoutes(fastify) {
       }
 
       let slug = existingProduct.slug;
-      let displayName = isDraft ? (body.name || '').trim() || 'Untitled product' : body.name;
+      let displayName = body.name;
 
       if (!isDraft) {
         const newSlug = slugFromProductName(body.name);
@@ -638,28 +653,131 @@ async function catalogRoutes(fastify) {
       const totalStock = body.stock + (body.restockQuantity ?? 0);
       const nextStatus = isDraft ? PRODUCT_STATUS.DRAFT : PRODUCT_STATUS.PUBLISHED;
 
+      const updateData = {
+        name: displayName,
+        slug,
+        status: nextStatus,
+        shortDescription: body.shortDescription ?? null,
+        description: body.description ?? null,
+        priceCents: body.priceCents,
+        salePriceCents: body.salePriceCents ?? null,
+        stock: totalStock,
+        fulfillmentType: body.fulfillmentType ?? null,
+        externalProductIdType: body.externalProductIdType?.trim() || null,
+        externalProductId: body.externalProductId?.trim() || null,
+        categoryId: body.categoryId ?? null,
+        vendorId: body.vendorId ?? null,
+        collectionId: body.collectionId ?? null,
+      };
+
+      const publishedPatch =
+        nextStatus === PRODUCT_STATUS.DRAFT
+          ? { publishedAt: null }
+          : existingProduct.status === PRODUCT_STATUS.DRAFT || existingProduct.publishedAt == null
+            ? { publishedAt: new Date() }
+            : {};
+
       await prisma.product.update({
         where: { id },
-        data: {
-          name: displayName,
-          slug,
-          status: nextStatus,
-          shortDescription: body.shortDescription ?? null,
-          description: body.description ?? null,
-          priceCents: body.priceCents,
-          salePriceCents: body.salePriceCents ?? null,
-          stock: totalStock,
-          fulfillmentType: body.fulfillmentType ?? null,
-          externalProductIdType: body.externalProductIdType?.trim() || null,
-          externalProductId: body.externalProductId?.trim() || null,
-          categoryId: body.categoryId ?? null,
-          vendorId: body.vendorId ?? null,
-          collectionId: body.collectionId ?? null,
-        },
+        data: { ...updateData, ...publishedPatch },
       });
 
       await replaceProductRelations(prisma, id, body, slug);
 
+      const withRelations = await loadProductWithRelations(prisma, id);
+      return reply.code(200).send({ data: mapProduct(withRelations) });
+    }
+  );
+
+  fastify.post(
+    '/products/:id/publish',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid product id' });
+      }
+      const prisma = fastify.prisma;
+      const existing = await loadProductWithRelations(prisma, id);
+      if (!existing) {
+        return reply.code(404).send({ message: 'Product not found' });
+      }
+      if (existing.status === PRODUCT_STATUS.PUBLISHED) {
+        return reply.code(400).send({ message: 'Product is already published' });
+      }
+      const name = (existing.name || '').trim();
+      if (!name) {
+        return reply.code(400).send({ message: 'Product title is required.' });
+      }
+      if (existing.categoryId == null) {
+        return reply.code(400).send({ message: 'Please select a category before publishing.' });
+      }
+      if (!existing.images || existing.images.length === 0) {
+        return reply.code(400).send({ message: 'Add at least one product image before publishing.' });
+      }
+      if (existing.priceCents < 1) {
+        return reply.code(400).send({ message: 'Regular price must be at least $0.01.' });
+      }
+      if (existing.salePriceCents != null && existing.salePriceCents > existing.priceCents) {
+        return reply.code(400).send({ message: 'Sale price cannot be greater than regular price.' });
+      }
+      const newSlug = slugFromProductName(name);
+      if (!newSlug) {
+        return reply.code(400).send({ message: 'Invalid product name' });
+      }
+      const slugConflict = await prisma.product.findFirst({
+        where: { slug: newSlug, NOT: { id } },
+      });
+      if (slugConflict) {
+        return reply.code(409).send({
+          message: 'A product with this name already exists. Change the title before publishing.',
+        });
+      }
+      await prisma.product.update({
+        where: { id },
+        data: {
+          name,
+          slug: newSlug,
+          status: PRODUCT_STATUS.PUBLISHED,
+          publishedAt: new Date(),
+        },
+      });
+      const withRelations = await loadProductWithRelations(prisma, id);
+      return reply.code(200).send({ data: mapProduct(withRelations) });
+    }
+  );
+
+  fastify.post(
+    '/products/:id/unpublish',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid product id' });
+      }
+      const prisma = fastify.prisma;
+      const existing = await prisma.product.findUnique({ where: { id } });
+      if (!existing) {
+        return reply.code(404).send({ message: 'Product not found' });
+      }
+      if (existing.status === PRODUCT_STATUS.DRAFT) {
+        return reply.code(400).send({ message: 'Product is already a draft' });
+      }
+      await prisma.product.update({
+        where: { id },
+        data: {
+          status: PRODUCT_STATUS.DRAFT,
+          publishedAt: null,
+        },
+      });
       const withRelations = await loadProductWithRelations(prisma, id);
       return reply.code(200).send({ data: mapProduct(withRelations) });
     }

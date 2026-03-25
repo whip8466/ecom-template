@@ -21,7 +21,10 @@ export function AdminSidebar() {
       <nav className="flex-1 overflow-y-auto py-3">
         <ul className="space-y-0.5 px-2">
           {ADMIN_SIDEBAR_MENU.map((item) => {
-            const active = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+            const isAddProduct = item.href === '/admin/product/new';
+            const active = isAddProduct
+              ? pathname === '/admin/product/new' || /^\/admin\/product\/edit\/\d+$/.test(pathname)
+              : pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
             return (
               <li key={item.href}>
                 <Link
