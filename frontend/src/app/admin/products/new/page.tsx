@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { apiRequest } from '@/lib/api';
+import { AdminPageShell } from '@/components/admin-shell';
 
 type Category = { id: number; name: string; slug: string };
 type Vendor = { id: number; name: string; slug: string };
@@ -718,48 +718,41 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="min-h-full bg-[#f2f5fb]">
-      <div className="border-b border-[#e4eaf5] bg-white px-6 py-3">
-        <nav className="text-sm text-[#8ea0bf]">
-          <Link href="/admin" className="hover:text-[#246bfd]">Dashboard</Link>
-          <span className="mx-2">/</span>
-          <span className="text-[#1c2740]">Add product</span>
-        </nav>
-      </div>
-
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-[#1c2740]">Add a product</h1>
-            <p className="mt-1 text-sm text-[#8ea0bf]">Orders placed across your store.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={handleDiscard}
-              className="rounded border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#4f607f] hover:bg-[#f4f7fc]"
-            >
-              Discard
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveDraft}
-              disabled={!draftLoaded || isSavingDraft || isSubmitting}
-              className="rounded border border-[#246bfd] bg-white px-4 py-2 text-sm font-medium text-[#246bfd] hover:bg-[#eef4ff] disabled:opacity-60"
-            >
-              {isSavingDraft ? 'Saving…' : 'Save draft'}
-            </button>
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={!draftLoaded || isSubmitting || isSavingDraft}
-              className="rounded bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
-            >
-              {isSubmitting ? 'Publishing…' : 'Publish product'}
-            </button>
-          </div>
-        </div>
-
+    <AdminPageShell
+      breadcrumbs={[
+        { label: 'Admin', href: '/admin' },
+        { label: 'Add product' },
+      ]}
+      title="Add a product"
+      description="Orders placed across your store."
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={handleDiscard}
+            className="rounded border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#4f607f] hover:bg-[#f4f7fc]"
+          >
+            Discard
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={!draftLoaded || isSavingDraft || isSubmitting}
+            className="rounded border border-[#246bfd] bg-white px-4 py-2 text-sm font-medium text-[#246bfd] hover:bg-[#eef4ff] disabled:opacity-60"
+          >
+            {isSavingDraft ? 'Saving…' : 'Save draft'}
+          </button>
+          <button
+            type="button"
+            onClick={handlePublish}
+            disabled={!draftLoaded || isSubmitting || isSavingDraft}
+            className="rounded bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+          >
+            {isSubmitting ? 'Publishing…' : 'Publish product'}
+          </button>
+        </>
+      }
+    >
         {error && (
           <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
@@ -1457,8 +1450,7 @@ export default function AddProductPage() {
           Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon
           <span className="ml-4 text-right">v1.0.0</span>
         </footer>
-      </div>
-    </div>
+    </AdminPageShell>
   );
 }
 

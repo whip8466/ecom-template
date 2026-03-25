@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/store/auth-store';
+import { AdminPageShell } from '@/components/admin-shell';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -128,16 +129,13 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <div className="min-h-full">
-      {/* Breadcrumbs */}
-      <nav className="text-sm text-[#8ea0bf]">
-        <Link href="/admin" className="hover:text-[#246bfd]">Admin</Link>
-        <span className="mx-2">/</span>
-        <span className="text-[#1c2740]">Products</span>
-      </nav>
-
-      <h1 className="mt-2 text-2xl font-bold text-[#1c2740]">Products</h1>
-
+    <AdminPageShell
+      breadcrumbs={[
+        { label: 'Admin', href: '/admin' },
+        { label: 'Products' },
+      ]}
+      title="Products"
+    >
       {/* Tabs */}
       <div className="mt-6 flex gap-6 border-b border-[#e5ebf5]">
         {TABS.map((tab) => (
@@ -387,6 +385,6 @@ export default function AdminProductsPage() {
         <span>Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon</span>
         <span>v1.0.0</span>
       </footer>
-    </div>
+    </AdminPageShell>
   );
 }
