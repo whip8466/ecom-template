@@ -31,7 +31,15 @@ function StorefrontHeader({
   const [searchCategorySlug, setSearchCategorySlug] = useState<string | null>(null);
   const [isSearchCategoryOpen, setIsSearchCategoryOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [headerScrolled, setHeaderScrolled] = useState(false);
   const wishlistCount = useWishlistStore((state) => state.items.length);
+
+  useEffect(() => {
+    const onScroll = () => setHeaderScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +60,22 @@ function StorefrontHeader({
     [categories],
   );
 
+  /** Parent category ids that have at least one direct child (for “has submenu” chevron). */
+  const categoryIdsWithChildren = useMemo(() => {
+    const ids = new Set<number>();
+    for (const c of categories) {
+      if (c.parentId != null) ids.add(c.parentId);
+    }
+    return ids;
+  }, [categories]);
+
+  useEffect(() => {
+    if (searchCategorySlug == null || rootCategories.length === 0) return;
+    if (!rootCategories.some((c) => c.slug === searchCategorySlug)) {
+      setSearchCategorySlug(null);
+    }
+  }, [rootCategories, searchCategorySlug]);
+
   useEffect(() => {
     if (rootCategories.length === 0) return;
     if (!activeCategorySlug || !rootCategories.some((c) => c.slug === activeCategorySlug)) {
@@ -61,6 +85,12 @@ function StorefrontHeader({
 
   const activeCategoryItem =
     rootCategories.find((c) => c.slug === activeCategorySlug) ?? rootCategories[0] ?? null;
+  const subcategoriesForActive = useMemo(() => {
+    if (!activeCategoryItem) return [];
+    return categories
+      .filter((c) => c.parentId === activeCategoryItem.id)
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  }, [categories, activeCategoryItem]);
   const activeCategoryIndex = Math.max(
     0,
     rootCategories.findIndex((c) => c.slug === activeCategorySlug),
@@ -91,8 +121,12 @@ function StorefrontHeader({
         </div>
       </div>
 
-      {/* Sticky main nav */}
-      <div className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)]">
+      {/* Sticky storefront header: logo, search, category menu (promo bar above scrolls away) */}
+      <header
+        className={`sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--card-bg)] transition-shadow duration-200 ${
+          headerScrolled ? 'shadow-md' : 'shadow-[var(--shadow-sm)]'
+        }`}
+      >
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
           <Link
             href="/"
@@ -143,7 +177,7 @@ function StorefrontHeader({
                     >
                       All Categories
                     </button>
-                    {categories.map((c) => (
+                    {rootCategories.map((c) => (
                       <button
                         key={c.id}
                         type="button"
@@ -153,7 +187,6 @@ function StorefrontHeader({
                         }}
                         className="block w-full px-4 py-2.5 text-left text-sm text-[#344054] transition hover:bg-[#f8fbff] hover:text-[#0989ff]"
                       >
-                        {'\u2014 '.repeat(c.depth ?? 0)}
                         {c.name}
                       </button>
                     ))}
@@ -242,12 +275,26 @@ function StorefrontHeader({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <button type="button" onMouseEnter={() => setActiveMenu('blog')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
-                Blog
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              <div
+                className="relative"
+                onMouseEnter={() => setActiveMenu('blog')}
+              >
+                <button type="button" className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                  Blog
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {activeMenu === 'blog' && (
+                  <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-sm border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                    <ul className="space-y-3 text-sm text-[#475467]">
+                      {['Blog Standard', 'Blog Grid', 'Blog List', 'Blog Details Full Width', 'Blog Details'].map((item) => (
+                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
               <button type="button" onMouseEnter={() => setActiveMenu('none')} className="py-3 hover:text-[#0989ff]">
                 Contact
               </button>
@@ -273,52 +320,81 @@ function StorefrontHeader({
                       {categories.length === 0 ? 'Loading categories…' : 'No top-level categories.'}
                     </div>
                   ) : (
-                    rootCategories.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onMouseEnter={() => setActiveCategorySlug(item.slug)}
-                        className={`flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
-                          activeCategorySlug === item.slug
-                            ? 'bg-[#f8fbff] text-[#0989ff]'
-                            : 'text-[#344054] hover:bg-[#f8fbff]'
-                        }`}
-                      >
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center">
-                          {item.iconUrl ? (
-                            <span
-                              className="block h-14 w-14 shrink-0 bg-contain bg-center bg-no-repeat"
-                              style={{ backgroundImage: `url(${item.iconUrl})` }}
-                              role="img"
-                              aria-hidden
-                            />
-                          ) : (
-                            <span className="text-center text-[13px] font-semibold leading-tight text-[#344054]">
-                              {categoryInitials(item.name)}
-                            </span>
-                          )}
-                        </div>
-                        <span className="flex-1 text-sm font-semibold">{item.name}</span>
-                        <svg className="h-4 w-4 shrink-0 text-[#98a2b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    ))
+                    rootCategories.map((item) => {
+                      const hasChildren = categoryIdsWithChildren.has(item.id);
+                      const isActive = activeCategorySlug === item.slug;
+                      const rowClass = `flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
+                        isActive ? 'bg-[#f8fbff] text-[#0989ff]' : 'text-[#344054] hover:bg-[#f8fbff]'
+                      }`;
+                      const rowInner = (
+                        <>
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center">
+                            {item.iconUrl ? (
+                              <span
+                                className="block h-14 w-14 shrink-0 bg-contain bg-center bg-no-repeat"
+                                style={{ backgroundImage: `url(${item.iconUrl})` }}
+                                role="img"
+                                aria-hidden
+                              />
+                            ) : (
+                              <span className="text-center text-[13px] font-semibold leading-tight text-[#344054]">
+                                {categoryInitials(item.name)}
+                              </span>
+                            )}
+                          </div>
+                          <span className="flex-1 text-sm font-semibold">{item.name}</span>
+                          {hasChildren ? (
+                            <svg className="h-4 w-4 shrink-0 text-[#98a2b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          ) : null}
+                        </>
+                      );
+                      if (hasChildren) {
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onMouseEnter={() => setActiveCategorySlug(item.slug)}
+                            className={rowClass}
+                          >
+                            {rowInner}
+                          </button>
+                        );
+                      }
+                      return (
+                        <Link
+                          key={item.id}
+                          href={`/shop?category=${encodeURIComponent(item.slug)}`}
+                          onMouseEnter={() => setActiveCategorySlug(item.slug)}
+                          onClick={() => setActiveMenu('none')}
+                          className={rowClass}
+                        >
+                          {rowInner}
+                        </Link>
+                      );
+                    })
                   )}
 
-                  {activeCategoryItem && (
+                  {activeCategoryItem && subcategoriesForActive.length > 0 ? (
                     <div
-                      className="absolute left-full w-max bg-white px-3 py-2 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
+                      className="absolute left-full min-w-[200px] max-w-sm max-h-[min(320px,70vh)] overflow-y-auto bg-white px-3 py-2 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
                       style={{ top: `${submenuTop}px` }}
                     >
-                      <Link
-                        href={`/shop?category=${encodeURIComponent(activeCategoryItem.slug)}`}
-                        className="block text-sm font-semibold whitespace-nowrap text-[#344054] hover:text-[#0989ff]"
-                      >
-                        Shop {activeCategoryItem.name}
-                      </Link>
+                      <ul className="space-y-0.5">
+                        {subcategoriesForActive.map((sub) => (
+                          <li key={sub.id}>
+                            <Link
+                              href={`/shop?category=${encodeURIComponent(sub.slug)}`}
+                              className="block rounded-sm px-1 py-1.5 text-sm font-medium text-[#344054] hover:bg-[#f8fbff] hover:text-[#0989ff]"
+                            >
+                              {sub.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -373,22 +449,8 @@ function StorefrontHeader({
               </div>
             </div>
           )}
-
-          {activeMenu === 'blog' && (
-            <div className="absolute left-0 right-0 top-full z-[70]">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="ml-[505px] w-[220px] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
-                  <ul className="space-y-3 text-sm text-[#475467]">
-                    {['Blog Standard', 'Blog Grid', 'Blog List', 'Blog Details Full Width', 'Blog Details'].map((item) => (
-                      <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      </header>
     </>
   );
 }
@@ -499,15 +561,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <header className="border-b border-[var(--border)] bg-[var(--card-bg)]">
-        <StorefrontHeader
-          cartCount={cartCount}
-          user={user}
-          pathname={pathname}
-          logout={logout}
-          router={router}
-        />
-      </header>
+      <StorefrontHeader
+        cartCount={cartCount}
+        user={user}
+        pathname={pathname}
+        logout={logout}
+        router={router}
+      />
       <main className="min-h-screen">
         {isHome ? children : (
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
