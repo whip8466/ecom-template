@@ -81,6 +81,80 @@ function slugFromProductName(name) {
     .replace(/^-|-$/g, '');
 }
 
+/** Trim + slug for category, vendor, tag names */
+function slugFromName(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function requireAdminOrManager(user, reply) {
+  if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+    reply.code(403).send({ message: 'Forbidden' });
+    return false;
+  }
+  return true;
+}
+
+/** parentId -> child category ids */
+function buildCategoryChildMap(rows) {
+  const byParent = new Map();
+  for (const c of rows) {
+    const k = c.parentId;
+    if (!byParent.has(k)) byParent.set(k, []);
+    byParent.get(k).push(c.id);
+  }
+  return byParent;
+}
+
+function collectSubtreeCategoryIds(rootId, byParent) {
+  const out = [rootId];
+  const stack = [...(byParent.get(rootId) ?? [])];
+  while (stack.length) {
+    const id = stack.pop();
+    out.push(id);
+    for (const ch of byParent.get(id) ?? []) stack.push(ch);
+  }
+  return out;
+}
+
+async function ensureUniqueCategorySlug(prisma, base, excludeId) {
+  const root = base && String(base).length > 0 ? String(base) : 'category';
+  let slug = root;
+  let n = 0;
+  for (;;) {
+    const conflict = await prisma.category.findFirst({
+      where: excludeId ? { slug, NOT: { id: excludeId } } : { slug },
+    });
+    if (!conflict) return slug;
+    n += 1;
+    slug = `${root}-${n}`;
+  }
+}
+
+function sortCategoriesTreeOrder(rows) {
+  const byParent = new Map();
+  for (const c of rows) {
+    const k = c.parentId;
+    if (!byParent.has(k)) byParent.set(k, []);
+    byParent.get(k).push(c);
+  }
+  for (const arr of byParent.values()) {
+    arr.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  const out = [];
+  function walk(parentId) {
+    for (const c of byParent.get(parentId) ?? []) {
+      out.push(c);
+      walk(c.id);
+    }
+  }
+  walk(null);
+  return out;
+}
+
 async function catalogRoutes(fastify) {
   fastify.get('/shop-meta', async () => {
     const prisma = fastify.prisma;
@@ -136,7 +210,15 @@ async function catalogRoutes(fastify) {
     }
 
     if (query.category) {
-      where.category = { is: { slug: query.category } };
+      const cat = await prisma.category.findUnique({ where: { slug: query.category } });
+      if (cat) {
+        const allCats = await prisma.category.findMany({ select: { id: true, parentId: true } });
+        const byParent = buildCategoryChildMap(allCats);
+        const ids = collectSubtreeCategoryIds(cat.id, byParent);
+        where.categoryId = { in: ids };
+      } else {
+        where.categoryId = { in: [] };
+      }
     }
 
     if (query.vendor) {
@@ -264,15 +346,33 @@ async function catalogRoutes(fastify) {
       where: { status: PRODUCT_STATUS.PUBLISHED, categoryId: { not: null } },
       _count: { _all: true },
     });
-    const countByCategoryId = new Map(grouped.map((g) => [g.categoryId, g._count._all]));
-    return {
-      data: categories.map((c) => ({
+    const directCount = new Map(grouped.map((g) => [g.categoryId, Number(g._count._all)]));
+    const flatRows = sortCategoriesTreeOrder(categories);
+    const byParent = buildCategoryChildMap(categories.map((c) => ({ id: c.id, parentId: c.parentId })));
+    const data = flatRows.map((c) => {
+      const subtreeIds = collectSubtreeCategoryIds(c.id, byParent);
+      let productCount = 0;
+      for (const sid of subtreeIds) {
+        productCount += Number(directCount.get(sid) ?? 0);
+      }
+      let depth = 0;
+      let p = c.parentId;
+      while (p != null) {
+        depth += 1;
+        const parent = categories.find((x) => x.id === p);
+        p = parent ? parent.parentId : null;
+      }
+      return {
         id: c.id,
         name: c.name,
         slug: c.slug,
-        productCount: countByCategoryId.get(c.id) ?? 0,
-      })),
-    };
+        parentId: c.parentId,
+        iconUrl: c.iconUrl,
+        depth,
+        productCount,
+      };
+    });
+    return { data };
   });
 
   fastify.post(
@@ -280,32 +380,171 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
-        return reply.code(403).send({ message: 'Forbidden' });
-      }
-      const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
+      if (!requireAdminOrManager(user, reply)) return;
+      const body = z
+        .object({
+          name: z.string().min(1).max(120),
+          parentId: z.number().int().positive().optional().nullable(),
+          iconUrl: z.union([z.string().max(2048), z.literal('')]).optional().nullable(),
+        })
+        .parse(request.body);
       const prisma = fastify.prisma;
-      const slug = body.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-      if (!slug) {
+      const trimmed = body.name.trim();
+      const baseSlug = slugFromName(trimmed);
+      if (!baseSlug) {
         return reply.code(400).send({ message: 'Invalid category name' });
       }
-      const existing = await prisma.category.findUnique({ where: { slug } });
-      if (existing) {
-        return reply.code(409).send({ message: 'Category with this name already exists' });
+      let parent = null;
+      if (body.parentId != null) {
+        parent = await prisma.category.findUnique({ where: { id: body.parentId } });
+        if (!parent) {
+          return reply.code(400).send({ message: 'Parent category not found' });
+        }
       }
+      const slugBase = parent ? `${parent.slug}-${baseSlug}` : baseSlug;
+      const slug = await ensureUniqueCategorySlug(prisma, slugBase, null);
+      const iconUrl = body.iconUrl === '' || body.iconUrl == null ? null : body.iconUrl;
       const category = await prisma.category.create({
-        data: { name: body.name.trim(), slug },
+        data: {
+          name: trimmed,
+          slug,
+          parentId: body.parentId ?? null,
+          iconUrl,
+        },
       });
       return reply.code(201).send({ data: category });
     }
   );
 
+  fastify.put(
+    '/categories/:id',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!requireAdminOrManager(user, reply)) return;
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid category id' });
+      }
+      const body = z
+        .object({
+          name: z.string().min(1).max(120).optional(),
+          parentId: z.number().int().positive().optional().nullable(),
+          iconUrl: z.union([z.string().max(2048), z.literal('')]).optional().nullable(),
+        })
+        .parse(request.body);
+      if (body.name === undefined && body.parentId === undefined && body.iconUrl === undefined) {
+        return reply.code(400).send({ message: 'No fields to update' });
+      }
+      const prisma = fastify.prisma;
+      const row = await prisma.category.findUnique({ where: { id } });
+      if (!row) {
+        return reply.code(404).send({ message: 'Category not found' });
+      }
+      const nextParentId = body.parentId !== undefined ? body.parentId : row.parentId;
+      const nextName = body.name !== undefined ? body.name.trim() : row.name;
+
+      if (body.name !== undefined || body.parentId !== undefined) {
+        if (nextParentId != null) {
+          if (nextParentId === id) {
+            return reply.code(400).send({ message: 'A category cannot be its own parent' });
+          }
+          const parentRow = await prisma.category.findUnique({ where: { id: nextParentId } });
+          if (!parentRow) {
+            return reply.code(400).send({ message: 'Parent category not found' });
+          }
+          let cur = nextParentId;
+          while (cur != null) {
+            if (cur === id) {
+              return reply.code(400).send({ message: 'Invalid parent: cannot nest under a subcategory of this category' });
+            }
+            const r = await prisma.category.findUnique({ where: { id: cur }, select: { parentId: true } });
+            cur = r?.parentId ?? null;
+          }
+        }
+        const baseSlug = slugFromName(nextName);
+        if (!baseSlug) {
+          return reply.code(400).send({ message: 'Invalid category name' });
+        }
+        let parentForSlug = null;
+        if (nextParentId != null) {
+          parentForSlug = await prisma.category.findUnique({ where: { id: nextParentId } });
+        }
+        const slugBase = parentForSlug ? `${parentForSlug.slug}-${baseSlug}` : baseSlug;
+        const slug = await ensureUniqueCategorySlug(prisma, slugBase, id);
+        const iconUrl =
+          body.iconUrl !== undefined
+            ? body.iconUrl === '' || body.iconUrl == null
+              ? null
+              : body.iconUrl
+            : undefined;
+        const updated = await prisma.category.update({
+          where: { id },
+          data: {
+            name: nextName,
+            slug,
+            parentId: nextParentId ?? null,
+            ...(iconUrl !== undefined ? { iconUrl } : {}),
+          },
+        });
+        return { data: updated };
+      }
+
+      const iconOnly =
+        body.iconUrl !== undefined
+          ? body.iconUrl === '' || body.iconUrl == null
+            ? null
+            : body.iconUrl
+          : undefined;
+      const updated = await prisma.category.update({
+        where: { id },
+        data: { ...(iconOnly !== undefined ? { iconUrl: iconOnly } : {}) },
+      });
+      return { data: updated };
+    }
+  );
+
+  fastify.delete(
+    '/categories/:id',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!requireAdminOrManager(user, reply)) return;
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid category id' });
+      }
+      const prisma = fastify.prisma;
+      const row = await prisma.category.findUnique({ where: { id } });
+      if (!row) {
+        return reply.code(404).send({ message: 'Category not found' });
+      }
+      const childCount = await prisma.category.count({ where: { parentId: id } });
+      if (childCount > 0) {
+        return reply.code(400).send({ message: 'Remove or reassign subcategories first' });
+      }
+      await prisma.category.delete({ where: { id } });
+      return reply.code(204).send();
+    }
+  );
+
   fastify.get('/vendors', async () => {
-    const vendors = await fastify.prisma.vendor.findMany({ orderBy: { name: 'asc' } });
-    return { data: vendors };
+    const prisma = fastify.prisma;
+    const vendors = await prisma.vendor.findMany({ orderBy: { name: 'asc' } });
+    const grouped = await prisma.product.groupBy({
+      by: ['vendorId'],
+      where: { status: PRODUCT_STATUS.PUBLISHED, vendorId: { not: null } },
+      _count: { _all: true },
+    });
+    const countByVendorId = new Map(grouped.map((g) => [g.vendorId, g._count._all]));
+    return {
+      data: vendors.map((v) => ({
+        id: v.id,
+        name: v.name,
+        slug: v.slug,
+        productCount: countByVendorId.get(v.id) ?? 0,
+      })),
+    };
   });
 
   fastify.post(
@@ -318,10 +557,7 @@ async function catalogRoutes(fastify) {
       }
       const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
       const prisma = fastify.prisma;
-      const slug = body.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
+      const slug = slugFromName(body.name);
       if (!slug) {
         return reply.code(400).send({ message: 'Invalid vendor name' });
       }
@@ -333,6 +569,57 @@ async function catalogRoutes(fastify) {
         data: { name: body.name.trim(), slug },
       });
       return reply.code(201).send({ data: vendor });
+    }
+  );
+
+  fastify.put(
+    '/vendors/:id',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!requireAdminOrManager(user, reply)) return;
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid vendor id' });
+      }
+      const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
+      const prisma = fastify.prisma;
+      const trimmed = body.name.trim();
+      const slug = slugFromName(trimmed);
+      if (!slug) {
+        return reply.code(400).send({ message: 'Invalid vendor name' });
+      }
+      const conflict = await prisma.vendor.findFirst({
+        where: { slug, NOT: { id } },
+      });
+      if (conflict) {
+        return reply.code(409).send({ message: 'Another vendor with this slug already exists' });
+      }
+      const updated = await prisma.vendor.update({
+        where: { id },
+        data: { name: trimmed, slug },
+      });
+      return { data: updated };
+    }
+  );
+
+  fastify.delete(
+    '/vendors/:id',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!requireAdminOrManager(user, reply)) return;
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid vendor id' });
+      }
+      const prisma = fastify.prisma;
+      const row = await prisma.vendor.findUnique({ where: { id } });
+      if (!row) {
+        return reply.code(404).send({ message: 'Vendor not found' });
+      }
+      await prisma.vendor.delete({ where: { id } });
+      return reply.code(204).send();
     }
   );
 
@@ -377,8 +664,21 @@ async function catalogRoutes(fastify) {
 
   fastify.get('/tags', async (request, reply) => {
     try {
-      const tags = await fastify.prisma.tag.findMany({ orderBy: { name: 'asc' } });
-      return { data: tags };
+      const prisma = fastify.prisma;
+      const tags = await prisma.tag.findMany({ orderBy: { name: 'asc' } });
+      const grouped = await prisma.productTag.groupBy({
+        by: ['tagId'],
+        _count: { _all: true },
+      });
+      const countByTagId = new Map(grouped.map((g) => [g.tagId, g._count._all]));
+      return {
+        data: tags.map((t) => ({
+          id: t.id,
+          name: t.name,
+          slug: t.slug,
+          productCount: countByTagId.get(t.id) ?? 0,
+        })),
+      };
     } catch (err) {
       request.log.error(err);
       const msg = (err && typeof err === 'object' && 'message' in err && err.message) || 'Failed to load tags. Run: npx prisma db push';
@@ -396,10 +696,7 @@ async function catalogRoutes(fastify) {
       }
       const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
       const prisma = fastify.prisma;
-      const slug = body.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
+      const slug = slugFromName(body.name);
       if (!slug) {
         return reply.code(400).send({ message: 'Invalid tag name' });
       }
@@ -411,6 +708,59 @@ async function catalogRoutes(fastify) {
         data: { name: body.name.trim(), slug },
       });
       return reply.code(201).send({ data: tag });
+    }
+  );
+
+  fastify.put(
+    '/tags/:id',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!requireAdminOrManager(user, reply)) return;
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid tag id' });
+      }
+      const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
+      const prisma = fastify.prisma;
+      const trimmed = body.name.trim();
+      const slug = slugFromName(trimmed);
+      if (!slug) {
+        return reply.code(400).send({ message: 'Invalid tag name' });
+      }
+      const conflict = await prisma.tag.findFirst({
+        where: {
+          AND: [{ NOT: { id } }, { OR: [{ slug }, { name: trimmed }] }],
+        },
+      });
+      if (conflict) {
+        return reply.code(409).send({ message: 'Another tag with this name already exists' });
+      }
+      const updated = await prisma.tag.update({
+        where: { id },
+        data: { name: trimmed, slug },
+      });
+      return { data: updated };
+    }
+  );
+
+  fastify.delete(
+    '/tags/:id',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!requireAdminOrManager(user, reply)) return;
+      const id = Number(request.params.id);
+      if (!Number.isInteger(id) || id < 1) {
+        return reply.code(400).send({ message: 'Invalid tag id' });
+      }
+      const prisma = fastify.prisma;
+      const row = await prisma.tag.findUnique({ where: { id } });
+      if (!row) {
+        return reply.code(404).send({ message: 'Tag not found' });
+      }
+      await prisma.tag.delete({ where: { id } });
+      return reply.code(204).send();
     }
   );
 

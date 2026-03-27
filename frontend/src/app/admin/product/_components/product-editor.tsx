@@ -8,7 +8,7 @@ import { apiRequest } from '@/lib/api';
 import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { AdminPageShell } from '@/components/admin-shell';
 
-type Category = { id: number; name: string; slug: string };
+type Category = { id: number; name: string; slug: string; depth?: number };
 type Vendor = { id: number; name: string; slug: string };
 type Collection = { id: number; name: string; slug: string };
 type Tag = { id: number; name: string; slug: string };
@@ -1230,7 +1230,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                       {categoriesLoading ? 'Loading categories...' : 'Select category'}
                     </option>
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
+                      <option key={c.id} value={c.id}>
+                        {'\u2014 '.repeat(c.depth ?? 0)}
+                        {c.name}
+                      </option>
                     ))}
                   </select>
                 </div>

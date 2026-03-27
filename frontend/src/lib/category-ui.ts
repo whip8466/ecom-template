@@ -2,6 +2,10 @@ export type StorefrontCategory = {
   id: number;
   name: string;
   slug: string;
+  parentId?: number | null;
+  iconUrl?: string | null;
+  depth?: number;
+  productCount?: number;
 };
 
 /** Two-letter label for category chips (e.g. "Fashion" → "FA", "Home Decor" → "HD"). */

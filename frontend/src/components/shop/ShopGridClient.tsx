@@ -28,6 +28,8 @@ type CategoryRow = {
   name: string;
   slug: string;
   productCount: number;
+  parentId?: number | null;
+  depth?: number;
 };
 
 const PAGE_SIZE = 9;
@@ -327,7 +329,10 @@ export function ShopGridClient() {
                       : 'text-[#344054] hover:bg-[#f5f9ff]'
                   }`}
                 >
-                  <span>{category.name}</span>
+                  <span style={{ paddingLeft: (category.depth ?? 0) * 10 }}>
+                    {(category.depth ?? 0) > 0 ? '· ' : ''}
+                    {category.name}
+                  </span>
                   <span>{category.productCount}</span>
                 </button>
               ))}

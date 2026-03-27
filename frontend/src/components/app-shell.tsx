@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { apiRequest } from '@/lib/api';
 import { categoryInitials, type StorefrontCategory } from '@/lib/category-ui';
 import type { User } from '@/lib/types';
@@ -46,18 +46,23 @@ function StorefrontHeader({
     };
   }, []);
 
+  const rootCategories = useMemo(
+    () => categories.filter((c) => c.parentId == null),
+    [categories],
+  );
+
   useEffect(() => {
-    if (categories.length === 0) return;
-    if (!activeCategorySlug || !categories.some((c) => c.slug === activeCategorySlug)) {
-      setActiveCategorySlug(categories[0].slug);
+    if (rootCategories.length === 0) return;
+    if (!activeCategorySlug || !rootCategories.some((c) => c.slug === activeCategorySlug)) {
+      setActiveCategorySlug(rootCategories[0].slug);
     }
-  }, [categories, activeCategorySlug]);
+  }, [rootCategories, activeCategorySlug]);
 
   const activeCategoryItem =
-    categories.find((c) => c.slug === activeCategorySlug) ?? categories[0] ?? null;
+    rootCategories.find((c) => c.slug === activeCategorySlug) ?? rootCategories[0] ?? null;
   const activeCategoryIndex = Math.max(
     0,
-    categories.findIndex((c) => c.slug === activeCategorySlug),
+    rootCategories.findIndex((c) => c.slug === activeCategorySlug),
   );
   const searchCategoryLabel =
     searchCategorySlug == null
@@ -147,6 +152,7 @@ function StorefrontHeader({
                         }}
                         className="block w-full px-4 py-2.5 text-left text-sm text-[#344054] transition hover:bg-[#f8fbff] hover:text-[#0989ff]"
                       >
+                        {'\u2014 '.repeat(c.depth ?? 0)}
                         {c.name}
                       </button>
                     ))}
@@ -268,10 +274,12 @@ function StorefrontHeader({
             <div className="absolute left-0 right-0 top-full z-[70]">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="relative w-[300px] rounded-b-md bg-white shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
-                  {categories.length === 0 ? (
-                    <div className="px-4 py-6 text-sm text-[#667085]">Loading categories…</div>
+                  {rootCategories.length === 0 ? (
+                    <div className="px-4 py-6 text-sm text-[#667085]">
+                      {categories.length === 0 ? 'Loading categories…' : 'No top-level categories.'}
+                    </div>
                   ) : (
-                    categories.map((item) => (
+                    rootCategories.map((item) => (
                       <button
                         key={item.id}
                         type="button"
@@ -282,8 +290,16 @@ function StorefrontHeader({
                             : 'text-[#344054] hover:bg-[#f8fbff]'
                         }`}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#eef4ff] text-xs font-semibold text-[#0989ff]">
-                          {categoryInitials(item.name)}
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E8F4FF] text-xs font-semibold text-[#0989ff]">
+                          {item.iconUrl ? (
+                            <span
+                              className="h-full w-full bg-contain bg-center bg-no-repeat"
+                              style={{ backgroundImage: `url(${item.iconUrl})` }}
+                              aria-hidden
+                            />
+                          ) : (
+                            categoryInitials(item.name)
+                          )}
                         </div>
                         <span className="flex-1 text-sm font-semibold">{item.name}</span>
                         <svg className="h-4 w-4 shrink-0 text-[#98a2b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -334,6 +350,7 @@ function StorefrontHeader({
                         categories.map((c) => (
                           <li key={c.id}>
                             <Link href={`/shop?category=${encodeURIComponent(c.slug)}`} className="hover:text-[#0989ff]">
+                              {'\u2014 '.repeat(c.depth ?? 0)}
                               {c.name}
                             </Link>
                           </li>

@@ -1,4 +1,5 @@
 export { ADMIN_SIDEBAR_MENU } from './constants';
+export type { AdminSidebarItem, AdminSidebarGroupItem, AdminSidebarLinkItem } from './constants';
 export { AdminNavIcon } from './nav-icon';
 export { AdminSidebar } from './admin-sidebar';
 export { AdminTopBar } from './admin-top-bar';

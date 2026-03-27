@@ -277,19 +277,34 @@ export default function HomePage() {
           ) : categories.length === 0 ? (
             <div className="col-span-full text-center text-sm text-[#7c8ea6]">No categories yet.</div>
           ) : (
-            categories.map((item) => (
-              <Link
-                key={item.id}
-                href={`/shop?category=${encodeURIComponent(item.slug)}`}
-                className="block text-center transition hover:opacity-90"
-              >
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#f1f6ff] text-sm font-semibold tracking-wide text-[#0989ff]">
-                  {categoryInitials(item.name)}
-                </div>
-                <p className="mt-2 text-sm font-medium text-[#1b2a4e]">{item.name}</p>
-                <p className="text-xs text-[#7c8ea6]">Shop now</p>
-              </Link>
-            ))
+            categories
+              .filter((item) => item.parentId == null)
+              .map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/shop?category=${encodeURIComponent(item.slug)}`}
+                  className="block text-center transition hover:opacity-90"
+                >
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#E8F4FF] p-2 text-sm font-semibold tracking-wide text-[#0989ff]">
+                    {item.iconUrl ? (
+                      <span
+                        className="block h-full w-full rounded-full bg-contain bg-center bg-no-repeat"
+                        style={{ backgroundImage: `url(${item.iconUrl})` }}
+                        role="img"
+                        aria-hidden
+                      />
+                    ) : (
+                      categoryInitials(item.name)
+                    )}
+                  </div>
+                  <p className="mt-2 text-sm font-medium text-[#1b2a4e]">{item.name}</p>
+                  <p className="text-xs text-[#7c8ea6]">
+                    {item.productCount != null
+                      ? `${item.productCount} ${item.productCount === 1 ? 'product' : 'products'}`
+                      : 'Shop now'}
+                  </p>
+                </Link>
+              ))
           )}
         </div>
       </section>
