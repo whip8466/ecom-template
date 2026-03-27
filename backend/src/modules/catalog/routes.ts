@@ -188,8 +188,12 @@ async function catalogRoutes(fastify) {
         sort: z.enum(['default', 'price_asc', 'price_desc']).optional(),
         status: z.enum(['all', 'draft', 'published']).optional(),
         discount: z.enum(['1', 'true']).optional(),
+        trending: z.enum(['top_sellers', 'featured', 'new_arrival']).optional(),
       })
       .parse(request.query || {});
+
+    /** Trending sections (Top Sellers, Featured, New Arrival) return at most 8 products per request. */
+    const limit = query.trending ? Math.min(query.limit, 8) : query.limit;
 
     const prisma = fastify.prisma;
     const where = {} as Record<string, any>;
@@ -240,28 +244,96 @@ async function catalogRoutes(fastify) {
     }
 
     const sort = query.sort ?? 'default';
-    const orderBy =
+    let orderBy =
       sort === 'price_asc'
         ? { priceCents: 'asc' }
         : sort === 'price_desc'
           ? { priceCents: 'desc' }
           : { createdAt: 'desc' };
 
+    if (query.trending === 'featured') {
+      where.productTags = { some: { tag: { slug: 'featured' } } };
+    }
+
+    if (query.trending === 'new_arrival') {
+      orderBy = [{ publishedAt: 'desc' }, { createdAt: 'desc' }] as any;
+    }
+
+    const productInclude = {
+      category: true,
+      vendor: true,
+      images: true,
+      availableColors: true,
+      variants: {
+        select: { id: true, sku: true, priceCents: true, stock: true },
+      },
+    };
+
+    if (query.trending === 'top_sellers') {
+      let aggregates = [];
+      try {
+        aggregates = await prisma.orderItem.groupBy({
+          by: ['productId'],
+          _sum: { quantity: true },
+          orderBy: { _sum: { quantity: 'desc' } },
+          take: 500,
+        });
+      } catch (err) {
+        request.log.warn(err, 'orderItem.groupBy failed');
+      }
+
+      const idsOrdered = aggregates.map((a) => a.productId);
+      const rank = new Map(idsOrdered.map((id, i) => [id, i]));
+
+      if (idsOrdered.length === 0) {
+        const [fallbackRows, fallbackTotal] = await Promise.all([
+          prisma.product.findMany({
+            where,
+            include: productInclude,
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            skip: (query.page - 1) * limit,
+          }),
+          prisma.product.count({ where }),
+        ]);
+        return {
+          data: fallbackRows.map(mapProduct),
+          pagination: {
+            page: query.page,
+            limit,
+            total: fallbackTotal,
+            totalPages: Math.ceil(fallbackTotal / limit) || 1,
+          },
+        };
+      }
+
+      const matched = await prisma.product.findMany({
+        where: { ...where, id: { in: idsOrdered } },
+        include: productInclude,
+      });
+      matched.sort((a, b) => (rank.get(a.id) ?? 9999) - (rank.get(b.id) ?? 9999));
+      const total = matched.length;
+      const skip = (query.page - 1) * limit;
+      const products = matched.slice(skip, skip + limit);
+
+      return {
+        data: products.map(mapProduct),
+        pagination: {
+          page: query.page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit) || 1,
+        },
+      };
+    }
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        include: {
-          category: true,
-          vendor: true,
-          images: true,
-          availableColors: true,
-          variants: {
-            select: { id: true, sku: true, priceCents: true, stock: true },
-          },
-        },
+        include: productInclude,
         orderBy,
-        take: query.limit,
-        skip: (query.page - 1) * query.limit,
+        take: limit,
+        skip: (query.page - 1) * limit,
       }),
       prisma.product.count({ where }),
     ]);
@@ -270,9 +342,9 @@ async function catalogRoutes(fastify) {
       data: products.map(mapProduct),
       pagination: {
         page: query.page,
-        limit: query.limit,
+        limit,
         total,
-        totalPages: Math.ceil(total / query.limit) || 1,
+        totalPages: Math.ceil(total / limit) || 1,
       },
     };
   });

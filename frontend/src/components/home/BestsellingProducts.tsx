@@ -10,11 +10,17 @@ type ProductsResponse = {
   pagination: { page: number; totalPages: number };
 };
 
-const tabs = ['Top Sellers', 'Featured', 'New'] as const;
+type TrendingTab = 'top_sellers' | 'featured' | 'new_arrival';
+
+const tabs: { label: string; value: TrendingTab }[] = [
+  { label: 'Top Sellers', value: 'top_sellers' },
+  { label: 'Featured', value: 'featured' },
+  { label: 'New Arrival', value: 'new_arrival' },
+];
 
 export function BestsellingProducts() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>('Top Sellers');
+  const [activeTab, setActiveTab] = useState<TrendingTab>('top_sellers');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,8 +28,10 @@ export function BestsellingProducts() {
     async function load() {
       try {
         setLoading(true);
-        const res = await apiRequest<ProductsResponse>('/api/products?limit=8');
-        if (!cancelled) setProducts(res.data);
+        const res = await apiRequest<ProductsResponse>(
+          `/api/products?limit=8&trending=${activeTab}`,
+        );
+        if (!cancelled) setProducts(res.data ?? []);
       } catch {
         if (!cancelled) setProducts([]);
       } finally {
@@ -31,8 +39,10 @@ export function BestsellingProducts() {
       }
     }
     load();
-    return () => { cancelled = true; };
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab]);
 
   return (
     <section className="border-b border-[var(--border)] bg-[var(--card-bg)] py-16 sm:py-20">
@@ -41,18 +51,18 @@ export function BestsellingProducts() {
           Trending Products
         </h2>
         <div className="mt-6 flex flex-wrap gap-4 border-b border-[var(--border)]">
-          {tabs.map((tab) => (
+          {tabs.map(({ label, value }) => (
             <button
-              key={tab}
+              key={value}
               type="button"
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(value)}
               className={`border-b-2 pb-3 text-sm font-medium transition-premium ${
-                activeTab === tab
+                activeTab === value
                   ? 'border-[var(--accent)] text-[var(--accent)]'
                   : 'border-transparent text-[var(--muted)] hover:text-[var(--navy)]'
               }`}
             >
-              {tab}
+              {label}
             </button>
           ))}
         </div>

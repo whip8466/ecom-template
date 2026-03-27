@@ -198,6 +198,14 @@ function SmallListCard({ title, items }: { title: string; items: MiniListItem[] 
   );
 }
 
+type TrendingTab = 'top_sellers' | 'featured' | 'new_arrival';
+
+const TRENDING_TABS: { label: string; value: TrendingTab }[] = [
+  { label: 'Top Sellers', value: 'top_sellers' },
+  { label: 'Featured', value: 'featured' },
+  { label: 'New Arrival', value: 'new_arrival' },
+];
+
 function HomeProductGrid({
   loading,
   emptyMessage,
@@ -227,6 +235,9 @@ function HomeProductGrid({
 export default function HomePage() {
   const [homeProducts, setHomeProducts] = useState<Product[]>([]);
   const [homeLoading, setHomeLoading] = useState(true);
+  const [trendingTab, setTrendingTab] = useState<TrendingTab>('top_sellers');
+  const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
   const [categories, setCategories] = useState<StorefrontCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
@@ -249,6 +260,24 @@ export default function HomePage() {
 
   useEffect(() => {
     let cancelled = false;
+    setTrendingLoading(true);
+    apiRequest<{ data: Product[] }>(`/api/products?limit=8&trending=${trendingTab}`)
+      .then((res) => {
+        if (!cancelled) setTrendingProducts(res.data ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setTrendingProducts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setTrendingLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [trendingTab]);
+
+  useEffect(() => {
+    let cancelled = false;
     apiRequest<{ data: StorefrontCategory[] }>('/api/categories')
       .then((res) => {
         if (!cancelled) setCategories(Array.isArray(res.data) ? res.data : []);
@@ -265,46 +294,59 @@ export default function HomePage() {
   }, []);
 
   const productCards = useMemo(() => homeProducts.map(mapProductToCard), [homeProducts]);
+  const trendingCards = useMemo(() => trendingProducts.map(mapProductToCard), [trendingProducts]);
+
+  const trendingEmptyMessage =
+    trendingTab === 'featured'
+      ? 'No featured products yet.'
+      : trendingTab === 'new_arrival'
+        ? 'No new arrivals yet.'
+        : 'No products match this list yet.';
 
   return (
     <div className="bg-white">
       <HomeBanner />
 
-      <section className="border-b border-[#e4ebf4] py-7">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:grid-cols-6 lg:px-8">
+      <section className="border-b border-[#e8eef5] bg-white py-8 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {categoriesLoading ? (
-            <div className="col-span-full flex justify-center py-4 text-sm text-[#7c8ea6]">Loading categories…</div>
+            <p className="py-4 text-center text-sm text-[#64748b]">Loading categories…</p>
           ) : categories.length === 0 ? (
-            <div className="col-span-full text-center text-sm text-[#7c8ea6]">No categories yet.</div>
+            <p className="py-4 text-center text-sm text-[#64748b]">No categories yet.</p>
           ) : (
-            categories
-              .filter((item) => item.parentId == null)
-              .map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/shop?category=${encodeURIComponent(item.slug)}`}
-                  className="block text-center transition hover:opacity-90"
-                >
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#E8F4FF] p-2 text-sm font-semibold tracking-wide text-[#0989ff]">
-                    {item.iconUrl ? (
-                      <span
-                        className="block h-full w-full rounded-full bg-contain bg-center bg-no-repeat"
-                        style={{ backgroundImage: `url(${item.iconUrl})` }}
-                        role="img"
-                        aria-hidden
-                      />
-                    ) : (
-                      categoryInitials(item.name)
-                    )}
-                  </div>
-                  <p className="mt-2 text-sm font-medium text-[#1b2a4e]">{item.name}</p>
-                  <p className="text-xs text-[#7c8ea6]">
-                    {item.productCount != null
-                      ? `${item.productCount} ${item.productCount === 1 ? 'product' : 'products'}`
-                      : 'Shop now'}
-                  </p>
-                </Link>
-              ))
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-8 sm:gap-x-8 md:gap-x-10 lg:gap-x-12">
+              {categories
+                .filter((item) => item.parentId == null)
+                .map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/shop?category=${encodeURIComponent(item.slug)}`}
+                    className="flex w-[5.75rem] flex-shrink-0 flex-col items-center text-center transition hover:opacity-90 sm:w-[6.5rem] md:w-28"
+                  >
+                    <div className="flex h-[5.5rem] w-[5.5rem] items-center justify-center rounded-full bg-[#E8F4FF] p-2.5 sm:h-[6.25rem] sm:w-[6.25rem] sm:p-3">
+                      {item.iconUrl ? (
+                        <span
+                          className="block h-full w-full rounded-full bg-contain bg-center bg-no-repeat"
+                          style={{ backgroundImage: `url(${item.iconUrl})` }}
+                          role="img"
+                          aria-hidden
+                        />
+                      ) : (
+                        <span className="text-xs font-semibold text-[#0989ff] sm:text-sm">
+                          {categoryInitials(item.name)}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-3 max-w-[9rem] text-sm font-bold leading-tight text-[#0f172a]">{item.name}</p>
+                    <p className="mt-1 text-xs text-[#64748b]">
+                      {(() => {
+                        const n = item.productCount ?? 0;
+                        return `${n} ${n === 1 ? 'Product' : 'Products'}`;
+                      })()}
+                    </p>
+                  </Link>
+                ))}
+            </div>
           )}
         </div>
       </section>
@@ -314,16 +356,25 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-semibold text-[#1b2a4e]">Trending Products</h2>
             <div className="flex items-center gap-5 text-sm">
-              <button type="button" className="font-semibold text-[#0989ff]">Top Sellers</button>
-              <button type="button" className="text-[#6f829f]">Featured</button>
-              <button type="button" className="text-[#6f829f]">New Arrival</button>
+              {TRENDING_TABS.map(({ label, value }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTrendingTab(value)}
+                  className={
+                    trendingTab === value ? 'font-semibold text-[#0989ff]' : 'text-[#6f829f] hover:text-[#1b2a4e]'
+                  }
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <HomeProductGrid
-              loading={homeLoading}
-              emptyMessage="No products in the catalog yet."
-              cards={productCards}
+              loading={trendingLoading}
+              emptyMessage={trendingEmptyMessage}
+              cards={trendingCards}
               keyPrefix="trending"
             />
           </div>

@@ -241,13 +241,6 @@ function StorefrontHeader({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <Link
-                href="/shop"
-                onMouseEnter={() => setActiveMenu('none')}
-                className="flex items-center gap-1 py-3 hover:text-[#0989ff]"
-              >
-                Products
-              </Link>
               <button type="button" onMouseEnter={() => setActiveMenu('blog')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
                 Blog
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,15 +283,18 @@ function StorefrontHeader({
                             : 'text-[#344054] hover:bg-[#f8fbff]'
                         }`}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E8F4FF] text-xs font-semibold text-[#0989ff]">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center">
                           {item.iconUrl ? (
                             <span
-                              className="h-full w-full bg-contain bg-center bg-no-repeat"
+                              className="block h-14 w-14 shrink-0 bg-contain bg-center bg-no-repeat"
                               style={{ backgroundImage: `url(${item.iconUrl})` }}
+                              role="img"
                               aria-hidden
                             />
                           ) : (
-                            categoryInitials(item.name)
+                            <span className="text-center text-[13px] font-semibold leading-tight text-[#344054]">
+                              {categoryInitials(item.name)}
+                            </span>
                           )}
                         </div>
                         <span className="flex-1 text-sm font-semibold">{item.name}</span>
@@ -311,25 +307,15 @@ function StorefrontHeader({
 
                   {activeCategoryItem && (
                     <div
-                      className="absolute left-full min-h-[132px] w-[260px] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
+                      className="absolute left-full w-max bg-white px-3 py-2 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
                       style={{ top: `${submenuTop}px` }}
                     >
-                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#98a2b3]">Browse</p>
-                      <ul className="space-y-3">
-                        <li>
-                          <Link
-                            href={`/shop?category=${encodeURIComponent(activeCategoryItem.slug)}`}
-                            className="text-sm font-semibold text-[#344054] hover:text-[#0989ff]"
-                          >
-                            Shop {activeCategoryItem.name}
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="/shop" className="text-sm font-semibold text-[#344054] hover:text-[#0989ff]">
-                            All products
-                          </Link>
-                        </li>
-                      </ul>
+                      <Link
+                        href={`/shop?category=${encodeURIComponent(activeCategoryItem.slug)}`}
+                        className="block text-sm font-semibold whitespace-nowrap text-[#344054] hover:text-[#0989ff]"
+                      >
+                        Shop {activeCategoryItem.name}
+                      </Link>
                     </div>
                   )}
                 </div>

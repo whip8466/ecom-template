@@ -85,7 +85,7 @@ async function seed() {
     collections.push(collection);
   }
 
-  const tagNames = ['Sale', 'Eco-Friendly', 'Limited Edition', 'Unisex', 'Premium', 'Trending'];
+  const tagNames = ['Sale', 'Eco-Friendly', 'Limited Edition', 'Unisex', 'Premium', 'Trending', 'Featured'];
   const tags = [];
   for (const name of tagNames) {
     const tag = await prisma.tag.create({
@@ -198,6 +198,16 @@ async function seed() {
         },
       });
     }
+  }
+
+  const featuredTag = tags.find((t) => t.slug === 'featured');
+  if (featuredTag) {
+    await prisma.productTag.createMany({
+      data: [
+        { productId: createdProducts[0].id, tagId: featuredTag.id },
+        { productId: createdProducts[1].id, tagId: featuredTag.id },
+      ],
+    });
   }
 
   const sizeValues = sizeType.values;
