@@ -7,6 +7,7 @@ async function seed() {
   const prisma = await initORM();
 
   await prisma.promoBanner.deleteMany();
+  await prisma.newsletterSubscription.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.productVariantOptionValue.deleteMany();

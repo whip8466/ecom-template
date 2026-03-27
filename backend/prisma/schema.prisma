@@ -254,6 +254,15 @@ model PromoBanner {
   @@map("promo_banners")
 }
 
+model NewsletterSubscription {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(320)
+  source    String   @default("footer") @db.VarChar(2048)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("newsletter_subscriptions")
+}
+
 model ProductImage {
   id       Int     @id @default(autoincrement())
   productId Int    @map("product_id")

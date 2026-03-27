@@ -396,22 +396,6 @@ export function HomePageClient({ initialPromoBanners }: { initialPromoBanners: P
           </div>
         </div>
       </section>
-
-      <section className="border-t border-[#d8e7ff] bg-[#0d86f8] py-6">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p className="text-sm font-medium text-white">Subscribe our Newsletter and get updates every week</p>
-          <form className="flex w-full max-w-md overflow-hidden rounded sm:w-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full bg-white px-4 py-2 text-sm text-[#1b2a4e] outline-none"
-            />
-            <button type="submit" className="bg-[#1b2a4e] px-4 py-2 text-sm font-semibold text-white">
-              Subscribe
-            </button>
-          </form>
-        </div>
-      </section>
     </div>
   );
 }

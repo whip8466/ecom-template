@@ -8,6 +8,7 @@
     "start": "tsx src/server.ts",
     "build": "tsc -p tsconfig.json",
     "db:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy && prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:down": "prisma migrate reset --force",
     "db:migration:create": "prisma migrate dev --create-only",
