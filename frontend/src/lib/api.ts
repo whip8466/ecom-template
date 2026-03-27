@@ -7,7 +7,10 @@ export async function apiRequest<T>(
   options?: RequestInit & { token?: string }
 ): Promise<T> {
   const headers = new Headers(options?.headers || {});
-  headers.set('Content-Type', 'application/json');
+  // Avoid Content-Type: application/json on DELETE/GET with no body — Fastify can reject the request.
+  if (options?.body != null && options.body !== '') {
+    headers.set('Content-Type', 'application/json');
+  }
 
   if (options?.token) {
     headers.set('Authorization', `Bearer ${options.token}`);

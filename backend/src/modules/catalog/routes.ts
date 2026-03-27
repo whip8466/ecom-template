@@ -82,6 +82,24 @@ function slugFromProductName(name) {
 }
 
 async function catalogRoutes(fastify) {
+  fastify.get('/shop-meta', async () => {
+    const prisma = fastify.prisma;
+    const where = { status: PRODUCT_STATUS.PUBLISHED };
+    const [agg, totalProducts] = await Promise.all([
+      prisma.product.aggregate({
+        where,
+        _min: { priceCents: true },
+        _max: { priceCents: true },
+      }),
+      prisma.product.count({ where }),
+    ]);
+    return {
+      minPriceCents: agg._min.priceCents ?? 0,
+      maxPriceCents: agg._max.priceCents ?? 0,
+      totalProducts,
+    };
+  });
+
   fastify.get('/products', async (request) => {
     const query = z
       .object({
@@ -89,7 +107,11 @@ async function catalogRoutes(fastify) {
         category: z.string().optional(),
         vendor: z.string().optional(),
         page: z.coerce.number().int().positive().default(1),
-        limit: z.coerce.number().int().positive().max(50).default(12),
+        limit: z.coerce.number().int().positive().max(100).default(12),
+        minPrice: z.coerce.number().int().min(0).optional(),
+        maxPrice: z.coerce.number().int().min(0).optional(),
+        inStock: z.enum(['1', 'true']).optional(),
+        sort: z.enum(['default', 'price_asc', 'price_desc']).optional(),
         status: z.enum(['all', 'draft', 'published']).optional(),
         discount: z.enum(['1', 'true']).optional(),
       })
@@ -125,6 +147,24 @@ async function catalogRoutes(fastify) {
       where.salePriceCents = { not: null };
     }
 
+    if (query.inStock) {
+      where.stock = { gt: 0 };
+    }
+
+    if (query.minPrice != null || query.maxPrice != null) {
+      where.priceCents = {};
+      if (query.minPrice != null) where.priceCents.gte = query.minPrice;
+      if (query.maxPrice != null) where.priceCents.lte = query.maxPrice;
+    }
+
+    const sort = query.sort ?? 'default';
+    const orderBy =
+      sort === 'price_asc'
+        ? { priceCents: 'asc' }
+        : sort === 'price_desc'
+          ? { priceCents: 'desc' }
+          : { createdAt: 'desc' };
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
@@ -137,7 +177,7 @@ async function catalogRoutes(fastify) {
             select: { id: true, sku: true, priceCents: true, stock: true },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         take: query.limit,
         skip: (query.page - 1) * query.limit,
       }),
@@ -217,8 +257,22 @@ async function catalogRoutes(fastify) {
   });
 
   fastify.get('/categories', async () => {
-    const categories = await fastify.prisma.category.findMany({ orderBy: { name: 'asc' } });
-    return { data: categories };
+    const prisma = fastify.prisma;
+    const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+    const grouped = await prisma.product.groupBy({
+      by: ['categoryId'],
+      where: { status: PRODUCT_STATUS.PUBLISHED, categoryId: { not: null } },
+      _count: { _all: true },
+    });
+    const countByCategoryId = new Map(grouped.map((g) => [g.categoryId, g._count._all]));
+    return {
+      data: categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        productCount: countByCategoryId.get(c.id) ?? 0,
+      })),
+    };
   });
 
   fastify.post(

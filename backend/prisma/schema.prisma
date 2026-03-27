@@ -20,6 +20,7 @@ model User {
   addresses     Address[]
   orders        Order[]
   customerNotes CustomerNote[]
+  wishlistItems WishlistItem[]
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -191,11 +192,25 @@ model Product {
   availableColors ProductColor[]
   variants        ProductVariant[]
   orderItems      OrderItem[]
+  wishlistItems   WishlistItem[]
   publishedAt     DateTime?      @map("published_at") @db.Timestamptz(6)
   createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("products")
+}
+
+model WishlistItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int      @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("wishlist_items")
 }
 
 model ProductImage {

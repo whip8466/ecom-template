@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { apiRequest } from '@/lib/api';
+import { categoryInitials, type StorefrontCategory } from '@/lib/category-ui';
 import type { User } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
@@ -10,64 +12,57 @@ import { useWishlistStore } from '@/store/wishlist-store';
 
 function StorefrontHeader({
   cartCount,
-  wishlistCount,
   user,
   pathname,
   logout,
   router,
 }: {
   cartCount: number;
-  wishlistCount: number;
   user: User | null;
   pathname: string;
   logout: () => void;
   router: ReturnType<typeof useRouter>;
 }) {
   const [activeMenu, setActiveMenu] = useState<'none' | 'categories' | 'shop' | 'blog'>('none');
-  const [activeCategory, setActiveCategory] = useState('mobile-tablets');
-  const searchCategories = ['Select Category', 'Electronics', 'Fashion', 'Beauty', 'Jewelry'];
-  const [selectedSearchCategory, setSelectedSearchCategory] = useState(searchCategories[0]);
+  const [categories, setCategories] = useState<StorefrontCategory[]>([]);
+  const [activeCategorySlug, setActiveCategorySlug] = useState('');
+  /** `null` = search all products; otherwise filter by category slug */
+  const [searchCategorySlug, setSearchCategorySlug] = useState<string | null>(null);
   const [isSearchCategoryOpen, setIsSearchCategoryOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const wishlistCount = useWishlistStore((state) => state.items.length);
 
-  const categoryItems = [
-    {
-      id: 'headphones',
-      name: 'Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80',
-      submenu: ['Wireless', 'Gaming', 'Noise Cancelling'],
-    },
-    {
-      id: 'mobile-tablets',
-      name: 'Mobile Tablets',
-      image: 'https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=300&q=80',
-      submenu: ['Samsung', 'Apple'],
-    },
-    {
-      id: 'cpu-heat-pipes',
-      name: 'CPU Heat Pipes',
-      image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&q=80',
-      submenu: ['ARGB', 'Liquid', 'Tower'],
-    },
-    {
-      id: 'smart-watch',
-      name: 'Smart Watch',
-      image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=300&q=80',
-      submenu: ['Android', 'iOS', 'Sport'],
-    },
-    {
-      id: 'bluetooth',
-      name: 'Bluetooth',
-      image: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f37?w=300&q=80',
-      submenu: ['Earbuds', 'Headsets', 'Speakers'],
-    },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: StorefrontCategory[] }>('/api/categories')
+      .then((res) => {
+        if (!cancelled) setCategories(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const activeCategoryItem = categoryItems.find((item) => item.id === activeCategory) ?? categoryItems[0];
+  useEffect(() => {
+    if (categories.length === 0) return;
+    if (!activeCategorySlug || !categories.some((c) => c.slug === activeCategorySlug)) {
+      setActiveCategorySlug(categories[0].slug);
+    }
+  }, [categories, activeCategorySlug]);
+
+  const activeCategoryItem =
+    categories.find((c) => c.slug === activeCategorySlug) ?? categories[0] ?? null;
   const activeCategoryIndex = Math.max(
     0,
-    categoryItems.findIndex((item) => item.id === activeCategory),
+    categories.findIndex((c) => c.slug === activeCategorySlug),
   );
+  const searchCategoryLabel =
+    searchCategorySlug == null
+      ? 'All Categories'
+      : categories.find((c) => c.slug === searchCategorySlug)?.name ?? 'All Categories';
   const categoryRowHeight = 74;
   const submenuTop = activeCategoryIndex * categoryRowHeight;
   const handleSearchSubmit = (e: FormEvent) => {
@@ -75,9 +70,7 @@ function StorefrontHeader({
     const query = searchText.trim();
     const params = new URLSearchParams();
     if (query) params.set('q', query);
-    if (selectedSearchCategory !== searchCategories[0]) {
-      params.set('category', selectedSearchCategory);
-    }
+    if (searchCategorySlug) params.set('category', searchCategorySlug);
     const queryString = params.toString();
     router.push(queryString ? `/shop?${queryString}` : '/shop');
     setIsSearchCategoryOpen(false);
@@ -126,29 +119,35 @@ function StorefrontHeader({
                   onClick={() => setIsSearchCategoryOpen((open) => !open)}
                   className="flex h-full w-full items-center justify-between whitespace-nowrap px-4 text-sm font-semibold text-[#1f2f4e]"
                 >
-                  {selectedSearchCategory}
+                  {searchCategoryLabel}
                   <svg className="h-4 w-4 text-[#1f2f4e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
 
                 {isSearchCategoryOpen && (
-                  <div className="absolute left-0 top-full z-70 mt-1 w-full overflow-hidden rounded-sm border border-[#e6edf6] bg-white shadow-[0_10px_20px_rgba(16,24,40,0.12)]">
-                    {searchCategories.map((category, idx) => (
+                  <div className="absolute left-0 top-full z-70 mt-1 max-h-64 w-full overflow-y-auto rounded-sm border border-[#e6edf6] bg-white shadow-[0_10px_20px_rgba(16,24,40,0.12)]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchCategorySlug(null);
+                        setIsSearchCategoryOpen(false);
+                      }}
+                      className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-[#111827] transition hover:bg-[#f8fbff] hover:text-[#0989ff]"
+                    >
+                      All Categories
+                    </button>
+                    {categories.map((c) => (
                       <button
-                        key={category}
+                        key={c.id}
                         type="button"
                         onClick={() => {
-                          setSelectedSearchCategory(category);
+                          setSearchCategorySlug(c.slug);
                           setIsSearchCategoryOpen(false);
                         }}
-                        className={`block w-full px-4 py-2.5 text-left text-sm transition ${
-                          idx === 0
-                            ? 'font-semibold text-[#111827]'
-                            : 'text-[#344054] hover:bg-[#f8fbff] hover:text-[#0989ff]'
-                        }`}
+                        className="block w-full px-4 py-2.5 text-left text-sm text-[#344054] transition hover:bg-[#f8fbff] hover:text-[#0989ff]"
                       >
-                        {category}
+                        {c.name}
                       </button>
                     ))}
                   </div>
@@ -230,27 +229,19 @@ function StorefrontHeader({
             </button>
 
             <nav className="flex flex-1 items-center gap-7 px-2 text-sm font-semibold text-[#101828]">
-              <Link href="/" onMouseEnter={() => setActiveMenu('none')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
-                Home
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </Link>
               <button type="button" onMouseEnter={() => setActiveMenu('shop')} className="flex items-center gap-1 py-3 text-[#0989ff]">
                 Shop
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+              <Link
+                href="/shop"
+                onMouseEnter={() => setActiveMenu('none')}
+                className="flex items-center gap-1 py-3 hover:text-[#0989ff]"
+              >
                 Products
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="py-3 hover:text-[#0989ff]">
-                Coupons
-              </button>
+              </Link>
               <button type="button" onMouseEnter={() => setActiveMenu('blog')} className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
                 Blog
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,37 +268,54 @@ function StorefrontHeader({
             <div className="absolute left-0 right-0 top-full z-[70]">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="relative w-[300px] rounded-b-md bg-white shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
-                  {categoryItems.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onMouseEnter={() => setActiveCategory(item.id)}
-                      className={`flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
-                        activeCategory === item.id ? 'bg-[#f8fbff] text-[#0989ff]' : 'text-[#344054] hover:bg-[#f8fbff]'
-                      }`}
-                    >
-                      <div className="h-10 w-10 rounded bg-cover bg-center" style={{ backgroundImage: `url(${item.image})` }} />
-                      <span className="flex-1 text-sm font-semibold">{item.name}</span>
-                      <svg className="h-4 w-4 text-[#98a2b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  ))}
+                  {categories.length === 0 ? (
+                    <div className="px-4 py-6 text-sm text-[#667085]">Loading categories…</div>
+                  ) : (
+                    categories.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onMouseEnter={() => setActiveCategorySlug(item.slug)}
+                        className={`flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
+                          activeCategorySlug === item.slug
+                            ? 'bg-[#f8fbff] text-[#0989ff]'
+                            : 'text-[#344054] hover:bg-[#f8fbff]'
+                        }`}
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#eef4ff] text-xs font-semibold text-[#0989ff]">
+                          {categoryInitials(item.name)}
+                        </div>
+                        <span className="flex-1 text-sm font-semibold">{item.name}</span>
+                        <svg className="h-4 w-4 shrink-0 text-[#98a2b3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    ))
+                  )}
 
-                  <div
-                    className="absolute left-full min-h-[132px] w-[260px] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
-                    style={{ top: `${submenuTop}px` }}
-                  >
-                    <ul className="space-y-3">
-                      {activeCategoryItem.submenu.map((sub) => (
-                        <li key={sub}>
-                          <Link href="/" className="text-sm font-semibold text-[#344054] hover:text-[#0989ff]">
-                            {sub}
+                  {activeCategoryItem && (
+                    <div
+                      className="absolute left-full min-h-[132px] w-[260px] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
+                      style={{ top: `${submenuTop}px` }}
+                    >
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#98a2b3]">Browse</p>
+                      <ul className="space-y-3">
+                        <li>
+                          <Link
+                            href={`/shop?category=${encodeURIComponent(activeCategoryItem.slug)}`}
+                            className="text-sm font-semibold text-[#344054] hover:text-[#0989ff]"
+                          >
+                            Shop {activeCategoryItem.name}
                           </Link>
                         </li>
-                      ))}
-                    </ul>
-                  </div>
+                        <li>
+                          <Link href="/shop" className="text-sm font-semibold text-[#344054] hover:text-[#0989ff]">
+                            All products
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -318,11 +326,19 @@ function StorefrontHeader({
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-5 gap-4 bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
                   <div>
-                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Shop Pages</h4>
-                    <ul className="space-y-2 text-sm text-[#475467]">
-                      {['Grid Layout', 'Shop Categories', 'List Layout', 'Full width Layout', '1600px Layout', 'Left Sidebar', 'Right Sidebar', 'Hidden Sidebar'].map((item) => (
-                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
-                      ))}
+                    <h4 className="mb-3 text-lg font-semibold text-[#101828]">Categories</h4>
+                    <ul className="max-h-52 space-y-2 overflow-y-auto text-sm text-[#475467]">
+                      {categories.length === 0 ? (
+                        <li className="text-[#98a2b3]">Loading…</li>
+                      ) : (
+                        categories.map((c) => (
+                          <li key={c.id}>
+                            <Link href={`/shop?category=${encodeURIComponent(c.slug)}`} className="hover:text-[#0989ff]">
+                              {c.name}
+                            </Link>
+                          </li>
+                        ))
+                      )}
                     </ul>
                   </div>
                   <div>
@@ -455,8 +471,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const token = useAuthStore((s) => s.token);
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const fetchWishlist = useWishlistStore((s) => s.fetchWishlist);
+  const clearWishlist = useWishlistStore((s) => s.clearWishlist);
   const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0));
-  const wishlistCount = useWishlistStore((state) => state.items.length);
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (token) {
+      void fetchWishlist(token);
+    } else {
+      clearWishlist();
+    }
+  }, [hasHydrated, token, fetchWishlist, clearWishlist]);
 
   const isAdminRoute = pathname.startsWith('/admin');
   const isHome = pathname === '/';
@@ -470,7 +497,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-[var(--border)] bg-[var(--card-bg)]">
         <StorefrontHeader
           cartCount={cartCount}
-          wishlistCount={wishlistCount}
           user={user}
           pathname={pathname}
           logout={logout}

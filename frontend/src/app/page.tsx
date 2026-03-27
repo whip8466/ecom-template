@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { apiRequest } from '@/lib/api';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
+import { categoryInitials, type StorefrontCategory } from '@/lib/category-ui';
 import { formatMoney } from '@/lib/format';
 import { effectiveAvailableStockForLine } from '@/lib/inventory';
 import type { Product } from '@/lib/types';
@@ -54,15 +55,6 @@ function productToMiniItem(p: Product): MiniListItem {
     image: p.images?.[0]?.imageUrl || '',
   };
 }
-
-const categoryItems = [
-  { name: 'Headphones', count: '12 item', iconLabel: 'HP' },
-  { name: 'Smart Watches', count: '08 item', iconLabel: 'SW' },
-  { name: 'Speakers', count: '14 item', iconLabel: 'SP' },
-  { name: 'Mouse', count: '09 item', iconLabel: 'MS' },
-  { name: 'Phones', count: '22 item', iconLabel: 'PH' },
-  { name: 'Cameras', count: '05 item', iconLabel: 'CM' },
-];
 
 function ProductCard({ product }: { product: ProductCardData }) {
   const router = useRouter();
@@ -234,6 +226,8 @@ function HomeProductGrid({
 export default function HomePage() {
   const [homeProducts, setHomeProducts] = useState<Product[]>([]);
   const [homeLoading, setHomeLoading] = useState(true);
+  const [categories, setCategories] = useState<StorefrontCategory[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -246,6 +240,23 @@ export default function HomePage() {
       })
       .finally(() => {
         if (!cancelled) setHomeLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: StorefrontCategory[] }>('/api/categories')
+      .then((res) => {
+        if (!cancelled) setCategories(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      })
+      .finally(() => {
+        if (!cancelled) setCategoriesLoading(false);
       });
     return () => {
       cancelled = true;
@@ -281,15 +292,25 @@ export default function HomePage() {
 
       <section className="border-b border-[#e4ebf4] py-7">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:grid-cols-6 lg:px-8">
-          {categoryItems.map((item) => (
-            <article key={item.name} className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#f1f6ff] text-sm font-semibold tracking-wide text-[#0989ff]">
-                {item.iconLabel}
-              </div>
-              <p className="mt-2 text-sm font-medium text-[#1b2a4e]">{item.name}</p>
-              <p className="text-xs text-[#7c8ea6]">{item.count}</p>
-            </article>
-          ))}
+          {categoriesLoading ? (
+            <div className="col-span-full flex justify-center py-4 text-sm text-[#7c8ea6]">Loading categories…</div>
+          ) : categories.length === 0 ? (
+            <div className="col-span-full text-center text-sm text-[#7c8ea6]">No categories yet.</div>
+          ) : (
+            categories.map((item) => (
+              <Link
+                key={item.id}
+                href={`/shop?category=${encodeURIComponent(item.slug)}`}
+                className="block text-center transition hover:opacity-90"
+              >
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#f1f6ff] text-sm font-semibold tracking-wide text-[#0989ff]">
+                  {categoryInitials(item.name)}
+                </div>
+                <p className="mt-2 text-sm font-medium text-[#1b2a4e]">{item.name}</p>
+                <p className="text-xs text-[#7c8ea6]">Shop now</p>
+              </Link>
+            ))
+          )}
         </div>
       </section>
 

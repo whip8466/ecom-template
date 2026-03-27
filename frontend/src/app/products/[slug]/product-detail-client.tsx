@@ -154,14 +154,15 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
       router.push(buildLoginRedirectHref(`/products/${slug}`));
       return;
     }
-    toggleWishlist({
+    const wasIn = isCurrentProductInWishlist;
+    setMessage(wasIn ? 'Removed from wishlist' : 'Added to wishlist');
+    void toggleWishlist({
       productId: product.id,
       slug: product.slug,
       name: product.name,
       priceCents: displayUnitPrice,
       imageUrl: mainImage.imageUrl,
     });
-    setMessage(isCurrentProductInWishlist ? 'Removed from wishlist' : 'Added to wishlist');
   };
 
   const descriptionText =

@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiRequest } from '@/lib/api';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
@@ -14,62 +14,166 @@ import { useWishlistStore } from '@/store/wishlist-store';
 
 type ProductsResponse = {
   data: Product[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
 };
 
-type ShopGridClientProps = {
-  initialQuery: string;
-  initialCategory: string;
+type ShopMeta = {
+  minPriceCents: number;
+  maxPriceCents: number;
+  totalProducts: number;
 };
 
-export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClientProps) {
+type CategoryRow = {
+  id: number;
+  name: string;
+  slug: string;
+  productCount: number;
+};
+
+const PAGE_SIZE = 9;
+
+function parseNonNegativeInt(s: string | null, fallback: number): number {
+  if (s == null || s === '') return fallback;
+  const n = Number.parseInt(s, 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+function parsePage(s: string | null): number {
+  const n = Number.parseInt(s || '1', 10);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+/** Build API query from current URL-style params */
+function buildProductsApiQuery(sp: URLSearchParams, limit: number): string {
+  const p = new URLSearchParams();
+  const q = sp.get('q')?.trim();
+  const category = sp.get('category')?.trim();
+  const minPrice = sp.get('minPrice')?.trim();
+  const maxPrice = sp.get('maxPrice')?.trim();
+  const inStock = sp.get('inStock');
+  const sale = sp.get('sale');
+  const sort = sp.get('sort')?.trim() || 'default';
+  const page = parsePage(sp.get('page'));
+
+  if (q) p.set('q', q);
+  if (category) p.set('category', category);
+  if (minPrice !== undefined && minPrice !== '') p.set('minPrice', minPrice);
+  if (maxPrice !== undefined && maxPrice !== '') p.set('maxPrice', maxPrice);
+  if (inStock === '1') p.set('inStock', '1');
+  if (sale === '1') p.set('discount', '1');
+  if (sort === 'low') p.set('sort', 'price_asc');
+  else if (sort === 'high') p.set('sort', 'price_desc');
+  else p.set('sort', 'default');
+  p.set('page', String(page));
+  p.set('limit', String(limit));
+  return p.toString();
+}
+
+export function ShopGridClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const user = useAuthStore((state) => state.user);
   const { items: cartItems, addToCart } = useCartStore();
   const { items: wishlistItems, toggleWishlist } = useWishlistStore();
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: PAGE_SIZE, total: 0, totalPages: 1 });
+  const [topRated, setTopRated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'default' | 'low' | 'high'>('default');
-  const [maxPrice, setMaxPrice] = useState(0);
-  const [minPrice, setMinPrice] = useState(0);
-  const [priceLimit, setPriceLimit] = useState(0);
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [onSaleOnly, setOnSaleOnly] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 9;
+  const [shopMeta, setShopMeta] = useState<ShopMeta | null>(null);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
+
+  const catalogMaxPrice = shopMeta?.maxPriceCents ?? 0;
+
+  const urlQ = searchParams.get('q')?.trim() ?? '';
+  const urlCategory = searchParams.get('category')?.trim() ?? '';
+  const urlMinPrice = parseNonNegativeInt(searchParams.get('minPrice'), 0);
+  const urlMaxPriceRaw = searchParams.get('maxPrice');
+  const urlMaxPrice =
+    urlMaxPriceRaw != null && urlMaxPriceRaw !== ''
+      ? parseNonNegativeInt(urlMaxPriceRaw, catalogMaxPrice || 1)
+      : null;
+  const urlInStock = searchParams.get('inStock') === '1';
+  const urlSale = searchParams.get('sale') === '1';
+  const urlSort = (searchParams.get('sort') || 'default') as 'default' | 'low' | 'high';
+
+  const effectiveMaxForSlider =
+    urlMaxPrice != null && catalogMaxPrice > 0 ? urlMaxPrice : catalogMaxPrice || 1;
+  const minPrice = urlMinPrice;
+  const priceLimit = catalogMaxPrice > 0 ? Math.min(effectiveMaxForSlider, catalogMaxPrice) : effectiveMaxForSlider;
+
+  const pushParams = useCallback(
+    (patch: Record<string, string | null | undefined>) => {
+      const p = new URLSearchParams(searchParams.toString());
+      Object.entries(patch).forEach(([k, v]) => {
+        if (v === null || v === undefined || v === '') p.delete(k);
+        else p.set(k, v);
+      });
+      const s = p.toString();
+      router.replace(s ? `/shop?${s}` : '/shop', { scroll: false });
+    },
+    [router, searchParams]
+  );
 
   useEffect(() => {
-    setSearchQuery(initialQuery);
-  }, [initialQuery]);
+    let cancelled = false;
+    apiRequest<{ data: CategoryRow[] }>('/api/categories')
+      .then((res) => {
+        if (!cancelled) setCategories(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
-    setActiveCategory(initialCategory);
-  }, [initialCategory]);
+    let cancelled = false;
+    apiRequest<ShopMeta>('/api/shop-meta')
+      .then((m) => {
+        if (!cancelled) setShopMeta(m);
+      })
+      .catch(() => {
+        if (!cancelled) setShopMeta({ minPriceCents: 0, maxPriceCents: 0, totalProducts: 0 });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const searchParamsKey = searchParams.toString();
 
   useEffect(() => {
+    if (!shopMeta) return;
+    const meta = shopMeta;
     let cancelled = false;
     async function load() {
       try {
         setLoading(true);
-        const res = await apiRequest<ProductsResponse>('/api/products?limit=200');
+        const sp = new URLSearchParams(searchParamsKey);
+        if (!sp.get('maxPrice') && meta.maxPriceCents > 0) {
+          sp.set('maxPrice', String(meta.maxPriceCents));
+        }
+        const qMain = buildProductsApiQuery(sp, PAGE_SIZE);
+        const spTop = new URLSearchParams(sp.toString());
+        spTop.set('page', '1');
+        const qTop = buildProductsApiQuery(spTop, 4);
+
+        const [mainRes, topRes] = await Promise.all([
+          apiRequest<ProductsResponse>(`/api/products?${qMain}`),
+          apiRequest<ProductsResponse>(`/api/products?${qTop}`),
+        ]);
         if (cancelled) return;
-        const apiProducts = res.data ?? [];
-        const computedMaxPrice = apiProducts.reduce(
-          (max, product) => Math.max(max, product.priceCents),
-          0,
-        );
-        setProducts(apiProducts);
-        setMaxPrice(computedMaxPrice);
-        setMinPrice(0);
-        setPriceLimit(computedMaxPrice);
+        setProducts(mainRes.data ?? []);
+        setPagination(mainRes.pagination);
+        setTopRated(topRes.data ?? []);
       } catch {
         if (!cancelled) {
           setProducts([]);
-          setMaxPrice(0);
-          setMinPrice(0);
-          setPriceLimit(0);
+          setPagination({ page: 1, limit: PAGE_SIZE, total: 0, totalPages: 1 });
+          setTopRated([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -79,68 +183,33 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [searchParamsKey, shopMeta]);
 
-  const categories = useMemo(() => {
-    const map = new Map<string, number>();
-    products.forEach((product) => {
-      const key = product.category?.name || 'Uncategorized';
-      map.set(key, (map.get(key) || 0) + 1);
-    });
-    return [...map.entries()]
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    const normalizedCategory = activeCategory.toLowerCase();
-
-    const base = products.filter((product, index) => {
-      const productName = product.name.toLowerCase();
-      const categoryName = product.category?.name?.toLowerCase() || '';
-
-      const matchesQuery =
-        !normalizedQuery ||
-        productName.includes(normalizedQuery) ||
-        categoryName.includes(normalizedQuery);
-
-      const matchesCategory =
-        !normalizedCategory || categoryName.includes(normalizedCategory);
-
-      const withinPrice = product.priceCents >= minPrice && product.priceCents <= priceLimit;
-      const matchesStock = !inStockOnly || product.stock > 0;
-      const matchesSale = !onSaleOnly || index % 3 === 0;
-
-      return matchesQuery && matchesCategory && withinPrice && matchesStock && matchesSale;
-    });
-
-    if (sortBy === 'low') {
-      return [...base].sort((a, b) => a.priceCents - b.priceCents);
-    }
-    if (sortBy === 'high') {
-      return [...base].sort((a, b) => b.priceCents - a.priceCents);
-    }
-    return base;
-  }, [activeCategory, inStockOnly, minPrice, onSaleOnly, priceLimit, products, searchQuery, sortBy]);
-
-  const topRated = filteredProducts.slice(0, 4);
-  const hasPriceFilter = maxPrice > 0 && (minPrice > 0 || priceLimit < maxPrice);
+  const hasPriceFilter =
+    catalogMaxPrice > 0 && (urlMinPrice > 0 || (urlMaxPrice != null && urlMaxPrice < catalogMaxPrice));
   const hasActiveFilters =
-    !!searchQuery ||
-    !!activeCategory ||
-    inStockOnly ||
-    onSaleOnly ||
+    !!urlQ ||
+    !!urlCategory ||
+    urlInStock ||
+    urlSale ||
     hasPriceFilter;
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-  const showingStart = filteredProducts.length === 0 ? 0 : startIndex + 1;
-  const showingEnd = Math.min(endIndex, filteredProducts.length);
-  const safeMaxPrice = Math.max(maxPrice, 1);
+
+  const totalPages = pagination.totalPages;
+  const currentPage = pagination.page;
+  const total = pagination.total;
+  const showingStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const showingEnd = Math.min(currentPage * PAGE_SIZE, total);
+
+  const safeMaxPrice = Math.max(catalogMaxPrice, 1);
   const minPercent = (minPrice / safeMaxPrice) * 100;
   const maxPercent = (priceLimit / safeMaxPrice) * 100;
+
+  const categoryNameLookup = useMemo(() => {
+    const m = new Map<string, string>();
+    categories.forEach((c) => m.set(c.slug, c.name));
+    return m;
+  }, [categories]);
+
   const handleWishlistToggle = (product: Product, imageUrl: string) => {
     if (!user) {
       router.push(buildLoginRedirectHref('/shop'));
@@ -154,14 +223,6 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
       imageUrl,
     });
   };
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, activeCategory, inStockOnly, onSaleOnly, minPrice, priceLimit, sortBy]);
-
-  useEffect(() => {
-    setCurrentPage((page) => Math.min(page, totalPages));
-  }, [totalPages]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -190,7 +251,12 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                 value={minPrice}
                 onChange={(e) => {
                   const nextMin = Number(e.target.value);
-                  setMinPrice(Math.min(nextMin, priceLimit));
+                  const nextMax = Math.max(priceLimit, nextMin);
+                  pushParams({
+                    minPrice: String(nextMin),
+                    maxPrice: String(nextMax),
+                    page: '1',
+                  });
                 }}
                 className="price-range-input z-20"
               />
@@ -201,7 +267,12 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                 value={priceLimit}
                 onChange={(e) => {
                   const nextMax = Number(e.target.value);
-                  setPriceLimit(Math.max(nextMax, minPrice));
+                  const nextMin = Math.min(minPrice, nextMax);
+                  pushParams({
+                    minPrice: String(nextMin),
+                    maxPrice: String(nextMax),
+                    page: '1',
+                  });
                 }}
                 className="price-range-input z-30"
               />
@@ -215,11 +286,19 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
           <section className="rounded-md border border-[#e5ecf6] bg-white p-4">
             <h2 className="text-sm font-semibold text-[#12213f]">Product Status</h2>
             <label className="mt-3 flex items-center gap-2 text-sm text-[#475467]">
-              <input type="checkbox" checked={onSaleOnly} onChange={(e) => setOnSaleOnly(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={urlSale}
+                onChange={(e) => pushParams({ sale: e.target.checked ? '1' : null, page: '1' })}
+              />
               On sale
             </label>
             <label className="mt-2 flex items-center gap-2 text-sm text-[#475467]">
-              <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={urlInStock}
+                onChange={(e) => pushParams({ inStock: e.target.checked ? '1' : null, page: '1' })}
+              />
               In stock
             </label>
           </section>
@@ -229,27 +308,27 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
             <div className="mt-3 space-y-2 text-sm">
               <button
                 type="button"
-                onClick={() => setActiveCategory('')}
+                onClick={() => pushParams({ category: null, page: '1' })}
                 className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left ${
-                  activeCategory ? 'text-[#344054] hover:bg-[#f5f9ff]' : 'bg-[#0989ff]/10 font-semibold text-[#0989ff]'
+                  urlCategory ? 'text-[#344054] hover:bg-[#f5f9ff]' : 'bg-[#0989ff]/10 font-semibold text-[#0989ff]'
                 }`}
               >
                 <span>All Categories</span>
-                <span>{products.length}</span>
+                <span>{shopMeta?.totalProducts ?? 0}</span>
               </button>
               {categories.map((category) => (
                 <button
-                  key={category.name}
+                  key={category.slug}
                   type="button"
-                  onClick={() => setActiveCategory(category.name)}
+                  onClick={() => pushParams({ category: category.slug, page: '1' })}
                   className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left ${
-                    activeCategory.toLowerCase() === category.name.toLowerCase()
+                    urlCategory.toLowerCase() === category.slug.toLowerCase()
                       ? 'bg-[#0989ff]/10 font-semibold text-[#0989ff]'
                       : 'text-[#344054] hover:bg-[#f5f9ff]'
                   }`}
                 >
                   <span>{category.name}</span>
-                  <span>{category.count}</span>
+                  <span>{category.productCount}</span>
                 </button>
               ))}
             </div>
@@ -287,32 +366,32 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                   Selected filters:
                 </span>
 
-                {!!searchQuery && (
+                {!!urlQ && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery('')}
+                    onClick={() => pushParams({ q: null })}
                     className="inline-flex items-center gap-1 rounded-full border border-[#d6e2f1] px-3 py-1 text-xs font-medium text-[#1f2f4e] hover:bg-[#f5f9ff]"
                   >
-                    Search: {searchQuery}
+                    Search: {urlQ}
                     <span aria-hidden>×</span>
                   </button>
                 )}
 
-                {!!activeCategory && (
+                {!!urlCategory && (
                   <button
                     type="button"
-                    onClick={() => setActiveCategory('')}
+                    onClick={() => pushParams({ category: null })}
                     className="inline-flex items-center gap-1 rounded-full border border-[#d6e2f1] px-3 py-1 text-xs font-medium text-[#1f2f4e] hover:bg-[#f5f9ff]"
                   >
-                    Category: {activeCategory}
+                    Category: {categoryNameLookup.get(urlCategory) || urlCategory}
                     <span aria-hidden>×</span>
                   </button>
                 )}
 
-                {inStockOnly && (
+                {urlInStock && (
                   <button
                     type="button"
-                    onClick={() => setInStockOnly(false)}
+                    onClick={() => pushParams({ inStock: null })}
                     className="inline-flex items-center gap-1 rounded-full border border-[#d6e2f1] px-3 py-1 text-xs font-medium text-[#1f2f4e] hover:bg-[#f5f9ff]"
                   >
                     In stock
@@ -320,10 +399,10 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                   </button>
                 )}
 
-                {onSaleOnly && (
+                {urlSale && (
                   <button
                     type="button"
-                    onClick={() => setOnSaleOnly(false)}
+                    onClick={() => pushParams({ sale: null })}
                     className="inline-flex items-center gap-1 rounded-full border border-[#d6e2f1] px-3 py-1 text-xs font-medium text-[#1f2f4e] hover:bg-[#f5f9ff]"
                   >
                     On sale
@@ -334,10 +413,13 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                 {hasPriceFilter && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setMinPrice(0);
-                      setPriceLimit(maxPrice);
-                    }}
+                    onClick={() =>
+                      pushParams({
+                        minPrice: null,
+                        maxPrice: catalogMaxPrice > 0 ? String(catalogMaxPrice) : null,
+                        page: '1',
+                      })
+                    }
                     className="inline-flex items-center gap-1 rounded-full border border-[#d6e2f1] px-3 py-1 text-xs font-medium text-[#1f2f4e] hover:bg-[#f5f9ff]"
                   >
                     Price: {formatMoney(minPrice)} - {formatMoney(priceLimit)}
@@ -347,14 +429,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setActiveCategory('');
-                    setInStockOnly(false);
-                    setOnSaleOnly(false);
-                    setMinPrice(0);
-                    setPriceLimit(maxPrice);
-                  }}
+                  onClick={() => router.replace('/shop', { scroll: false })}
                   className="ml-auto text-xs font-semibold text-[#0989ff] hover:text-[#0476df]"
                 >
                   Clear all filters
@@ -365,11 +440,13 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#e5ecf6] bg-white px-4 py-2.5">
             <p className="text-sm text-[#67748a]">
-              Showing {showingStart}-{showingEnd} of {filteredProducts.length} results
+              Showing {showingStart}-{showingEnd} of {total} results
             </p>
             <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'default' | 'low' | 'high')}
+              value={urlSort}
+              onChange={(e) =>
+                pushParams({ sort: e.target.value === 'default' ? null : e.target.value, page: '1' })
+              }
               className="rounded border border-[#dfe8f5] bg-white px-3 py-1.5 text-sm text-[#344054] outline-none"
             >
               <option value="default">Default sorting</option>
@@ -389,16 +466,16 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                 </div>
               ))}
             </div>
-          ) : filteredProducts.length === 0 ? (
+          ) : products.length === 0 ? (
             <div className="rounded-md border border-dashed border-[#cdd9eb] bg-white p-10 text-center text-sm text-[#67748a]">
               No products found for your current filters.
             </div>
           ) : (
             <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {paginatedProducts.map((product, index) => {
+              {products.map((product, index) => {
                 const imageUrl = product.images?.[0]?.imageUrl || '';
-                const isSale = (startIndex + index) % 3 === 0;
+                const isSale = (showingStart - 1 + index) % 3 === 0;
                 const cardAvailable = effectiveAvailableStockForLine(product, null);
                 const inCart = cartItems.some((item) => item.productId === product.id);
                 const inWishlist = wishlistItems.some((item) => item.productId === product.id);
@@ -492,7 +569,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
               <div className="mt-6 flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  onClick={() => pushParams({ page: String(Math.max(1, currentPage - 1)) })}
                   disabled={currentPage === 1}
                   className="rounded border border-[#d7e4f6] px-3 py-1.5 text-sm text-[#344054] disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -502,7 +579,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                   <button
                     key={page}
                     type="button"
-                    onClick={() => setCurrentPage(page)}
+                    onClick={() => pushParams({ page: String(page) })}
                     className={`rounded px-3 py-1.5 text-sm ${
                       page === currentPage
                         ? 'bg-[#0989ff] font-semibold text-white'
@@ -514,7 +591,7 @@ export function ShopGridClient({ initialQuery, initialCategory }: ShopGridClient
                 ))}
                 <button
                   type="button"
-                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  onClick={() => pushParams({ page: String(Math.min(totalPages, currentPage + 1)) })}
                   disabled={currentPage === totalPages}
                   className="rounded border border-[#d7e4f6] px-3 py-1.5 text-sm text-[#344054] disabled:cursor-not-allowed disabled:opacity-50"
                 >

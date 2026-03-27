@@ -1,15 +1,16 @@
+import { Suspense } from 'react';
 import { ShopGridClient } from '@/components/shop/ShopGridClient';
 
-type ShopPageProps = {
-  searchParams?: Promise<{ q?: string; category?: string }>;
-};
-
-export default async function ShopPage({ searchParams }: ShopPageProps) {
-  const params = await searchParams;
+export default function ShopPage() {
   return (
-    <ShopGridClient
-      initialQuery={(params?.q || '').trim()}
-      initialCategory={(params?.category || '').trim()}
-    />
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-7xl px-4 py-16 text-center text-sm text-[#67748a] sm:px-6 lg:px-8">
+          Loading…
+        </div>
+      }
+    >
+      <ShopGridClient />
+    </Suspense>
   );
 }
