@@ -263,6 +263,35 @@ model NewsletterSubscription {
   @@map("newsletter_subscriptions")
 }
 
+/** Singleton row (id = 1): storefront contact page + footer copy. */
+model ContactSettings {
+  id           Int      @id @default(1)
+  headline     String   @default("Keep In Touch with Us") @db.VarChar(200)
+  primaryEmail String   @map("primary_email") @db.VarChar(320)
+  supportEmail String   @map("support_email") @db.VarChar(320)
+  phone        String   @db.VarChar(80)
+  addressLine  String   @map("address_line") @db.VarChar(500)
+  mapEmbedUrl  String?  @map("map_embed_url") @db.Text
+  facebookUrl  String?  @map("facebook_url") @db.VarChar(500)
+  twitterUrl   String?  @map("twitter_url") @db.VarChar(500)
+  linkedinUrl  String?  @map("linkedin_url") @db.VarChar(500)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("contact_settings")
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  email     String   @db.VarChar(320)
+  subject   String   @db.VarChar(500)
+  body      String   @db.Text
+  saveInfo  Boolean  @default(false) @map("save_info")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("contact_messages")
+}
+
 model ProductImage {
   id       Int     @id @default(autoincrement())
   productId Int    @map("product_id")

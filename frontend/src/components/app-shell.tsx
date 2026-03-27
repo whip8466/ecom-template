@@ -295,9 +295,13 @@ function StorefrontHeader({
                   </div>
                 )}
               </div>
-              <button type="button" onMouseEnter={() => setActiveMenu('none')} className="py-3 hover:text-[#0989ff]">
+              <Link
+                href="/contact"
+                onMouseEnter={() => setActiveMenu('none')}
+                className="py-3 hover:text-[#0989ff]"
+              >
                 Contact
-              </button>
+              </Link>
             </nav>
 
             <div className="hidden items-center gap-2 text-xs text-[#101828] lg:flex" onMouseEnter={() => setActiveMenu('none')}>
@@ -492,7 +496,7 @@ function StorefrontFooter() {
           <div>
             <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Support</h4>
             <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Contact Us</Link></li>
+              <li><Link href="/contact" className="transition-premium hover:text-[var(--navy)]">Contact Us</Link></li>
               <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Shipping Info</Link></li>
               <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Returns</Link></li>
               <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">FAQ</Link></li>
