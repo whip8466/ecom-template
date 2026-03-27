@@ -309,13 +309,13 @@ export default function AdminProductsPage() {
             placeholder="Search products"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="h-10 w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
+            className="h-10 w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
           />
         </form>
         <select
           value={categorySlug}
           onChange={(e) => { setCategorySlug(e.target.value); setPage(1); }}
-          className="h-10 min-w-[160px] rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+          className="h-10 min-w-[160px] rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
           aria-label="Filter by category"
         >
           <option value="">All categories</option>
@@ -326,7 +326,7 @@ export default function AdminProductsPage() {
         <select
           value={vendorSlug}
           onChange={(e) => { setVendorSlug(e.target.value); setPage(1); }}
-          className="h-10 min-w-[160px] rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+          className="h-10 min-w-[160px] rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
           aria-label="Filter by vendor"
         >
           <option value="">All vendors</option>
@@ -337,14 +337,14 @@ export default function AdminProductsPage() {
         <button
           type="button"
           onClick={clearFilters}
-          className="h-10 rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+          className="h-10 rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
         >
           Clear filters
         </button>
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
-            className="flex h-10 items-center gap-2 rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+            className="flex h-10 items-center gap-2 rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -353,7 +353,7 @@ export default function AdminProductsPage() {
           </button>
           <Link
             href="/admin/product/new"
-            className="flex h-10 items-center gap-2 rounded-sm bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0]"
+            className="flex h-10 items-center gap-2 rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0]"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -370,7 +370,7 @@ export default function AdminProductsPage() {
       ) : null}
 
       {/* Table */}
-      <div className="mt-6 overflow-hidden rounded-sm border border-[#e5ebf5] bg-white">
+      <div className="mt-6 overflow-hidden rounded-admin border border-[#e5ebf5] bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#246bfd] border-t-transparent" />
@@ -385,7 +385,7 @@ export default function AdminProductsPage() {
                       type="checkbox"
                       checked={products.length > 0 && selectedIds.size === products.length}
                       onChange={toggleSelectAll}
-                      className="h-4 w-4 rounded-sm border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
+                      className="h-4 w-4 rounded-admin border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
                     />
                   </th>
                   <th className="p-4 font-medium">Image</th>
@@ -414,11 +414,11 @@ export default function AdminProductsPage() {
                           type="checkbox"
                           checked={selectedIds.has(product.id)}
                           onChange={() => toggleSelect(product.id)}
-                          className="h-4 w-4 rounded-sm border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
+                          className="h-4 w-4 rounded-admin border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
                         />
                       </td>
                       <td className="p-4">
-                        <div className="h-12 w-12 overflow-hidden rounded-sm border border-[#e5ebf5] bg-[#f1f5f9]">
+                        <div className="h-12 w-12 overflow-hidden rounded-admin border border-[#e5ebf5] bg-[#f1f5f9]">
                           {product.images?.[0] ? (
                             <img
                               src={product.images[0].imageUrl}
@@ -490,7 +490,7 @@ export default function AdminProductsPage() {
                                 prev?.id === product.id ? null : { id: product.id, rect }
                               );
                             }}
-                            className="inline-flex rounded-sm p-2 text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#1c2740]"
+                            className="inline-flex rounded-admin p-2 text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#1c2740]"
                           >
                             <ActionsMenuIcon />
                           </button>
@@ -516,7 +516,7 @@ export default function AdminProductsPage() {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="rounded-sm border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
+            className="rounded-admin border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -529,7 +529,7 @@ export default function AdminProductsPage() {
                 key={p}
                 type="button"
                 onClick={() => setPage(p)}
-                className={`h-9 min-w-9 rounded-sm px-2 text-sm font-medium ${
+                className={`h-9 min-w-9 rounded-admin px-2 text-sm font-medium ${
                   page === p ? 'bg-[#246bfd] text-white' : 'border border-[#e5ebf5] bg-white text-[#475569] hover:bg-[#f8fafc]'
                 }`}
               >
@@ -541,7 +541,7 @@ export default function AdminProductsPage() {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="rounded-sm border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
+            className="rounded-admin border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -568,7 +568,7 @@ export default function AdminProductsPage() {
           return createPortal(
             <div
               role="menu"
-              className="min-w-[168px] rounded-md border border-[#e5ebf5] bg-white py-1 text-left shadow-lg"
+              className="min-w-[168px] rounded-admin border border-[#e5ebf5] bg-white py-1 text-left shadow-lg"
               style={{
                 position: 'fixed',
                 top,

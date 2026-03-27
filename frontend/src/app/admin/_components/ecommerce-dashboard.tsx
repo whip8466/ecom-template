@@ -135,7 +135,7 @@ const returningLines = [
 const returningMonths = ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
 
 function cardClass() {
-  return 'rounded-[0.65rem] border border-[#e3e6ed] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]';
+  return 'rounded-admin-card border border-[#e3e6ed] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]';
 }
 
 function BarChart({ data, max = 100 }: { data: typeof orderBars; max?: number }) {
@@ -144,11 +144,11 @@ function BarChart({ data, max = 100 }: { data: typeof orderBars; max?: number })
       {data.map((d, i) => (
         <div key={i} className="flex flex-1 flex-col justify-end gap-0.5">
           <div
-            className="w-full rounded-[2px]"
+            className="w-full rounded-none"
             style={{ height: `${(d.completed / max) * 100}%`, minHeight: '4px', backgroundColor: P.primary }}
           />
           <div
-            className="w-full rounded-[2px]"
+            className="w-full rounded-none"
             style={{ height: `${(d.pending / max) * 100}%`, minHeight: '4px', backgroundColor: P.primaryLight }}
           />
         </div>
@@ -287,7 +287,7 @@ function WorldMapVisual() {
   ];
   return (
     <div
-      className="relative flex h-64 items-center justify-center overflow-hidden rounded-[0.65rem] border bg-linear-to-b from-[#f5f7fa] to-[#eef1f6]"
+      className="relative flex h-64 items-center justify-center overflow-hidden rounded-admin-card border bg-linear-to-b from-[#f5f7fa] to-[#eef1f6]"
       style={{ borderColor: P.border }}
     >
       <svg viewBox="0 0 320 160" className="h-full w-full opacity-[0.95]" aria-hidden>
@@ -426,14 +426,11 @@ export function EcommerceDashboard() {
                 {card.sub}
               </p>
             </div>
-            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${card.iconBg}`}>{card.icon}</div>
+            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-admin ${card.iconBg}`}>{card.icon}</div>
           </div>
         ))}
 
-        <div
-          className="border border-[#e3e6ed] bg-white p-5 sm:col-span-1 xl:col-span-3"
-          style={{ borderRadius: '0.65rem' }}
-        >
+        <div className="rounded-admin-card border border-[#e3e6ed] bg-white p-5 sm:col-span-1 xl:col-span-3">
           <p className="text-xs font-medium" style={{ color: P.muted }}>
             Total orders
           </p>
@@ -449,18 +446,15 @@ export function EcommerceDashboard() {
           </div>
           <div className="mt-3 flex flex-wrap gap-4 text-xs" style={{ color: P.muted }}>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: P.primary }} /> Completed
+              <span className="h-2 w-2 rounded-admin" style={{ backgroundColor: P.primary }} /> Completed
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: P.primaryLight }} /> Pending payment
+              <span className="h-2 w-2 rounded-admin" style={{ backgroundColor: P.primaryLight }} /> Pending payment
             </span>
           </div>
         </div>
 
-        <div
-          className="border border-[#e3e6ed] bg-white p-5 sm:col-span-1 xl:col-span-3"
-          style={{ borderRadius: '0.65rem' }}
-        >
+        <div className="rounded-admin-card border border-[#e3e6ed] bg-white p-5 sm:col-span-1 xl:col-span-3">
           <p className="text-xs font-medium" style={{ color: P.muted }}>
             New customers
           </p>
@@ -489,10 +483,7 @@ export function EcommerceDashboard() {
 
       {/* Middle: Total sells + coupons + paying */}
       <div className="grid gap-4 lg:grid-cols-12 lg:grid-rows-2">
-        <div
-          className="border bg-white p-5 lg:col-span-6 lg:row-span-2"
-          style={{ ...borderStyle, borderRadius: '0.65rem' }}
-        >
+        <div className="rounded-admin-card border bg-white p-5 lg:col-span-6 lg:row-span-2" style={borderStyle}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-[#31374a]">Total sells</h2>
@@ -501,7 +492,7 @@ export function EcommerceDashboard() {
               </p>
             </div>
             <div
-              className="flex items-center gap-2 rounded-lg border bg-[#f5f7fa] px-3 py-1.5 text-xs font-medium"
+              className="flex items-center gap-2 rounded-admin border bg-[#f5f7fa] px-3 py-1.5 text-xs font-medium"
               style={{ borderColor: P.border, color: P.muted }}
             >
               Mar 1 – 31, 2022
@@ -515,7 +506,7 @@ export function EcommerceDashboard() {
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs" style={{ color: P.muted2 }}>
             <span className="flex items-center gap-2">
-              <span className="h-2 w-4 rounded-sm" style={{ backgroundColor: P.primary }} /> Actual
+              <span className="h-2 w-4 rounded-admin" style={{ backgroundColor: P.primary }} /> Actual
             </span>
             <span className="flex items-center gap-2">
               <span className="h-0.5 w-4 border-t-2 border-dashed border-[#9db7ff]" /> Projection
@@ -524,7 +515,7 @@ export function EcommerceDashboard() {
           </div>
         </div>
 
-        <div className="border bg-white p-5 lg:col-span-3" style={{ ...borderStyle, borderRadius: '0.65rem' }}>
+        <div className="rounded-admin-card border bg-white p-5 lg:col-span-3" style={borderStyle}>
           <h2 className="text-base font-semibold text-[#31374a]">Top coupons</h2>
           <p className="text-xs" style={{ color: P.muted2 }}>
             Last 7 days
@@ -545,7 +536,7 @@ export function EcommerceDashboard() {
           </div>
         </div>
 
-        <div className="border bg-white p-5 lg:col-span-3" style={{ ...borderStyle, borderRadius: '0.65rem' }}>
+        <div className="rounded-admin-card border bg-white p-5 lg:col-span-3" style={borderStyle}>
           <div className="flex items-start justify-between gap-2">
             <div>
               <h2 className="text-base font-semibold text-[#31374a]">Paying vs non paying</h2>
@@ -577,7 +568,7 @@ export function EcommerceDashboard() {
       </div>
 
       {/* Latest reviews */}
-      <div className="overflow-hidden border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]" style={{ ...borderStyle, borderRadius: '0.65rem' }}>
+      <div className="overflow-hidden rounded-admin-card border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]" style={borderStyle}>
         <div className="flex flex-wrap items-center justify-between gap-4 border-b p-4 sm:p-5" style={{ borderColor: P.border }}>
           <div>
             <h2 className="text-base font-semibold text-[#31374a]">Latest reviews</h2>
@@ -589,12 +580,12 @@ export function EcommerceDashboard() {
             <input
               type="search"
               placeholder="Search..."
-              className="h-9 w-full min-w-[160px] rounded-lg border bg-[#f5f7fa] px-3 text-sm sm:w-48"
+              className="h-9 w-full min-w-[160px] rounded-admin border bg-[#f5f7fa] px-3 text-sm sm:w-48"
               style={{ borderColor: P.border, color: P.text }}
             />
             <button
               type="button"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
+              className="rounded-admin px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
               style={{ backgroundColor: P.primary }}
             >
               Chat demo
@@ -627,7 +618,7 @@ export function EcommerceDashboard() {
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <img src={r.img} alt="" className="h-11 w-11 rounded-lg border object-cover" style={{ borderColor: P.border }} />
+                      <img src={r.img} alt="" className="h-11 w-11 rounded-admin border object-cover" style={{ borderColor: P.border }} />
                       <div>
                         <button type="button" className="text-left font-medium hover:underline" style={{ color: P.primary }}>
                           {r.product}
@@ -707,7 +698,7 @@ export function EcommerceDashboard() {
 
       {/* Regions + map */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="border bg-white p-5" style={{ ...borderStyle, borderRadius: '0.65rem' }}>
+        <div className="rounded-admin-card border bg-white p-5" style={borderStyle}>
           <h2 className="text-base font-semibold text-[#31374a]">Top regions by revenue</h2>
           <p className="text-xs" style={{ color: P.muted2 }}>
             Where you generated most of the revenue
@@ -719,7 +710,7 @@ export function EcommerceDashboard() {
               { label: 'Revenue', value: '$15,758' },
               { label: 'Conv. rate', value: '10.32%' },
             ].map((k) => (
-              <div key={k.label} className="rounded-lg px-3 py-2 text-center" style={{ backgroundColor: P.surface }}>
+              <div key={k.label} className="rounded-admin px-3 py-2 text-center" style={{ backgroundColor: P.surface }}>
                 <p className="text-sm font-bold text-[#31374a]">{k.value}</p>
                 <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: P.muted2 }}>
                   {k.label}
@@ -774,10 +765,10 @@ export function EcommerceDashboard() {
           </div>
         </div>
 
-        <div className="border bg-white p-5" style={{ ...borderStyle, borderRadius: '0.65rem' }}>
+        <div className="rounded-admin-card border bg-white p-5" style={borderStyle}>
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#31374a]">World map</h2>
-            <div className="flex gap-0.5 rounded-lg border p-0.5" style={{ borderColor: P.border, backgroundColor: P.surface }}>
+            <div className="flex gap-0.5 rounded-admin border p-0.5" style={{ borderColor: P.border, backgroundColor: P.surface }}>
               <button type="button" className="rounded px-2 py-0.5 text-sm hover:bg-white" style={{ color: P.muted }}>
                 +
               </button>
@@ -794,7 +785,7 @@ export function EcommerceDashboard() {
 
       {/* Projection + returning */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="border bg-white p-5" style={{ ...borderStyle, borderRadius: '0.65rem' }}>
+        <div className="rounded-admin-card border bg-white p-5" style={borderStyle}>
           <h2 className="text-base font-semibold text-[#31374a]">Projection vs actual</h2>
           <p className="text-xs" style={{ color: P.muted2 }}>
             Actual earnings vs projection earnings
@@ -804,11 +795,11 @@ export function EcommerceDashboard() {
               <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-2">
                 <div className="flex h-36 w-full max-w-[36px] items-end justify-center gap-0.5">
                   <div
-                    className="w-1/2 max-w-[14px] rounded-t"
+                    className="w-1/2 max-w-[14px] rounded-none"
                     style={{ height: `${d.projected}%`, minHeight: '8%', backgroundColor: '#b8d0ff' }}
                   />
                   <div
-                    className="w-1/2 max-w-[14px] rounded-t"
+                    className="w-1/2 max-w-[14px] rounded-none"
                     style={{ height: `${d.actual}%`, minHeight: '8%', backgroundColor: P.primary }}
                   />
                 </div>
@@ -823,15 +814,15 @@ export function EcommerceDashboard() {
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-6 text-xs" style={{ color: P.muted }}>
             <span className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: '#b8d0ff' }} /> Projected revenue
+              <span className="h-2.5 w-2.5 rounded-admin" style={{ backgroundColor: '#b8d0ff' }} /> Projected revenue
             </span>
             <span className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: P.primary }} /> Actual revenue
+              <span className="h-2.5 w-2.5 rounded-admin" style={{ backgroundColor: P.primary }} /> Actual revenue
             </span>
           </div>
         </div>
 
-        <div className="border bg-white p-5" style={{ ...borderStyle, borderRadius: '0.65rem' }}>
+        <div className="rounded-admin-card border bg-white p-5" style={borderStyle}>
           <h2 className="text-base font-semibold text-[#31374a]">Returning customer rate</h2>
           <p className="text-xs" style={{ color: P.muted2 }}>
             Rate of customers returning to your shop over time

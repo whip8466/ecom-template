@@ -24,7 +24,7 @@ export function AdminTopBar({ user }: Props) {
           <input
             type="search"
             placeholder="Search..."
-            className="h-10 w-full rounded-lg border border-[#e3e6ed] bg-[#f5f7fa] py-2 pl-10 pr-4 text-sm text-[#31374a] outline-none placeholder:text-[#9aa3b8] focus:border-[#85a9ff] focus:bg-white focus:ring-1 focus:ring-[#85a9ff]"
+            className="h-10 w-full rounded-admin border border-[#e3e6ed] bg-[#f5f7fa] py-2 pl-10 pr-4 text-sm text-[#31374a] outline-none placeholder:text-[#9aa3b8] focus:border-[#85a9ff] focus:bg-white focus:ring-1 focus:ring-[#85a9ff]"
           />
         </div>
       </div>
@@ -32,7 +32,7 @@ export function AdminTopBar({ user }: Props) {
       <div className="ml-auto flex items-center gap-1 sm:gap-2">
         <button
           type="button"
-          className="hidden rounded-lg p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a] sm:inline-flex"
+          className="hidden rounded-admin p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a] sm:inline-flex"
           aria-label="Language"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@ export function AdminTopBar({ user }: Props) {
         </button>
         <button
           type="button"
-          className="hidden rounded-lg p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a] sm:inline-flex"
+          className="hidden rounded-admin p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a] sm:inline-flex"
           aria-label="Theme"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export function AdminTopBar({ user }: Props) {
             />
           </svg>
         </button>
-        <button type="button" className="relative rounded-lg p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a]">
+        <button type="button" className="relative rounded-admin p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a]">
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -69,7 +69,7 @@ export function AdminTopBar({ user }: Props) {
           </svg>
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#fa6238]" />
         </button>
-        <button type="button" className="hidden rounded-lg p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a] md:inline-flex" aria-label="Apps">
+        <button type="button" className="hidden rounded-admin p-2 text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a] md:inline-flex" aria-label="Apps">
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"

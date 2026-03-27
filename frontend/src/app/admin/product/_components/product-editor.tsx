@@ -846,7 +846,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
           <button
             type="button"
             onClick={handleDiscard}
-            className="rounded border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#4f607f] hover:bg-[#f4f7fc]"
+            className="rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#4f607f] hover:bg-[#f4f7fc]"
           >
             Discard
           </button>
@@ -854,7 +854,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
             type="button"
             onClick={handleSaveDraft}
             disabled={!draftLoaded || isSavingDraft || isSubmitting}
-            className="rounded border border-[#246bfd] bg-white px-4 py-2 text-sm font-medium text-[#246bfd] hover:bg-[#eef4ff] disabled:opacity-60"
+            className="rounded-admin border border-[#246bfd] bg-white px-4 py-2 text-sm font-medium text-[#246bfd] hover:bg-[#eef4ff] disabled:opacity-60"
           >
             {isSavingDraft ? 'Saving…' : 'Save draft'}
           </button>
@@ -862,7 +862,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
             type="button"
             onClick={handlePublish}
             disabled={!draftLoaded || isSubmitting || isSavingDraft}
-            className="rounded bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+            className="rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
           >
             {isSubmitting ? 'Publishing…' : 'Publish product'}
           </button>
@@ -870,7 +870,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
       }
     >
         {error && (
-          <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-admin border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -885,13 +885,13 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                 placeholder="Write title here..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-2 w-full rounded border border-[#e5ebf5] bg-[#f9fbff] px-4 py-2.5 text-[#1c2740] placeholder:text-[#8ea0bf] focus:border-[#246bfd] focus:outline-none"
+                className="mt-2 w-full rounded-admin border border-[#e5ebf5] bg-[#f9fbff] px-4 py-2.5 text-[#1c2740] placeholder:text-[#8ea0bf] focus:border-[#246bfd] focus:outline-none"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-[#1c2740]">Product Description</label>
-              <div className="mt-2 flex flex-wrap gap-1 rounded-t border border-b-0 border-[#e5ebf5] bg-[#f9fbff] px-2 py-1">
+              <div className="mt-2 flex flex-wrap gap-1 rounded-t-admin border border-b-0 border-[#e5ebf5] bg-[#f9fbff] px-2 py-1">
                 <ToolbarButton title="Undo">↶</ToolbarButton>
                 <ToolbarButton title="Redo">↷</ToolbarButton>
                 <ToolbarButton title="Bold">B</ToolbarButton>
@@ -913,14 +913,14 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={6}
-                className="w-full rounded-b border border-[#e5ebf5] bg-[#f9fbff] px-4 py-3 text-[#1c2740] placeholder:text-[#8ea0bf] focus:border-[#246bfd] focus:outline-none"
+                className="w-full rounded-b-admin border border-[#e5ebf5] bg-[#f9fbff] px-4 py-3 text-[#1c2740] placeholder:text-[#8ea0bf] focus:border-[#246bfd] focus:outline-none"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-[#1c2740]">Display images</label>
               <div className="mt-2 flex flex-col gap-3">
-                <div className="flex flex-col items-center justify-center rounded border-2 border-dashed border-[#e5ebf5] bg-[#f9fbff] py-10 text-center">
+                <div className="flex flex-col items-center justify-center rounded-admin-card border-2 border-dashed border-[#e5ebf5] bg-[#f9fbff] py-10 text-center">
                   <svg className="h-12 w-12 text-[#8ea0bf]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
@@ -937,16 +937,16 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                     value={newImageUrl}
                     onChange={(e) => setNewImageUrl(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImageUrl())}
-                    className="flex-1 min-w-[200px] rounded border border-[#e5ebf5] bg-white px-3 py-2 text-sm placeholder:text-[#8ea0bf] focus:border-[#246bfd] focus:outline-none"
+                    className="flex-1 min-w-[200px] rounded-admin border border-[#e5ebf5] bg-white px-3 py-2 text-sm placeholder:text-[#8ea0bf] focus:border-[#246bfd] focus:outline-none"
                   />
-                  <button type="button" onClick={addImageUrl} className="rounded bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0]">
+                  <button type="button" onClick={addImageUrl} className="rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0]">
                     Add image URL
                   </button>
                 </div>
                 {imageUrls.length > 0 && (
                   <ul className="flex flex-wrap gap-2">
                     {imageUrls.map((url, i) => (
-                      <li key={i} className="relative flex items-center gap-2 rounded border border-[#e5ebf5] bg-white px-2 py-1 text-xs">
+                      <li key={i} className="relative flex items-center gap-2 rounded-admin border border-[#e5ebf5] bg-white px-2 py-1 text-xs">
                         <span className="max-w-[180px] truncate text-[#4f607f]">{url}</span>
                         <button type="button" onClick={() => removeImageUrl(i)} className="text-red-500 hover:underline">Remove</button>
                       </li>
@@ -998,7 +998,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                         placeholder="$$$"
                         value={regularPrice}
                         onChange={(e) => setRegularPrice(e.target.value)}
-                        className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none"
+                        className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none"
                       />
                     </div>
                     <div>
@@ -1008,7 +1008,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                         placeholder="$$$"
                         value={salePrice}
                         onChange={(e) => setSalePrice(e.target.value)}
-                        className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none"
+                        className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none"
                       />
                     </div>
                   </div>
@@ -1027,14 +1027,14 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                           value={restockAdd}
                           onChange={(e) => setRestockAdd(sanitizeQuantityDigits(e.target.value))}
                           disabled={isRestocking}
-                          className="w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-60"
+                          className="w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-60"
                         />
                       </div>
                       <button
                         type="button"
                         onClick={handleRestockConfirm}
                         disabled={isRestocking || !draftLoaded}
-                        className="flex items-center gap-2 rounded-sm bg-[#246bfd] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+                        className="flex items-center gap-2 rounded-admin bg-[#246bfd] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1051,7 +1051,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                         {restockFormError || restockSuccess}
                       </p>
                     )}
-                    <div className="rounded-sm border border-[#e5ebf5] bg-[#f8fafc] p-3">
+                    <div className="rounded-admin border border-[#e5ebf5] bg-[#f8fafc] p-3">
                       <label className="block text-xs font-medium text-[#64748b]">
                         {editIdParam ? 'Stock on hand' : 'Initial stock (for new product)'}
                       </label>
@@ -1061,7 +1061,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                         autoComplete="off"
                         value={stock}
                         onChange={(e) => setStock(sanitizeQuantityDigits(e.target.value))}
-                        className="mt-1 w-32 rounded-sm border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        className="mt-1 w-32 rounded-admin border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       />
                     </div>
                     <div className="space-y-2 border-t border-[#e5ebf5] pt-4 text-sm text-[#475569]">
@@ -1141,7 +1141,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-[#1c2740]">Fulfilled by Phoenix</span>
-                            <span className="rounded border border-[#ea580c] bg-[#fff7ed] px-2 py-0.5 text-xs font-medium text-[#c2410c]">RECOMMENDED</span>
+                            <span className="rounded-admin border border-[#ea580c] bg-[#fff7ed] px-2 py-0.5 text-xs font-medium text-[#c2410c]">RECOMMENDED</span>
                           </div>
                           <p className="mt-1 text-sm text-[#64748b]">Your product, Our responsibility. For a measly fee, we will handle the delivery process for you.</p>
                         </div>
@@ -1161,7 +1161,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                         <select
                           value={productIdType}
                           onChange={(e) => setProductIdType(e.target.value)}
-                          className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+                          className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
                         >
                           <option value="ISBN">ISBN</option>
                           <option value="UPC">UPC</option>
@@ -1175,7 +1175,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                           placeholder="ISBN Number"
                           value={productId}
                           onChange={(e) => setProductId(e.target.value)}
-                          className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none"
+                          className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2.5 text-[#1c2740] placeholder:text-[#9ca3af] focus:border-[#246bfd] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1187,7 +1187,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
 
           {/* Right column - 1/3 */}
           <div className="space-y-6">
-            <div className="rounded-lg border border-[#e5ebf5] bg-white p-5 shadow-sm">
+            <div className="rounded-admin-card border border-[#e5ebf5] bg-white p-5 shadow-sm">
               <h3 className="text-sm font-bold text-[#1c2740]">Organize</h3>
               <div className="mt-4 space-y-4">
                 <div>
@@ -1202,7 +1202,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
                     disabled={categoriesLoading}
-                    className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
                   >
                     <option value="">
                       {categoriesLoading ? 'Loading categories...' : 'Select category'}
@@ -1224,7 +1224,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                     value={vendorId}
                     onChange={(e) => setVendorId(e.target.value)}
                     disabled={vendorsLoading}
-                    className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
                   >
                     <option value="">
                       {vendorsLoading ? 'Loading vendors...' : 'Select vendor'}
@@ -1246,7 +1246,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                     value={collectionId}
                     onChange={(e) => setCollectionId(e.target.value)}
                     disabled={collectionsLoading}
-                    className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
                   >
                     <option value="">
                       {collectionsLoading ? 'Loading collections...' : 'Select collection'}
@@ -1271,7 +1271,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                       <button
                         type="button"
                         onClick={() => setTagsDropdownOpen((open) => !open)}
-                        className="mt-1.5 flex w-full items-center justify-between rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-left text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+                        className="mt-1.5 flex w-full items-center justify-between rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-left text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
                       >
                         <span className={tagIds.length === 0 ? 'text-[#94a3b8]' : ''}>
                           {tagIds.length === 0
@@ -1286,7 +1286,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                       </button>
                       {tagsDropdownOpen && (
                         <>
-                          <div className="absolute left-0 right-0 top-full z-10 mt-0.5 max-h-48 overflow-y-auto rounded-sm border border-[#e5ebf5] bg-white py-1 shadow-lg">
+                          <div className="absolute left-0 right-0 top-full z-10 mt-0.5 max-h-48 overflow-y-auto rounded-admin border border-[#e5ebf5] bg-white py-1 shadow-lg">
                             {tags.length === 0 ? (
                               <p className="px-4 py-2 text-sm text-[#64748b]">No tags yet. Add one above.</p>
                             ) : (
@@ -1305,7 +1305,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                                         setTagIds((prev) => prev.filter((id) => id !== String(t.id)));
                                       }
                                     }}
-                                    className="h-4 w-4 rounded border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
+                                    className="h-4 w-4 rounded-admin border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
                                   />
                                   <span>{t.name}</span>
                                 </label>
@@ -1325,7 +1325,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
               </div>
             </div>
 
-            <div className="rounded-sm border border-[#e5ebf5] bg-white p-5">
+            <div className="rounded-admin-card border border-[#e5ebf5] bg-white p-5">
               <h3 className="text-sm font-bold text-[#1c2740]">Variants</h3>
               <div className="mt-4">
                 {variantOptionTypesLoading ? (
@@ -1357,7 +1357,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                             <select
                               value={v.optionTypeId}
                               onChange={(e) => updateVariantOption(i, Number(e.target.value))}
-                              className="w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+                              className="w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2.5 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
                             >
                               {variantOptionTypes.map((t) => (
                                 <option key={t.id} value={t.id}>{t.name}</option>
@@ -1369,7 +1369,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                             <button
                               type="button"
                               onClick={() => setVariantValueDropdownOpen((open) => (open === i ? null : i))}
-                              className="flex w-full items-center justify-between rounded-sm border border-[#e5ebf5] bg-white px-4 py-2.5 text-left text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+                              className="flex w-full items-center justify-between rounded-admin border border-[#e5ebf5] bg-white px-4 py-2.5 text-left text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
                             >
                               <span className={v.values.length === 0 ? 'text-[#94a3b8]' : ''}>
                                 {v.values.length === 0
@@ -1385,7 +1385,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                             </button>
                             {variantValueDropdownOpen === i && (
                               <>
-                                <div className="absolute left-0 right-0 top-full z-10 mt-0.5 max-h-48 overflow-y-auto rounded-sm border border-[#e5ebf5] bg-white py-1 shadow-lg">
+                                <div className="absolute left-0 right-0 top-full z-10 mt-0.5 max-h-48 overflow-y-auto rounded-admin border border-[#e5ebf5] bg-white py-1 shadow-lg">
                                   {getVariantOptionValues(v.optionTypeId).map((opt) => (
                                     <label
                                       key={opt.id}
@@ -1395,7 +1395,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                                         type="checkbox"
                                         checked={v.values.includes(opt.value)}
                                         onChange={() => toggleVariantValue(i, opt.value)}
-                                        className="h-4 w-4 rounded-sm border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
+                                        className="h-4 w-4 rounded-admin border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
                                       />
                                       <span>{opt.label}</span>
                                     </label>
@@ -1416,7 +1416,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                       type="button"
                       onClick={addVariant}
                       disabled={variantOptionTypes.length === 0}
-                      className="mt-4 w-full rounded-sm border border-[#bfdbfe] bg-[#eff6ff] py-2.5 text-sm font-medium text-[#246bfd] hover:bg-[#dbeafe] disabled:opacity-50"
+                      className="mt-4 w-full rounded-admin border border-[#bfdbfe] bg-[#eff6ff] py-2.5 text-sm font-medium text-[#246bfd] hover:bg-[#dbeafe] disabled:opacity-50"
                     >
                       Add another option
                     </button>
@@ -1436,7 +1436,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
             aria-labelledby="add-category-title"
             onClick={closeAddCategoryModal}
           >
-            <div className="w-full max-w-md rounded-lg border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-md rounded-admin-card border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
               <h2 id="add-category-title" className="text-lg font-bold text-[#1c2740]">Add new category</h2>
               <p className="mt-1 text-sm text-[#64748b]">Enter a name for the new category. The slug will be generated automatically.</p>
               <div className="mt-4">
@@ -1447,7 +1447,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="e.g. Electronics"
-                  className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
+                  className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
                 />
               </div>
@@ -1458,7 +1458,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                 <button
                   type="button"
                   onClick={closeAddCategoryModal}
-                  className="rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+                  className="rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
                 >
                   Cancel
                 </button>
@@ -1466,7 +1466,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   type="button"
                   onClick={handleAddCategory}
                   disabled={addCategoryLoading}
-                  className="rounded-sm bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+                  className="rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
                 >
                   {addCategoryLoading ? 'Saving…' : 'Save'}
                 </button>
@@ -1484,7 +1484,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
             aria-labelledby="add-vendor-title"
             onClick={closeAddVendorModal}
           >
-            <div className="w-full max-w-md rounded-lg border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-md rounded-admin-card border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
               <h2 id="add-vendor-title" className="text-lg font-bold text-[#1c2740]">Add new vendor</h2>
               <p className="mt-1 text-sm text-[#64748b]">Enter a name for the new vendor. The slug will be generated automatically.</p>
               <div className="mt-4">
@@ -1495,7 +1495,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   value={newVendorName}
                   onChange={(e) => setNewVendorName(e.target.value)}
                   placeholder="e.g. Acme Corp"
-                  className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
+                  className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddVendor())}
                 />
               </div>
@@ -1506,7 +1506,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                 <button
                   type="button"
                   onClick={closeAddVendorModal}
-                  className="rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+                  className="rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
                 >
                   Cancel
                 </button>
@@ -1514,7 +1514,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   type="button"
                   onClick={handleAddVendor}
                   disabled={addVendorLoading}
-                  className="rounded-sm bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+                  className="rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
                 >
                   {addVendorLoading ? 'Saving…' : 'Save'}
                 </button>
@@ -1532,7 +1532,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
             aria-labelledby="add-collection-title"
             onClick={closeAddCollectionModal}
           >
-            <div className="w-full max-w-md rounded-lg border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-md rounded-admin-card border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
               <h2 id="add-collection-title" className="text-lg font-bold text-[#1c2740]">Add new collection</h2>
               <p className="mt-1 text-sm text-[#64748b]">Enter a name for the new collection. The slug will be generated automatically.</p>
               <div className="mt-4">
@@ -1543,7 +1543,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   value={newCollectionName}
                   onChange={(e) => setNewCollectionName(e.target.value)}
                   placeholder="e.g. Summer 2026"
-                  className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
+                  className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCollection())}
                 />
               </div>
@@ -1554,7 +1554,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                 <button
                   type="button"
                   onClick={closeAddCollectionModal}
-                  className="rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+                  className="rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
                 >
                   Cancel
                 </button>
@@ -1562,7 +1562,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   type="button"
                   onClick={handleAddCollection}
                   disabled={addCollectionLoading}
-                  className="rounded-sm bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+                  className="rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
                 >
                   {addCollectionLoading ? 'Saving…' : 'Save'}
                 </button>
@@ -1580,7 +1580,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
             aria-labelledby="add-tag-title"
             onClick={closeAddTagModal}
           >
-            <div className="w-full max-w-md rounded-lg border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-md rounded-admin-card border border-[#e5ebf5] bg-white p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
               <h2 id="add-tag-title" className="text-lg font-bold text-[#1c2740]">Add new tag</h2>
               <p className="mt-1 text-sm text-[#64748b]">Enter a name for the new tag. The slug will be generated automatically.</p>
               <div className="mt-4">
@@ -1591,7 +1591,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
                   placeholder="e.g. Bestseller"
-                  className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
+                  className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-[#f8fafc] px-4 py-2.5 text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                 />
               </div>
@@ -1602,7 +1602,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                 <button
                   type="button"
                   onClick={closeAddTagModal}
-                  className="rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+                  className="rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
                 >
                   Cancel
                 </button>
@@ -1610,7 +1610,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                   type="button"
                   onClick={handleAddTag}
                   disabled={addTagLoading}
-                  className="rounded-sm bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
+                  className="rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0] disabled:opacity-60"
                 >
                   {addTagLoading ? 'Saving…' : 'Save'}
                 </button>
@@ -1629,7 +1629,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
 
 function ToolbarButton({ children, title }: { children: React.ReactNode; title: string }) {
   return (
-    <button type="button" title={title} className="rounded p-1.5 text-[#4f607f] hover:bg-[#e5ebf5] hover:text-[#1c2740]">
+    <button type="button" title={title} className="rounded-admin p-1.5 text-[#4f607f] hover:bg-[#e5ebf5] hover:text-[#1c2740]">
       {children}
     </button>
   );

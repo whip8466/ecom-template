@@ -212,7 +212,7 @@ export default function AdminOrdersPage() {
       actions={
         <Link
           href="/admin/orders/new"
-          className="inline-flex h-10 items-center gap-2 rounded-sm bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0]"
+          className="inline-flex h-10 items-center gap-2 rounded-admin bg-[#246bfd] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e5ae0]"
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -252,7 +252,7 @@ export default function AdminOrdersPage() {
             placeholder="Search orders (id, customer name or email)"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="h-10 w-full rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
+            className="h-10 w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none"
           />
         </form>
         <select
@@ -261,7 +261,7 @@ export default function AdminOrdersPage() {
             setPaymentStatus(e.target.value);
             setPage(1);
           }}
-          className="h-10 min-w-[160px] rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+          className="h-10 min-w-[160px] rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
           aria-label="Payment status"
         >
           <option value="">Payment status</option>
@@ -275,7 +275,7 @@ export default function AdminOrdersPage() {
             setFulfillmentStatus(e.target.value);
             setPage(1);
           }}
-          className="h-10 min-w-[180px] rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
+          className="h-10 min-w-[180px] rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none"
           aria-label="Fulfillment status"
         >
           <option value="">Fulfillment status</option>
@@ -287,14 +287,14 @@ export default function AdminOrdersPage() {
         <button
           type="button"
           onClick={clearFilters}
-          className="h-10 rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+          className="h-10 rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
         >
           Clear filters
         </button>
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
-            className="flex h-10 items-center gap-2 rounded-sm border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+            className="flex h-10 items-center gap-2 rounded-admin border border-[#e5ebf5] bg-white px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
             disabled
             title="Export coming soon"
           >
@@ -318,7 +318,7 @@ export default function AdminOrdersPage() {
         </div>
       ) : null}
 
-      <div className="mt-6 overflow-hidden rounded-sm border border-[#e5ebf5] bg-white">
+      <div className="mt-6 overflow-hidden rounded-admin border border-[#e5ebf5] bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#246bfd] border-t-transparent" />
@@ -398,7 +398,7 @@ export default function AdminOrdersPage() {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="rounded-sm border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
+            className="rounded-admin border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -411,7 +411,7 @@ export default function AdminOrdersPage() {
                 key={p}
                 type="button"
                 onClick={() => setPage(p)}
-                className={`h-9 min-w-9 rounded-sm px-2 text-sm font-medium ${
+                className={`h-9 min-w-9 rounded-admin px-2 text-sm font-medium ${
                   page === p ? 'bg-[#246bfd] text-white' : 'border border-[#e5ebf5] bg-white text-[#475569] hover:bg-[#f8fafc]'
                 }`}
               >
@@ -423,7 +423,7 @@ export default function AdminOrdersPage() {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="rounded-sm border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
+            className="rounded-admin border border-[#e5ebf5] bg-white p-2 text-[#475569] hover:bg-[#f8fafc] disabled:opacity-50 disabled:hover:bg-white"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

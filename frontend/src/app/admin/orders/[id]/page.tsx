@@ -331,7 +331,7 @@ export default function AdminOrderDetailPage() {
     <div className="flex flex-wrap items-center gap-2">
       <Link
         href={`/admin/orders/${order.id}/invoice`}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+        className="inline-flex h-9 items-center gap-1.5 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -341,7 +341,7 @@ export default function AdminOrderDetailPage() {
       <button
         type="button"
         onClick={() => window.print()}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+        className="inline-flex h-9 items-center gap-1.5 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -355,7 +355,7 @@ export default function AdminOrderDetailPage() {
       </button>
       <Link
         href={`/admin/orders/${order.id}/refund`}
-        className="inline-flex h-9 items-center rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+        className="inline-flex h-9 items-center rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
       >
         Refund
       </Link>
@@ -363,7 +363,7 @@ export default function AdminOrderDetailPage() {
         <button
           type="button"
           onClick={() => setMoreOpen((o) => !o)}
-          className="inline-flex h-9 items-center gap-1 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+          className="inline-flex h-9 items-center gap-1 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
         >
           More actions
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -373,7 +373,7 @@ export default function AdminOrderDetailPage() {
         {moreOpen ? (
           <div
             role="menu"
-            className="absolute right-0 z-20 mt-1 min-w-[180px] rounded-md border border-[#e5ebf5] bg-white py-1 shadow-lg"
+            className="absolute right-0 z-20 mt-1 min-w-[180px] rounded-admin border border-[#e5ebf5] bg-white py-1 shadow-lg"
           >
             <Link
               href={`/admin/orders/${order.id}/invoice`}
@@ -427,7 +427,7 @@ export default function AdminOrderDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-3 lg:items-start print:grid-cols-1">
         <div className="space-y-6 lg:col-span-2">
-          <div className="overflow-hidden rounded-sm border border-[#e5ebf5] bg-white">
+          <div className="overflow-hidden rounded-admin border border-[#e5ebf5] bg-white">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
@@ -501,7 +501,7 @@ export default function AdminOrderDetailPage() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-md border border-[#e5ebf5] bg-white">
+          <div className="overflow-hidden rounded-admin border border-[#e5ebf5] bg-white">
             <div className="grid grid-cols-1 divide-y divide-[#e5ebf5] lg:grid-cols-3 lg:divide-x lg:divide-y-0">
               {/* Billing details — Phoenix: icon + label + value; links in blue */}
               <section className="p-5 sm:p-6">
@@ -584,7 +584,7 @@ export default function AdminOrderDetailPage() {
         </div>
 
         <div className="space-y-4 print:mt-6">
-          <div className="rounded-sm border border-[#e5ebf5] bg-white p-4">
+          <div className="rounded-admin border border-[#e5ebf5] bg-white p-4">
             <h2 className="text-sm font-semibold text-[#1c2740]">Summary</h2>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between gap-2">
@@ -612,7 +612,7 @@ export default function AdminOrderDetailPage() {
             </dl>
           </div>
 
-          <div className="rounded-sm border border-[#e5ebf5] bg-white p-4">
+          <div className="rounded-admin border border-[#e5ebf5] bg-white p-4">
             <h2 className="text-sm font-semibold text-[#1c2740]">Order status</h2>
             <div className="mt-4 space-y-4">
               <div>
@@ -628,7 +628,7 @@ export default function AdminOrderDetailPage() {
                     if (v === order.paymentStatus) return;
                     void patchOrder({ paymentStatus: v }, 'payment');
                   }}
-                  className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
+                  className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
                 >
                   {PAYMENT_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -653,7 +653,7 @@ export default function AdminOrderDetailPage() {
                     if (v === order.status) return;
                     void patchOrder({ status: v }, 'fulfillment');
                   }}
-                  className="mt-1.5 w-full rounded-sm border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
+                  className="mt-1.5 w-full rounded-admin border border-[#e5ebf5] bg-white px-3 py-2 text-sm text-[#1c2740] focus:border-[#246bfd] focus:outline-none disabled:opacity-60"
                 >
                   {FULFILLMENT_STATUSES.map((s) => (
                     <option key={s} value={s}>

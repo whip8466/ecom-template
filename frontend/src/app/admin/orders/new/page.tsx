@@ -14,7 +14,7 @@ export default function AdminAddOrderPlaceholderPage() {
       title="Add order"
       description="Orders are created when customers check out on the storefront."
     >
-      <div className="max-w-lg rounded-sm border border-[#e5ebf5] bg-white p-6 text-sm text-[#475569]">
+      <div className="max-w-lg rounded-admin border border-[#e5ebf5] bg-white p-6 text-sm text-[#475569]">
         <p>
           There is no draft-order flow in this app yet. To create an order, sign in as a customer, add products to the cart from the shop, and complete checkout.
         </p>

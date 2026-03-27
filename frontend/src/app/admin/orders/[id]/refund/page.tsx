@@ -176,7 +176,7 @@ export default function AdminOrderRefundPage() {
       <button
         type="button"
         onClick={() => setMoreOpen((o) => !o)}
-        className="inline-flex h-9 items-center gap-1 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+        className="inline-flex h-9 items-center gap-1 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
       >
         More actions
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,7 +186,7 @@ export default function AdminOrderRefundPage() {
       {moreOpen ? (
         <div
           role="menu"
-          className="absolute right-0 z-20 mt-1 min-w-[200px] rounded-md border border-[#e5ebf5] bg-white py-1 shadow-lg"
+          className="absolute right-0 z-20 mt-1 min-w-[200px] rounded-admin border border-[#e5ebf5] bg-white py-1 shadow-lg"
         >
           <Link
             href={`/admin/orders/${order.id}`}
@@ -232,7 +232,7 @@ export default function AdminOrderRefundPage() {
     >
       <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
         <div className="lg:col-span-2">
-          <div className="overflow-hidden rounded-md border border-[#e5ebf5] bg-white shadow-sm">
+          <div className="overflow-hidden rounded-admin border border-[#e5ebf5] bg-white shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
@@ -333,7 +333,7 @@ export default function AdminOrderRefundPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-md border border-[#e5ebf5] bg-white p-5 shadow-sm">
+          <div className="rounded-admin border border-[#e5ebf5] bg-white p-5 shadow-sm">
             <h2 className="text-base font-semibold text-[#1c2740]">Summary</h2>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between gap-3">
@@ -365,7 +365,7 @@ export default function AdminOrderRefundPage() {
             </dl>
           </div>
 
-          <div className="rounded-md border border-[#e5ebf5] bg-white p-5 shadow-sm">
+          <div className="rounded-admin border border-[#e5ebf5] bg-white p-5 shadow-sm">
             <h2 className="text-base font-semibold text-[#1c2740]">Refund amount</h2>
             <form onSubmit={handleRefundSubmit} className="mt-4 space-y-4">
               <div>
@@ -379,7 +379,7 @@ export default function AdminOrderRefundPage() {
                   placeholder="Amount"
                   value={amountInput}
                   onChange={(e) => setAmountInput(e.target.value)}
-                  className="w-full rounded-sm border border-[#e5ebf5] bg-white px-3 py-2.5 text-sm text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none focus:ring-1 focus:ring-[#246bfd]"
+                  className="w-full rounded-admin border border-[#e5ebf5] bg-white px-3 py-2.5 text-sm text-[#1c2740] placeholder:text-[#94a3b8] focus:border-[#246bfd] focus:outline-none focus:ring-1 focus:ring-[#246bfd]"
                 />
                 <p className="mt-1.5 text-xs text-[#64748b]">
                   Max {formatMoney(order.totalAmountCents)} (order total). Decimals allowed.
@@ -388,7 +388,7 @@ export default function AdminOrderRefundPage() {
               <button
                 type="submit"
                 disabled={!refundValid || submitting}
-                className="w-full rounded-sm bg-[#246bfd] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e5ae0] disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-admin bg-[#246bfd] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e5ae0] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {refundValid && refundCents != null ? `Refund ${formatMoney(refundCents)}` : 'Refund'}
               </button>

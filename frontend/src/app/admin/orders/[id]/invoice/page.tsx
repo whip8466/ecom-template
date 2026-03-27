@@ -244,7 +244,7 @@ export default function AdminOrderInvoicePage() {
       <button
         type="button"
         onClick={handleDownload}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+        className="inline-flex h-9 items-center gap-1.5 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -254,7 +254,7 @@ export default function AdminOrderInvoicePage() {
       <button
         type="button"
         onClick={() => window.print()}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+        className="inline-flex h-9 items-center gap-1.5 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -286,7 +286,7 @@ export default function AdminOrderInvoicePage() {
     >
       <div className="mx-auto max-w-5xl bg-white print:max-w-none">
         {/* Meta grid — Phoenix-style grey panel */}
-        <div className="rounded-md border border-[#e5ebf5] bg-[#f8fafc] p-4 sm:p-6">
+        <div className="rounded-admin border border-[#e5ebf5] bg-[#f8fafc] p-4 sm:p-6">
           <div className="grid gap-8 text-sm text-[#475569] lg:grid-cols-3">
             <div className="space-y-3">
               <p>
@@ -338,7 +338,7 @@ export default function AdminOrderInvoicePage() {
         </div>
 
         {/* Line items */}
-        <div className="mt-6 overflow-hidden rounded-md border border-[#e5ebf5]">
+        <div className="mt-6 overflow-hidden rounded-admin border border-[#e5ebf5]">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] border-collapse text-left text-sm">
               <thead>
@@ -431,7 +431,7 @@ export default function AdminOrderInvoicePage() {
         <div className="mt-8 flex flex-col gap-3 border-t border-[#e4eaf5] pt-6 sm:flex-row sm:items-center sm:justify-between print:hidden">
           <Link
             href="/shop"
-            className="inline-flex w-fit items-center justify-center rounded-sm bg-[#246bfd] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e5ae0]"
+            className="inline-flex w-fit items-center justify-center rounded-admin bg-[#246bfd] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e5ae0]"
           >
             Browse more items
           </Link>
@@ -439,14 +439,14 @@ export default function AdminOrderInvoicePage() {
             <button
               type="button"
               onClick={handleDownload}
-              className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
             >
               Download invoice
             </button>
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-admin border border-[#e5ebf5] bg-white px-3 text-sm font-medium text-[#475569] hover:bg-[#f8fafc]"
             >
               Print
             </button>

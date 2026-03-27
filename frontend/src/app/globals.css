@@ -17,6 +17,9 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.04);
   --radius: 0.75rem;
   --radius-lg: 1rem;
+  /* Admin: square corners (inputs, buttons, cards, forms) */
+  --admin-radius: 0;
+  --admin-radius-card: 0;
 }
 
 @theme inline {
@@ -66,6 +69,38 @@ html {
   .transition-premium {
     transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.2s ease;
   }
+
+  /** Inputs, buttons, selects, pagination — matches admin top bar / Phoenix controls */
+  .rounded-admin {
+    border-radius: var(--admin-radius);
+  }
+
+  /** Tables, modals, main panels — matches Phoenix dashboard cards */
+  .rounded-admin-card {
+    border-radius: var(--admin-radius-card);
+  }
+
+  .rounded-l-admin {
+    border-top-left-radius: var(--admin-radius);
+    border-bottom-left-radius: var(--admin-radius);
+  }
+
+  .rounded-t-admin {
+    border-top-left-radius: var(--admin-radius);
+    border-top-right-radius: var(--admin-radius);
+  }
+
+  .rounded-b-admin {
+    border-bottom-left-radius: var(--admin-radius);
+    border-bottom-right-radius: var(--admin-radius);
+  }
+}
+
+/* Admin shell: remove Tailwind default `rounded` (0.25rem) on alerts, badges, checkboxes — keep `rounded-full` for avatars/spinners */
+.admin-app-sidebar .rounded:not(.rounded-full),
+.admin-app-topbar .rounded:not(.rounded-full),
+.admin-app-main .rounded:not(.rounded-full) {
+  border-radius: 0 !important;
 }
 
 .price-range-input {
