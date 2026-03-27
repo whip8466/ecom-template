@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
 import { messageFromApiErrorPayload } from '@/lib/api-error';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { formatMoney } from '@/lib/format';
 import type { Address } from '@/lib/types';
@@ -119,6 +120,7 @@ export default function CheckoutPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
         throw new Error(messageFromApiErrorPayload(data));
       }
       const response = data as { data: { id: number } };

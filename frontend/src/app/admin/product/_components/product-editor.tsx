@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { messageFromApiErrorPayload } from '@/lib/api-error';
 import { apiRequest } from '@/lib/api';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { AdminPageShell } from '@/components/admin-shell';
 
 type Category = { id: number; name: string; slug: string };
@@ -440,7 +441,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         body: JSON.stringify({ name }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { message?: string }).message || 'Failed to create category');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error((data as { message?: string }).message || 'Failed to create category');
+      }
       const category = data.data as Category;
       setCategories((prev) => [...prev, category].sort((a, b) => a.name.localeCompare(b.name)));
       setCategoryId(String(category.id));
@@ -483,7 +487,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         body: JSON.stringify({ name }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { message?: string }).message || 'Failed to create vendor');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error((data as { message?: string }).message || 'Failed to create vendor');
+      }
       const vendor = data.data as Vendor;
       setVendors((prev) => [...prev, vendor].sort((a, b) => a.name.localeCompare(b.name)));
       setVendorId(String(vendor.id));
@@ -525,7 +532,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         body: JSON.stringify({ name }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { message?: string }).message || 'Failed to create collection');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error((data as { message?: string }).message || 'Failed to create collection');
+      }
       const collection = data.data as Collection;
       setCollections((prev) => [...prev, collection].sort((a, b) => a.name.localeCompare(b.name)));
       setCollectionId(String(collection.id));
@@ -567,7 +577,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         body: JSON.stringify({ name }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { message?: string }).message || 'Failed to create tag');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error((data as { message?: string }).message || 'Failed to create tag');
+      }
       const tag = data.data as Tag;
       setTags((prev) => [...prev, tag].sort((a, b) => a.name.localeCompare(b.name)));
       setTagIds((prev) => (prev.includes(String(tag.id)) ? prev : [...prev, String(tag.id)]));
@@ -617,7 +630,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         body: JSON.stringify({ restockQuantity: Number(add) }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(parseApiError(data));
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error(parseApiError(data));
+      }
       const payload = (data as { data?: ApiProductDetail }).data;
       if (payload) {
         if (typeof payload.stock === 'number') setStock(String(payload.stock));
@@ -773,7 +789,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(parseApiError(data));
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error(parseApiError(data));
+      }
       const created = data as { data?: ApiProductDetail };
       const d = created.data;
       if (d) {
@@ -824,7 +843,10 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(parseApiError(data));
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error(parseApiError(data));
+      }
       router.push('/admin/product/list');
     } catch (e) {
       setError((e as Error).message || 'Failed to publish product');

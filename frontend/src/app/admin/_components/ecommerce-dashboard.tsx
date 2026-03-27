@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
@@ -339,12 +340,15 @@ export function EcommerceDashboard() {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-      const ordersJson = (await ordersRes.json()) as { counts?: OrderTabCounts };
+      const ordersJson = (await ordersRes.json()) as { counts?: OrderTabCounts; message?: string };
+      if (!ordersRes.ok) await handleInvalidTokenIfNeeded(ordersRes.status, ordersJson);
       if (ordersRes.ok && ordersJson.counts) setCounts(ordersJson.counts);
 
       const productsJson = (await productsRes.json()) as {
         data?: { stock: number; variants?: { stock: number }[] }[];
+        message?: string;
       };
+      if (!productsRes.ok) await handleInvalidTokenIfNeeded(productsRes.status, productsJson);
       if (productsRes.ok && Array.isArray(productsJson.data)) {
         const out = productsJson.data.filter((p) => {
           const variants = p.variants;

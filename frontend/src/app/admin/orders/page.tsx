@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { AdminPageShell } from '@/components/admin-shell';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
@@ -171,6 +172,7 @@ export default function AdminOrdersPage() {
         message?: string;
       };
       if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, json);
         throw new Error(json.message || 'Failed to load orders');
       }
       setOrders(Array.isArray(json.data) ? json.data : []);

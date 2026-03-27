@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { AdminPageShell } from '@/components/admin-shell';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { grandTotalInWords } from '@/lib/amount-in-words';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -156,7 +157,10 @@ export default function AdminOrderInvoicePage() {
       headers: { Authorization: `Bearer ${token}` },
     });
     const json = (await res.json().catch(() => ({}))) as { data?: OrderDetail; message?: string };
-    if (!res.ok) throw new Error(json.message || 'Failed to load order');
+    if (!res.ok) {
+      await handleInvalidTokenIfNeeded(res.status, json);
+      throw new Error(json.message || 'Failed to load order');
+    }
     setOrder(json.data ?? null);
   }, [token, id]);
 

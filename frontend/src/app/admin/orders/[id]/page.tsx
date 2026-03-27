@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AdminPageShell } from '@/components/admin-shell';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
@@ -220,7 +221,10 @@ export default function AdminOrderDetailPage() {
       headers: { Authorization: `Bearer ${token}` },
     });
     const json = (await res.json().catch(() => ({}))) as { data?: OrderDetail; message?: string };
-    if (!res.ok) throw new Error(json.message || 'Failed to load order');
+    if (!res.ok) {
+      await handleInvalidTokenIfNeeded(res.status, json);
+      throw new Error(json.message || 'Failed to load order');
+    }
     setOrder(json.data ?? null);
   }, [token, id]);
 
@@ -274,7 +278,10 @@ export default function AdminOrderDetailPage() {
         body: JSON.stringify(patch),
       });
       const json = (await res.json().catch(() => ({}))) as { data?: OrderDetail; message?: string };
-      if (!res.ok) throw new Error(json.message || 'Failed to update order');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, json);
+        throw new Error(json.message || 'Failed to update order');
+      }
       if (json.data) setOrder(json.data);
       else await loadOrder();
     } catch (e) {

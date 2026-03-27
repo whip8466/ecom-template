@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
@@ -122,6 +123,7 @@ export default function AdminCustomersPage() {
       });
       const json = await res.json();
       if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, json);
         setError((json as { message?: string }).message || 'Failed to load customers');
         setRows([]);
         return;
@@ -377,12 +379,12 @@ export default function AdminCustomersPage() {
                       <input type="checkbox" className="rounded-admin" style={{ borderColor: P.border }} aria-label={`Select ${r.name}`} />
                     </td>
                     <td className="p-3">
-                      <div className="flex items-center gap-3">
+                      <Link href={`/admin/customers/${r.id}`} className="flex items-center gap-3 hover:opacity-90">
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#edf5ff] text-xs font-semibold text-[#3874ff]">
                           {initials(r.name)}
                         </span>
                         <span className="font-medium text-[#31374a]">{r.name}</span>
-                      </div>
+                      </Link>
                     </td>
                     <td className="p-3">
                       <a href={`mailto:${r.email}`} className="text-[#3874ff] hover:underline">

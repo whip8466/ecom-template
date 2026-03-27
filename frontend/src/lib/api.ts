@@ -1,3 +1,5 @@
+import { handleInvalidTokenIfNeeded } from './invalidate-session';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
 export async function apiRequest<T>(
@@ -20,6 +22,7 @@ export async function apiRequest<T>(
   const payload = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    await handleInvalidTokenIfNeeded(response.status, payload);
     throw new Error((payload as { message?: string }).message || 'Request failed');
   }
 

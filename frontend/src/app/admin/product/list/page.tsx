@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useAuthStore } from '@/store/auth-store';
 import { AdminPageShell } from '@/components/admin-shell';
+import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
+import { useAuthStore } from '@/store/auth-store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -157,7 +158,10 @@ export default function AdminProductsPage() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((json as { message?: string }).message || 'Failed to load products');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, json);
+        throw new Error((json as { message?: string }).message || 'Failed to load products');
+      }
       const data = json as { data: Product[]; pagination: { total: number } };
       setProducts(Array.isArray(data.data) ? data.data : []);
       setTotal(data.pagination?.total ?? 0);
@@ -188,12 +192,28 @@ export default function AdminProductsPage() {
   useEffect(() => {
     if (!token) return;
     fetch(`${API_BASE}/api/categories`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((d: { data?: Category[] }) => setCategories(Array.isArray(d.data) ? d.data : []))
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          await handleInvalidTokenIfNeeded(r.status, d);
+          return;
+        }
+        setCategories(Array.isArray((d as { data?: Category[] }).data) ? (d as { data: Category[] }).data : []);
+      })
       .catch(() => {});
     fetch(`${API_BASE}/api/vendors`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((d: { data?: { id: number; name: string; slug: string }[] }) => setVendors(Array.isArray(d.data) ? d.data : []))
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          await handleInvalidTokenIfNeeded(r.status, d);
+          return;
+        }
+        setVendors(
+          Array.isArray((d as { data?: { id: number; name: string; slug: string }[] }).data)
+            ? (d as { data: { id: number; name: string; slug: string }[] }).data
+            : []
+        );
+      })
       .catch(() => {});
   }, [token]);
 
@@ -222,7 +242,10 @@ export default function AdminProductsPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { message?: string }).message || 'Failed to publish');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error((data as { message?: string }).message || 'Failed to publish');
+      }
       await fetchProducts();
       setActionMenu(null);
     } catch (e) {
@@ -242,7 +265,10 @@ export default function AdminProductsPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { message?: string }).message || 'Failed to unpublish');
+      if (!res.ok) {
+        await handleInvalidTokenIfNeeded(res.status, data);
+        throw new Error((data as { message?: string }).message || 'Failed to unpublish');
+      }
       await fetchProducts();
       setActionMenu(null);
     } catch (e) {
