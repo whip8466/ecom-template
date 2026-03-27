@@ -9,6 +9,7 @@ const ordersRoutes = require('./modules/orders/routes');
 const usersRoutes = require('./modules/users/routes');
 const wishlistRoutes = require('./modules/wishlist/routes');
 const homeBannerRoutes = require('./modules/homeBanner/routes');
+const promoBannerRoutes = require('./modules/promoBanner/routes');
 const { env } = require('./config/env');
 
 async function buildApp(prisma) {
@@ -56,6 +57,7 @@ async function buildApp(prisma) {
     await api.register(usersRoutes);
     await api.register(wishlistRoutes);
     await api.register(homeBannerRoutes);
+    await api.register(promoBannerRoutes);
   }, { prefix: '/api' });
 
   return fastify;

@@ -6,6 +6,7 @@ const { UserRole, OrderStatus, PaymentStatus } = require('../src/constants/enums
 async function seed() {
   const prisma = await initORM();
 
+  await prisma.promoBanner.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.productVariantOptionValue.deleteMany();
@@ -279,6 +280,37 @@ async function seed() {
       quantity: 1,
       subtotalCents: createdProducts[2].priceCents,
     },
+  });
+
+  await prisma.promoBanner.createMany({
+    data: [
+      {
+        sortOrder: 0,
+        eyebrowLabel: 'Weekend Sale',
+        title: 'Smartphone BLU G91 Pro 2022',
+        subtitle: 'Sale 20% off all store',
+        imageUrl:
+          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=640&q=80',
+        imageAlt: 'Smartphones',
+        ctaLabel: 'Shop Now',
+        ctaHref: '/shop',
+        styleVariant: 'neutral',
+        isActive: true,
+      },
+      {
+        sortOrder: 1,
+        eyebrowLabel: 'Holiday Offer',
+        title: 'HyperX Cloud II Wireless',
+        subtitle: 'Sale 35% off',
+        imageUrl:
+          'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=640&q=80',
+        imageAlt: 'Wireless gaming headset',
+        ctaLabel: 'Shop Now',
+        ctaHref: '/shop',
+        styleVariant: 'accent',
+        isActive: true,
+      },
+    ],
   });
 
   await prisma.$disconnect();

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { apiRequest } from '@/lib/api';
-import type { HomeBannerSlide } from '@/lib/home-banner';
+import { resolveHomeBannerCtaHref, type HomeBannerSlide } from '@/lib/home-banner';
 
 export function HomeBanner() {
   const [slides, setSlides] = useState<HomeBannerSlide[]>([]);
@@ -57,7 +57,11 @@ export function HomeBanner() {
     return null;
   }
 
-  const cta = slide.ctaHref?.startsWith('/') ? slide.ctaHref : '/shop';
+  const cta = resolveHomeBannerCtaHref(slide.ctaHref);
+  const ctaIsExternal = /^https?:\/\//i.test(cta);
+
+  const shopNowClassName =
+    'mt-7 inline-flex w-fit shrink-0 items-center gap-2 rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-[#0d6f8f] shadow-lg transition hover:bg-[#f0f9ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
 
   return (
     <section
@@ -66,24 +70,9 @@ export function HomeBanner() {
       aria-roledescription="carousel"
       aria-label="Featured promotions"
     >
-      <div
-        className="pointer-events-none absolute -right-16 bottom-0 top-0 w-1/2 opacity-[0.12]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath fill='%23ffffff' d='M160 20c20 40-10 90-50 110-30 15-60 5-80-15 50-30 90-50 130-95z'/%3E%3Cpath fill='%23ffffff' d='M180 120c-10 35-45 55-85 60 25-40 50-75 85-60z'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'right center',
-          backgroundSize: '70% auto',
-        }}
-        aria-hidden
-      />
-      <div className="pointer-events-none absolute -right-24 top-0 h-72 w-72 rounded-full bg-[#0989ff]/15 blur-3xl" aria-hidden />
-
-      <div className="relative mx-auto max-w-7xl px-4 py-[2.7rem] sm:px-6 lg:px-8 lg:py-[3.6rem]">
-        <div
-          key={index}
-          className="grid items-center gap-[1.8rem] lg:grid-cols-2 lg:gap-[2.7rem]"
-        >
-          <div className="text-white">
+      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+        <div className="grid min-h-[20rem] items-center gap-[1.8rem] sm:min-h-[22rem] lg:h-[26rem] lg:max-h-[26rem] lg:min-h-[26rem] lg:grid-cols-2 lg:gap-[2.7rem] lg:items-center lg:overflow-hidden">
+          <div className="flex min-h-0 flex-col justify-center text-white lg:max-h-full lg:overflow-y-auto lg:pr-1">
             <p className="text-sm text-white/90">
               {slide.priceLine.split(/(\$[\d,.]+)/).map((part, i) =>
                 part.startsWith('$') ? (
@@ -109,22 +98,29 @@ export function HomeBanner() {
               </span>
               {slide.offerSuffix}
             </p>
-            <Link
-              href={cta}
-              className="mt-7 inline-flex items-center gap-2 rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-[#0d6f8f] shadow-lg transition hover:bg-[#f0f9ff]"
-            >
-              Shop Now
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
+            {ctaIsExternal ? (
+              <a href={cta} className={shopNowClassName} target="_blank" rel="noopener noreferrer">
+                Shop Now
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            ) : (
+              <Link href={cta} className={shopNowClassName}>
+                Shop Now
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            )}
           </div>
-          <div className="flex justify-center lg:justify-end">
-            <div
-              className="aspect-square w-full max-w-[min(100%,25.2rem)] rounded-2xl bg-cover bg-center shadow-2xl ring-1 ring-white/10"
-              style={{ backgroundImage: `url(${slide.imageUrl})` }}
-              role="img"
-              aria-label={slide.imageAlt}
+          <div className="flex h-[12.5rem] shrink-0 items-center justify-center sm:h-56 lg:h-[16rem] lg:max-h-[16rem] lg:justify-end xl:h-[18rem] xl:max-h-[18rem]">
+            <img
+              src={slide.imageUrl}
+              alt={slide.imageAlt || slide.title}
+              className="h-full max-h-full w-auto max-w-full object-contain object-center"
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
             />
           </div>
         </div>
