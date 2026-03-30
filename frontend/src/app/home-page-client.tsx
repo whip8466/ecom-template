@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiRequest } from '@/lib/api';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import { categoryInitials, type StorefrontCategory } from '@/lib/category-ui';
-import { formatMoney } from '@/lib/format';
+import { DealCountdown } from '@/components/deal/DealCountdown';
+import { effectiveListPriceCents, formatMoney } from '@/lib/format';
 import { effectiveAvailableStockForLine } from '@/lib/inventory';
 import type { Product } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
@@ -14,6 +15,7 @@ import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { HomeBanner } from '@/components/home/HomeBanner';
 import { HomePromoBanners } from '@/components/home/HomePromoBanners';
+import type { DealOfDayRow } from '@/lib/deal-of-day';
 import type { PromoBanner } from '@/lib/promo-banners';
 
 type ProductCardData = {
@@ -27,6 +29,8 @@ type ProductCardData = {
   badge?: string;
   image: string;
   availableStock?: number;
+  dealEndsAt?: string;
+  onDealEnd?: () => void;
 };
 
 function mapProductToCard(p: Product): ProductCardData {
@@ -43,6 +47,26 @@ function mapProductToCard(p: Product): ProductCardData {
     badge: hasSale ? 'Sale' : undefined,
     image: p.images?.[0]?.imageUrl || '',
     availableStock: effectiveAvailableStockForLine(p, null),
+  };
+}
+
+function mapDealRowToCard(row: DealOfDayRow, onDealEnd?: () => void): ProductCardData {
+  const p = row.product;
+  const listCents = effectiveListPriceCents(p);
+  const dealCents = row.deal.dealPriceCents;
+  return {
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    category: p.category?.name ?? 'Shop',
+    priceCents: dealCents,
+    price: formatMoney(dealCents),
+    oldPrice: listCents !== dealCents ? formatMoney(listCents) : undefined,
+    badge: 'Deal',
+    image: p.images?.[0]?.imageUrl || '',
+    availableStock: effectiveAvailableStockForLine(p, null),
+    dealEndsAt: row.deal.endsAt,
+    onDealEnd,
   };
 }
 
@@ -76,73 +100,78 @@ function ProductCard({ product }: { product: ProductCardData }) {
             style={{ backgroundImage: `url(${product.image})` }}
           />
           {product.badge && (
-            <span className={`absolute left-2 top-2 rounded px-2 py-0.5 text-[10px] font-semibold text-white ${product.badge === 'New' ? 'bg-[#0989ff]' : 'bg-[#eb5757]'}`}>
+            <span
+              className={`absolute left-2 top-2 rounded px-2 py-0.5 text-[10px] font-semibold text-white ${product.badge === 'New'
+                  ? 'bg-[#0989ff]'
+                  : product.badge === 'Deal'
+                    ? 'bg-[#c2410c]'
+                    : 'bg-[#eb5757]'
+                }`}
+            >
               {product.badge}
             </span>
           )}
         </Link>
         <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
-        <button
-          type="button"
-          title={inCart ? 'View Cart' : 'Add To Cart'}
-          onClick={() => {
-            if (inCart) {
-              router.push('/cart');
-              return;
-            }
-            const cap = product.availableStock ?? 999;
-            if (cap < 1) return;
-            addToCart({
-              productId: product.id,
-              slug: product.slug,
-              name: product.name,
-              priceCents: product.priceCents,
-              imageUrl: product.image,
-              quantity: 1,
-              availableStock: cap,
-            });
-          }}
-          className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${
-            inCart ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
-          }`}
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2m0 0L7 13h10l1.6-8H5.4zM9 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z" />
-          </svg>
-          <span className="pointer-events-none absolute -left-[86px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
-            {inCart ? 'View Cart' : 'Add To Cart'}
-          </span>
-        </button>
-        <button
-          type="button"
-          title="Quick View"
-          onClick={() => router.push(`/products/${product.slug}`)}
-          className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          <span className="pointer-events-none absolute -left-[76px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
-            Quick View
-          </span>
-        </button>
-        <button
-          type="button"
-          title="Add to Wishlist"
-          onClick={handleWishlistToggle}
-          className={`group/item relative grid h-12 w-12 place-items-center transition ${
-            inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
-          }`}
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-          <span className="pointer-events-none absolute -left-[104px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
-            Add to Wishlist
-          </span>
-        </button>
-      </div>
+          <button
+            type="button"
+            title={inCart ? 'View Cart' : 'Add To Cart'}
+            onClick={() => {
+              if (inCart) {
+                router.push('/cart');
+                return;
+              }
+              const cap = product.availableStock ?? 999;
+              if (cap < 1) return;
+              addToCart({
+                productId: product.id,
+                slug: product.slug,
+                name: product.name,
+                priceCents: product.priceCents,
+                imageUrl: product.image,
+                quantity: 1,
+                availableStock: cap,
+              });
+            }}
+            className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${inCart ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+              }`}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2m0 0L7 13h10l1.6-8H5.4zM9 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z" />
+            </svg>
+            <span className="pointer-events-none absolute -left-[86px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+              {inCart ? 'View Cart' : 'Add To Cart'}
+            </span>
+          </button>
+          <button
+            type="button"
+            title="Quick View"
+            onClick={() => router.push(`/products/${product.slug}`)}
+            className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span className="pointer-events-none absolute -left-[76px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+              Quick View
+            </span>
+          </button>
+          <button
+            type="button"
+            title="Add to Wishlist"
+            onClick={handleWishlistToggle}
+            className={`group/item relative grid h-12 w-12 place-items-center transition ${inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+              }`}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span className="pointer-events-none absolute -left-[104px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+              Add to Wishlist
+            </span>
+          </button>
+        </div>
       </div>
       <p className="mt-3 text-[11px] uppercase tracking-wide text-[#7c8ea6]">{product.category}</p>
       <h3 className="mt-1 text-sm font-semibold text-[#1b2a4e]">
@@ -153,6 +182,16 @@ function ProductCard({ product }: { product: ProductCardData }) {
         <span className="font-semibold text-[#0989ff]">{product.price}</span>
         {product.oldPrice && <span className="text-[#7c8ea6] line-through">{product.oldPrice}</span>}
       </div>
+      {product.dealEndsAt && (
+        <div className="mt-1 flex items-center gap-1 text-[11px] font-medium text-[#c2410c]">
+          <span>Ends in</span>
+          <DealCountdown
+            endsAt={product.dealEndsAt}
+            onEnd={product.onDealEnd}
+            className="text-[11px] text-[#c2410c]"
+          />
+        </div>
+      )}
     </article>
   );
 }
@@ -191,9 +230,17 @@ function HomeProductGrid({
   );
 }
 
-export function HomePageClient({ initialPromoBanners }: { initialPromoBanners: PromoBanner[] }) {
+export function HomePageClient({
+  initialPromoBanners,
+  initialDealOfDay = [],
+}: {
+  initialPromoBanners: PromoBanner[];
+  initialDealOfDay?: DealOfDayRow[];
+}) {
   const [homeProducts, setHomeProducts] = useState<Product[]>([]);
   const [homeLoading, setHomeLoading] = useState(true);
+  const [dealRows, setDealRows] = useState<DealOfDayRow[]>(initialDealOfDay);
+  const [dealLoading, setDealLoading] = useState(initialDealOfDay.length === 0);
   const [trendingTab, setTrendingTab] = useState<TrendingTab>('top_sellers');
   const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(true);
@@ -211,6 +258,33 @@ export function HomePageClient({ initialPromoBanners }: { initialPromoBanners: P
       })
       .finally(() => {
         if (!cancelled) setHomeLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refetchDeals = useCallback(() => {
+    apiRequest<{ data: DealOfDayRow[] }>('/api/deal-of-day')
+      .then((res) => {
+        setDealRows(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        setDealRows([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: DealOfDayRow[] }>('/api/deal-of-day')
+      .then((res) => {
+        if (!cancelled) setDealRows(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setDealRows([]);
+      })
+      .finally(() => {
+        if (!cancelled) setDealLoading(false);
       });
     return () => {
       cancelled = true;
@@ -253,6 +327,13 @@ export function HomePageClient({ initialPromoBanners }: { initialPromoBanners: P
   }, []);
 
   const productCards = useMemo(() => homeProducts.map(mapProductToCard), [homeProducts]);
+  /** Only real deals from GET /api/deal-of-day — no fallback to random catalog products. */
+  const dealCards = useMemo(
+    () => dealRows.map((row) => mapDealRowToCard(row, refetchDeals)),
+    [dealRows, refetchDeals],
+  );
+  const dealSectionLoading = dealLoading;
+
   const trendingCards = useMemo(() => trendingProducts.map(mapProductToCard), [trendingProducts]);
 
   const trendingEmptyMessage =
@@ -261,6 +342,8 @@ export function HomePageClient({ initialPromoBanners }: { initialPromoBanners: P
       : trendingTab === 'new_arrival'
         ? 'No new arrivals yet.'
         : 'No products match this list yet.';
+
+  const showDealSection = dealSectionLoading || dealRows.length > 0;
 
   return (
     <div className="bg-white">
@@ -342,36 +425,28 @@ export function HomePageClient({ initialPromoBanners }: { initialPromoBanners: P
 
       <HomePromoBanners initialBanners={initialPromoBanners} />
 
-      <section className="py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-[#1b2a4e]">Deal of The Day</h2>
-            <Link href="/" className="text-sm font-semibold text-[#0989ff]">View All</Link>
-          </div>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            <HomeProductGrid
-              loading={homeLoading}
-              emptyMessage="No products in the catalog yet."
-              cards={productCards.slice(0, 4)}
-              keyPrefix="deal"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[#f7fbff] py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold text-[#1b2a4e]">Popular Products</h2>
-            <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {showDealSection ? (
+        <section className="bg-[#f7fbff] py-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-[#1b2a4e]">Deal of The Day</h2>
+              </div>
+              <Link href="/shop" className="shrink-0 text-sm font-semibold text-[#0989ff] sm:pt-1">
+                View All
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
               <HomeProductGrid
-                loading={homeLoading}
-                emptyMessage="No products in the catalog yet."
-                cards={productCards}
-                keyPrefix="popular"
+                loading={dealSectionLoading}
+                emptyMessage="No active deals."
+                cards={dealCards}
+                keyPrefix="deal"
               />
             </div>
           </div>
-      </section>
+        </section>
+      ) : null}
 
       <section className="py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

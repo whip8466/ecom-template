@@ -228,6 +228,19 @@ function effectiveLineUnitCents(product, variant) {
   return effectiveProductPriceCents(product);
 }
 
+/** Flash deal price when the slot is activated and the timer has not expired. */
+async function activeDealUnitPriceCents(tx, productId) {
+  const row = await tx.dealOfDayProduct.findFirst({
+    where: {
+      productId,
+      activatedAt: { not: null },
+      endsAt: { gt: new Date() },
+    },
+  });
+  if (!row || row.dealPriceCents == null || row.dealPriceCents < 1) return null;
+  return row.dealPriceCents;
+}
+
 /** Align with storefront: use variant stock when any variant has stock; else product.stock. */
 function effectiveAvailableStock(product, variant) {
   const variants = product.variants || [];
@@ -464,7 +477,9 @@ async function ordersRoutes(fastify) {
               throw createHttpError(400, `Insufficient stock for selected options on ${product.name}`);
             }
 
-            const unitPrice = effectiveLineUnitCents(product, variant);
+            const dealUnit = await activeDealUnitPriceCents(tx, product.id);
+            const unitPrice =
+              dealUnit != null ? dealUnit : effectiveLineUnitCents(product, variant);
             const subtotal = unitPrice * inputItem.quantity;
             total += subtotal;
 
@@ -515,7 +530,9 @@ async function ordersRoutes(fastify) {
             }
           }
 
-          const unitPrice = effectiveProductPriceCents(product);
+          const dealUnit = await activeDealUnitPriceCents(tx, product.id);
+          const unitPrice =
+            dealUnit != null ? dealUnit : effectiveProductPriceCents(product);
           const subtotal = unitPrice * inputItem.quantity;
           total += subtotal;
 

@@ -478,9 +478,8 @@ export function ShopGridClient() {
           ) : (
             <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {products.map((product, index) => {
+              {products.map((product) => {
                 const imageUrl = product.images?.[0]?.imageUrl || '';
-                const isSale = (showingStart - 1 + index) % 3 === 0;
                 const cardAvailable = effectiveAvailableStockForLine(product, null);
                 const inCart = cartItems.some((item) => item.productId === product.id);
                 const inWishlist = wishlistItems.some((item) => item.productId === product.id);
@@ -489,11 +488,6 @@ export function ShopGridClient() {
                     <div className="relative overflow-hidden rounded bg-[#f4f8ff]">
                       <Link href={`/products/${product.slug}`} className="block">
                         <div className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105" style={{ backgroundImage: `url(${imageUrl})` }} />
-                        {isSale && (
-                          <span className="absolute right-2 top-2 rounded bg-[#ff5a72] px-2 py-0.5 text-[10px] font-semibold text-white">
-                            Out Of Stock
-                          </span>
-                        )}
                       </Link>
 
                       <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">

@@ -79,4 +79,10 @@ export const ADMIN_SIDEBAR_MENU: AdminSidebarItem[] = [
     label: 'Promo banners',
     icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
   },
+  {
+    kind: 'link',
+    href: '/admin/deal-of-day',
+    label: 'Deal of the day',
+    icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
 ];

@@ -407,7 +407,27 @@ async function catalogRoutes(fastify) {
       return reply.code(404).send({ message: 'Product not found' });
     }
 
-    return { data: mapProduct(product) };
+    const activeDeal = await fastify.prisma.dealOfDayProduct.findFirst({
+      where: {
+        productId: product.id,
+        activatedAt: { not: null },
+        endsAt: { gt: new Date() },
+      },
+    });
+
+    return {
+      data: {
+        ...mapProduct(product),
+        ...(activeDeal
+          ? {
+              activeDeal: {
+                dealPriceCents: activeDeal.dealPriceCents,
+                endsAt: activeDeal.endsAt.toISOString(),
+              },
+            }
+          : {}),
+      },
+    };
   });
 
   fastify.get('/categories', async () => {

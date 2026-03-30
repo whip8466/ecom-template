@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
 import type { Product } from '@/lib/types';
-import { effectivePriceCents, effectiveVariantUnitPriceCents, formatMoney } from '@/lib/format';
+import { DealCountdown } from '@/components/deal/DealCountdown';
+import { effectiveListPriceCents, effectivePriceCents, effectiveVariantUnitPriceCents, formatMoney } from '@/lib/format';
 import { resolveSwatchColor } from '@/lib/swatch-color';
 import { effectiveAvailableStockForLine } from '@/lib/inventory';
 import {
@@ -98,8 +99,13 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
   const [message, setMessage] = useState('');
 
   const displayUnitPrice = effectiveVariantUnitPriceCents(product, matchedVariant);
-  const strikePrice =
-    displayUnitPrice < product.priceCents ? product.priceCents : undefined;
+  const dealOn =
+    product.activeDeal != null && new Date(product.activeDeal.endsAt).getTime() > Date.now();
+  const strikePrice = dealOn
+    ? effectiveListPriceCents(product)
+    : displayUnitPrice < product.priceCents
+      ? product.priceCents
+      : undefined;
 
   const galleryImages = product.images?.length
     ? product.images
@@ -227,6 +233,16 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
               <p className="text-lg text-[#94a3b8] line-through">{formatMoney(strikePrice)}</p>
             )}
           </div>
+          {dealOn && product.activeDeal && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-[#fecaca] bg-[#fff1f2] px-3 py-2 text-sm text-[#9f1239]">
+              <span className="font-semibold">Deal ends in</span>
+              <DealCountdown
+                endsAt={product.activeDeal.endsAt}
+                onEnd={() => router.refresh()}
+                className="text-[#9f1239]"
+              />
+            </div>
+          )}
           <p className="mt-3 text-sm leading-relaxed text-[#667085]">
             {product.shortDescription || descriptionText}
           </p>

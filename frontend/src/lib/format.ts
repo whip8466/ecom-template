@@ -5,11 +5,14 @@ export function formatMoney(cents: number) {
   }).format(cents / 100);
 }
 
-/** Price used at checkout when a sale price is set and lower than list price. */
-export function effectivePriceCents(product: {
+export type ProductWithOptionalDeal = {
   priceCents: number;
   salePriceCents?: number | null;
-}): number {
+  activeDeal?: { dealPriceCents: number; endsAt: string } | null;
+};
+
+/** List / sale price only (no flash deal). */
+export function effectiveListPriceCents(product: { priceCents: number; salePriceCents?: number | null }): number {
   const sale = product.salePriceCents;
   if (sale != null && sale >= 0 && sale < product.priceCents) {
     return sale;
@@ -17,13 +20,26 @@ export function effectivePriceCents(product: {
   return product.priceCents;
 }
 
-/** Unit price for a line item: variant override, else product (including sale). */
+/** Storefront line price: active flash deal wins, then sale, then list. */
+export function effectivePriceCents(product: ProductWithOptionalDeal): number {
+  const deal = product.activeDeal;
+  if (deal && new Date(deal.endsAt).getTime() > Date.now() && deal.dealPriceCents > 0) {
+    return deal.dealPriceCents;
+  }
+  return effectiveListPriceCents(product);
+}
+
+/** Unit price for a line item: active deal overrides variant and list/sale. */
 export function effectiveVariantUnitPriceCents(
-  product: { priceCents: number; salePriceCents?: number | null },
+  product: ProductWithOptionalDeal,
   variant: { priceCents: number | null } | null | undefined
 ): number {
+  const deal = product.activeDeal;
+  if (deal && new Date(deal.endsAt).getTime() > Date.now() && deal.dealPriceCents > 0) {
+    return deal.dealPriceCents;
+  }
   if (variant && variant.priceCents != null) {
     return variant.priceCents;
   }
-  return effectivePriceCents(product);
+  return effectiveListPriceCents(product);
 }

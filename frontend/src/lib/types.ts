@@ -18,6 +18,12 @@ export type ProductColor = { id: number; colorName: string; colorCode: string; s
 
 export type ProductTag = { id: number; name: string; slug: string };
 
+/** Active Deal of the Day flash offer (from GET /api/products/:slug when configured). */
+export type ProductActiveDeal = {
+  dealPriceCents: number;
+  endsAt: string;
+};
+
 export type ProductOptionType = { id: number; name: string; slug: string };
 
 export type ProductVariantOptionValue = {
@@ -57,6 +63,7 @@ export type Product = {
   variants?: ProductVariant[];
   images: ProductImage[];
   availableColors: ProductColor[];
+  activeDeal?: ProductActiveDeal | null;
 };
 
 export type Address = {

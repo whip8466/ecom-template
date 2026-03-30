@@ -198,11 +198,45 @@ model Product {
   variants        ProductVariant[]
   orderItems      OrderItem[]
   wishlistItems   WishlistItem[]
+  dealOfDaySlot    DealOfDayProduct?
+  dealOfDayHistory DealOfDayHistory[]
   publishedAt     DateTime?      @map("published_at") @db.Timestamptz(6)
   createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("products")
+}
+
+/// Curated home “Deal of the Day” strip (up to four rows, ordered by sortOrder).
+model DealOfDayProduct {
+  id              Int       @id @default(autoincrement())
+  sortOrder       Int       @map("sort_order")
+  productId       Int       @unique @map("product_id")
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dealPriceCents  Int       @map("deal_price_cents")
+  durationMinutes Int       @default(60) @map("duration_minutes")
+  activatedAt     DateTime? @map("activated_at") @db.Timestamptz(6)
+  endsAt          DateTime? @map("ends_at") @db.Timestamptz(6)
+
+  @@unique([sortOrder])
+  @@map("deal_of_day_products")
+}
+
+/// Archived deal runs (expired, stopped early, or removed from slots while live).
+model DealOfDayHistory {
+  id              Int      @id @default(autoincrement())
+  productId       Int      @map("product_id")
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dealPriceCents  Int      @map("deal_price_cents")
+  durationMinutes Int      @map("duration_minutes")
+  activatedAt     DateTime @map("activated_at") @db.Timestamptz(6)
+  endsAt          DateTime @map("ends_at") @db.Timestamptz(6)
+  endedAt         DateTime @map("ended_at") @db.Timestamptz(6)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([productId])
+  @@index([endedAt])
+  @@map("deal_of_day_history")
 }
 
 model WishlistItem {

@@ -1,10 +1,10 @@
-const UserRole = Object.freeze({
+export const UserRole = Object.freeze({
   CUSTOMER: 'CUSTOMER',
   MANAGER: 'MANAGER',
   ADMIN: 'ADMIN',
 });
 
-const OrderStatus = Object.freeze({
+export const OrderStatus = Object.freeze({
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
   PROCESSING: 'PROCESSING',
@@ -13,7 +13,7 @@ const OrderStatus = Object.freeze({
   CANCELLED: 'CANCELLED',
 });
 
-const PaymentStatus = Object.freeze({
+export const PaymentStatus = Object.freeze({
   PENDING: 'PENDING',
   PAID: 'PAID',
   FAILED: 'FAILED',
