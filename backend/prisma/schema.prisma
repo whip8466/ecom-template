@@ -326,6 +326,35 @@ model ContactMessage {
   @@map("contact_messages")
 }
 
+model BlogCategory {
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(200)
+  slug      String     @unique @db.VarChar(200)
+  posts     BlogPost[]
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id              Int           @id @default(autoincrement())
+  title           String        @db.VarChar(500)
+  slug            String        @unique @db.VarChar(200)
+  excerpt         String?       @db.VarChar(1000)
+  body            String        @db.Text
+  coverImageUrl   String?       @map("cover_image_url") @db.VarChar(2000)
+  publishedAt     DateTime?     @map("published_at") @db.Timestamptz(6)
+  blogCategoryId  Int?          @map("blog_category_id")
+  blogCategory    BlogCategory? @relation(fields: [blogCategoryId], references: [id], onDelete: SetNull)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([publishedAt])
+  @@index([blogCategoryId])
+  @@map("blog_posts")
+}
+
 model ProductImage {
   id       Int     @id @default(autoincrement())
   productId Int    @map("product_id")

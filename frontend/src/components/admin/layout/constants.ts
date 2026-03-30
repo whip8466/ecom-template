@@ -81,6 +81,18 @@ export const ADMIN_SIDEBAR_MENU: AdminSidebarItem[] = [
   },
   {
     kind: 'link',
+    href: '/admin/blog',
+    label: 'Blog',
+    icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z',
+  },
+  {
+    kind: 'link',
+    href: '/admin/blog/categories',
+    label: 'Blog categories',
+    icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z',
+  },
+  {
+    kind: 'link',
     href: '/admin/deal-of-day',
     label: 'Deal of the day',
     icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',

@@ -26,6 +26,7 @@ function StorefrontHeader({
 }) {
   const [activeMenu, setActiveMenu] = useState<'none' | 'categories' | 'shop' | 'blog'>('none');
   const [categories, setCategories] = useState<StorefrontCategory[]>([]);
+  const [blogCategories, setBlogCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
   const [activeCategorySlug, setActiveCategorySlug] = useState('');
   /** `null` = search all products; otherwise filter by category slug */
   const [searchCategorySlug, setSearchCategorySlug] = useState<string | null>(null);
@@ -49,6 +50,20 @@ function StorefrontHeader({
       })
       .catch(() => {
         if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: { id: number; name: string; slug: string }[] }>('/api/blog/categories')
+      .then((res) => {
+        if (!cancelled) setBlogCategories(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setBlogCategories([]);
       });
     return () => {
       cancelled = true;
@@ -275,26 +290,46 @@ function StorefrontHeader({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <div
-                className="relative"
-                onMouseEnter={() => setActiveMenu('blog')}
-              >
-                <button type="button" className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+              {blogCategories.length > 0 ? (
+                <div className="relative" onMouseEnter={() => setActiveMenu('blog')}>
+                  <button type="button" className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
+                    Blog
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {activeMenu === 'blog' && (
+                    <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-sm border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                      <ul className="space-y-3 text-sm text-[#475467]">
+                        <li>
+                          <Link href="/blog" className="hover:text-[#0989ff]" onClick={() => setActiveMenu('none')}>
+                            All posts
+                          </Link>
+                        </li>
+                        {blogCategories.map((c) => (
+                          <li key={c.id}>
+                            <Link
+                              href={`/blog?category=${encodeURIComponent(c.slug)}`}
+                              className="hover:text-[#0989ff]"
+                              onClick={() => setActiveMenu('none')}
+                            >
+                              {c.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/blog"
+                  onMouseEnter={() => setActiveMenu('none')}
+                  className="py-3 hover:text-[#0989ff]"
+                >
                   Blog
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {activeMenu === 'blog' && (
-                  <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-sm border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
-                    <ul className="space-y-3 text-sm text-[#475467]">
-                      {['Blog Standard', 'Blog Grid', 'Blog List', 'Blog Details Full Width', 'Blog Details'].map((item) => (
-                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+                </Link>
+              )}
               <Link
                 href="/contact"
                 onMouseEnter={() => setActiveMenu('none')}

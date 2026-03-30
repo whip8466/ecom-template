@@ -29,7 +29,7 @@ export function LatestArticles() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-display text-3xl font-semibold text-[var(--navy)] sm:text-4xl">Latest news & articles</h2>
-          <Link href="/" className="text-sm font-semibold text-[var(--accent)] transition-premium hover:text-[var(--accent-hover)]">
+          <Link href="/blog" className="text-sm font-semibold text-[var(--accent)] transition-premium hover:text-[var(--accent-hover)]">
             View All Blog
           </Link>
         </div>

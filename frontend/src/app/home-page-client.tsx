@@ -13,8 +13,10 @@ import type { Product } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
+import { BlogPostCard } from '@/components/blog/BlogPostCard';
 import { HomeBanner } from '@/components/home/HomeBanner';
 import { HomePromoBanners } from '@/components/home/HomePromoBanners';
+import type { BlogPostSummary } from '@/lib/blog';
 import type { DealOfDayRow } from '@/lib/deal-of-day';
 import type { PromoBanner } from '@/lib/promo-banners';
 
@@ -246,6 +248,8 @@ export function HomePageClient({
   const [trendingLoading, setTrendingLoading] = useState(true);
   const [categories, setCategories] = useState<StorefrontCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [blogPreview, setBlogPreview] = useState<BlogPostSummary[]>([]);
+  const [blogPreviewLoading, setBlogPreviewLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -320,6 +324,24 @@ export function HomePageClient({
       })
       .finally(() => {
         if (!cancelled) setCategoriesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: BlogPostSummary[] }>('/api/blog')
+      .then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        if (!cancelled) setBlogPreview(rows.slice(0, 3));
+      })
+      .catch(() => {
+        if (!cancelled) setBlogPreview([]);
+      })
+      .finally(() => {
+        if (!cancelled) setBlogPreviewLoading(false);
       });
     return () => {
       cancelled = true;
@@ -450,25 +472,31 @@ export function HomePageClient({
 
       <section className="py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-[#1b2a4e]">Latest News & Articles</h2>
-            <Link href="/" className="text-sm font-semibold text-[#0989ff]">View All Blog</Link>
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <h2 className="text-2xl font-semibold text-[#1b2a4e]">Latest News &amp; Articles</h2>
+            <Link href="/blog" className="shrink-0 text-sm font-semibold text-[#0989ff] hover:underline">
+              View All Blog
+            </Link>
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {[
-              'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=900&q=80',
-              'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&q=80',
-              'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=900&q=80',
-            ].map((image, index) => (
-              <article key={image} className="overflow-hidden rounded-md border border-[#e4ebf4] bg-white">
-                <div className="aspect-16/10 bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
-                <div className="p-4">
-                  <p className="text-xs text-[#7c8ea6]">Jan 0{index + 1}, 2026</p>
-                  <h3 className="mt-2 text-base font-semibold text-[#1b2a4e]">Latest smart gadgets for your daily setup</h3>
-                </div>
-              </article>
-            ))}
-          </div>
+          {blogPreviewLoading ? (
+            <p className="py-8 text-center text-sm text-[#64748b]">Loading articles…</p>
+          ) : blogPreview.length === 0 ? (
+            <p className="rounded-md border border-dashed border-[#cdd9eb] bg-[#f8fafc] py-10 text-center text-sm text-[#64748b]">
+              No articles yet. Check back soon.
+            </p>
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+              {blogPreview.map((p) => (
+                <BlogPostCard
+                  key={p.id}
+                  slug={p.slug}
+                  title={p.title}
+                  publishedAt={p.publishedAt}
+                  coverImageUrl={p.coverImageUrl}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
