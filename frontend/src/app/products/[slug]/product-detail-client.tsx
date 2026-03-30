@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
-import type { Product } from '@/lib/types';
+import type { Product, ProductReviewSummary } from '@/lib/types';
 import { DealCountdown } from '@/components/deal/DealCountdown';
 import { effectiveListPriceCents, effectivePriceCents, effectiveVariantUnitPriceCents, formatMoney } from '@/lib/format';
 import { resolveSwatchColor } from '@/lib/swatch-color';
@@ -24,11 +24,13 @@ import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { looksLikeHtmlMarkup, plainTextFromHtml } from '@/lib/blog-body-html';
+import { ProductReviewsSection } from './product-reviews-section';
 
 type Props = {
   product: Product;
   relatedProducts: Product[];
   slug: string;
+  reviewSummary: ProductReviewSummary;
 };
 
 function buildAdditionalRows(product: Product): { label: string; value: string }[] {
@@ -51,7 +53,7 @@ function buildAdditionalRows(product: Product): { label: string; value: string }
   return rows;
 }
 
-export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
+export function ProductDetailClient({ product, relatedProducts, slug, reviewSummary }: Props) {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const { items: cartItems, addToCart } = useCartStore();
@@ -234,9 +236,27 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
             {product.category?.name || 'Shop'}
           </p>
           <h1 className="mt-1 text-3xl font-semibold text-[#0f1f40]">{product.name}</h1>
-          <div className="mt-2 flex items-center gap-3 text-sm">
-            <span className="text-[#f5a623]">★★★★★</span>
-            <span className="text-[#7b8aa3]">(Reviews coming soon)</span>
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+            {reviewSummary.count > 0 && reviewSummary.averageRating != null ? (
+              <>
+                <span className="text-[#f5a623]" aria-hidden>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i}>
+                      {i < Math.round(reviewSummary.averageRating!) ? '★' : '☆'}
+                    </span>
+                  ))}
+                </span>
+                <span className="text-[#7b8aa3]">
+                  {reviewSummary.averageRating.toFixed(1)} · {reviewSummary.count}{' '}
+                  {reviewSummary.count === 1 ? 'review' : 'reviews'}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[#f5a623]">★★★★★</span>
+                <span className="text-[#7b8aa3]">No reviews yet</span>
+              </>
+            )}
           </div>
           <div className="mt-3 flex flex-wrap items-baseline gap-2">
             <p className="text-3xl font-semibold text-[#0f1f40]">{formatMoney(displayUnitPrice)}</p>
@@ -492,7 +512,7 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
         )}
 
         {activeTab === 'reviews' && (
-          <p className="mt-5 text-sm text-[#7b8aa3]">No reviews yet. Be the first to review this product.</p>
+          <ProductReviewsSection productId={product.id} initial={reviewSummary} />
         )}
       </section>
 

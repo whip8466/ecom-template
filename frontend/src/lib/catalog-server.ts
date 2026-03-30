@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import type { Product } from '@/lib/types';
+import type { Product, ProductReviewSummary } from '@/lib/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -18,6 +18,17 @@ async function fetchProductBySlugUncached(slug: string): Promise<Product | null>
 
 /** Deduplicated per request when used from metadata + page. */
 export const getProductBySlug = cache(fetchProductBySlugUncached);
+
+export async function getProductReviews(productId: number): Promise<ProductReviewSummary> {
+  const res = await fetch(`${API_BASE_URL}/api/products/${productId}/reviews`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    return { reviews: [], averageRating: null, count: 0 };
+  }
+  const json = (await res.json()) as { data: ProductReviewSummary };
+  return json.data;
+}
 
 export async function getRelatedProductsForProduct(current: Product): Promise<Product[]> {
   const res = await fetch(`${API_BASE_URL}/api/products?limit=40`, { cache: 'no-store' });

@@ -66,6 +66,21 @@ export type Product = {
   activeDeal?: ProductActiveDeal | null;
 };
 
+/** Public product review (from GET /api/products/:id/reviews). */
+export type ProductReviewPublic = {
+  id: number;
+  rating: number;
+  body: string;
+  createdAt: string;
+  authorLabel: string;
+};
+
+export type ProductReviewSummary = {
+  reviews: ProductReviewPublic[];
+  averageRating: number | null;
+  count: number;
+};
+
 export type Address = {
   id: number;
   fullName: string;

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { apiRequest } from '@/lib/api';
 import { categoryInitials, type StorefrontCategory } from '@/lib/category-ui';
 import type { User } from '@/lib/types';
@@ -33,7 +33,22 @@ function StorefrontHeader({
   const [isSearchCategoryOpen, setIsSearchCategoryOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const wishlistCount = useWishlistStore((state) => state.items.length);
+
+  const firstName = user?.name?.split(' ')[0] || 'Account';
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [userMenuOpen]);
 
   useEffect(() => {
     const onScroll = () => setHeaderScrolled(window.scrollY > 4);
@@ -129,13 +144,6 @@ function StorefrontHeader({
 
   return (
     <>
-      <div className="bg-[var(--accent)] text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs sm:px-6 lg:px-8">
-          <span>FREE Express Shipping On Orders $70+</span>
-          <span className="hidden sm:block">{user ? 'Setting • Wishlist • Cart' : 'Setting • Cart'}</span>
-        </div>
-      </div>
-
       {/* Sticky storefront header: logo, search, category menu (promo bar above scrolls away) */}
       <header
         className={`sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--card-bg)] transition-shadow duration-200 ${
@@ -222,11 +230,6 @@ function StorefrontHeader({
 
           <nav className="flex items-center gap-1.5 sm:gap-2.5">
             {user && (
-              <span className="hidden text-xs text-[var(--muted)] md:block">
-                Hello, {user.name?.split(' ')[0] || 'Account'}
-              </span>
-            )}
-            {user && (
               <Link
                 href="/wishlist"
                 className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
@@ -257,9 +260,61 @@ function StorefrontHeader({
               )}
             </Link>
             {!user ? (
-              <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">Login</Link>
+              <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">
+                Login
+              </Link>
             ) : (
-              <button type="button" className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs" onClick={() => { logout(); if (pathname.startsWith('/account')) router.push('/'); }}>Logout</button>
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((o) => !o)}
+                  className="flex max-w-[200px] items-center gap-1 rounded-md border border-transparent px-2 py-1.5 text-left text-xs font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)] md:max-w-none md:gap-1.5 md:px-3 md:text-sm"
+                  aria-expanded={userMenuOpen}
+                  aria-haspopup="menu"
+                >
+                  <span className="truncate">
+                    Hello, {firstName}
+                  </span>
+                  <svg className="h-4 w-4 shrink-0 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {userMenuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 top-full z-[100] mt-1 min-w-[200px] rounded-none border border-[var(--border)] bg-[var(--card-bg)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
+                  >
+                    <Link
+                      href="/account/orders"
+                      role="menuitem"
+                      className="block px-4 py-2.5 text-sm text-[var(--navy)] hover:bg-[var(--cream)]"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      My orders
+                    </Link>
+                    <Link
+                      href="/account/addresses"
+                      role="menuitem"
+                      className="block px-4 py-2.5 text-sm text-[var(--navy)] hover:bg-[var(--cream)]"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      Addresses
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="w-full border-t border-[var(--border)] px-4 py-2.5 text-left text-sm text-[var(--navy)] hover:bg-[var(--cream)]"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        logout();
+                        if (pathname.startsWith('/account')) router.push('/');
+                      }}
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </nav>
         </div>
@@ -299,7 +354,7 @@ function StorefrontHeader({
                     </svg>
                   </button>
                   {activeMenu === 'blog' && (
-                    <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-sm border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                    <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-none border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
                       <ul className="space-y-3 text-sm text-[#475467]">
                         <li>
                           <Link href="/blog" className="hover:text-[#0989ff]" onClick={() => setActiveMenu('none')}>

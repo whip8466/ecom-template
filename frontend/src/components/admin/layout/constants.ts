@@ -41,6 +41,7 @@ export const ADMIN_SIDEBAR_MENU: AdminSidebarItem[] = [
     children: [
       { href: '/admin/product/list', label: 'List' },
       { href: '/admin/deal-of-day', label: 'Deal of the day' },
+      { href: '/admin/product/reviews', label: 'Reviews' },
     ],
   },
   {

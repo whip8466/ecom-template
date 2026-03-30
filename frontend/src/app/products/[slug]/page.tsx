@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getRelatedProductsForProduct } from '@/lib/catalog-server';
+import { getProductBySlug, getProductReviews, getRelatedProductsForProduct } from '@/lib/catalog-server';
 import { ProductDetailClient } from './product-detail-client';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -25,6 +25,16 @@ export default async function ProductDetailsPage({ params }: Props) {
   if (!product) {
     notFound();
   }
-  const relatedProducts = await getRelatedProductsForProduct(product);
-  return <ProductDetailClient product={product} relatedProducts={relatedProducts} slug={slug} />;
+  const [relatedProducts, reviewSummary] = await Promise.all([
+    getRelatedProductsForProduct(product),
+    getProductReviews(product.id),
+  ]);
+  return (
+    <ProductDetailClient
+      product={product}
+      relatedProducts={relatedProducts}
+      slug={slug}
+      reviewSummary={reviewSummary}
+    />
+  );
 }

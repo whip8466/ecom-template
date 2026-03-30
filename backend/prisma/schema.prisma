@@ -18,10 +18,11 @@ model User {
   role          String         @default("CUSTOMER") @db.VarChar(30)
   isActive      Boolean        @default(true) @map("is_active")
   addresses     Address[]
-  orders        Order[]
-  customerNotes CustomerNote[]
-  wishlistItems WishlistItem[]
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  orders         Order[]
+  customerNotes  CustomerNote[]
+  wishlistItems  WishlistItem[]
+  productReviews ProductReview[]
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("users")
@@ -198,6 +199,7 @@ model Product {
   variants        ProductVariant[]
   orderItems      OrderItem[]
   wishlistItems   WishlistItem[]
+  productReviews  ProductReview[]
   dealOfDaySlot    DealOfDayProduct?
   dealOfDayHistory DealOfDayHistory[]
   publishedAt     DateTime?      @map("published_at") @db.Timestamptz(6)
@@ -402,6 +404,25 @@ model OrderItem {
   colorName                String? @map("color_name")
   quantity                 Int
   subtotalCents            Int     @map("subtotal_cents")
+  review                   ProductReview?
 
   @@map("order_items")
+}
+
+/// One review per purchased order line (verified buyer). Tied to order_item_id.
+model ProductReview {
+  id          Int       @id @default(autoincrement())
+  orderItemId Int       @unique @map("order_item_id")
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  userId      Int       @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   Int       @map("product_id")
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating      Int
+  body        String    @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([productId])
+  @@index([userId])
+  @@map("product_reviews")
 }
