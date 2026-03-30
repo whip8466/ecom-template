@@ -394,7 +394,7 @@ export default function AdminDealOfDayPage() {
                     ) : null}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <label className="block text-xs font-medium text-[#60759b]">
-                        Deal price (USD)
+                        Deal price (INR)
                         <input
                           type="text"
                           inputMode="decimal"

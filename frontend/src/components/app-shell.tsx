@@ -147,7 +147,7 @@ function StorefrontHeader({
             href="/"
             className="font-display text-xl font-semibold text-[var(--navy)] transition-premium hover:opacity-90"
           >
-            Lumina
+            Dhidi
           </Link>
 
           <div className="hidden flex-1 justify-center lg:flex">
@@ -338,16 +338,6 @@ function StorefrontHeader({
                 Contact
               </Link>
             </nav>
-
-            <div className="hidden items-center gap-2 text-xs text-[#101828] lg:flex" onMouseEnter={() => setActiveMenu('none')}>
-              <svg className="h-5 w-5 text-[#0989ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.95.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.129a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.209-.502l4.493 1.498a1 1 0 01.684.95V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              <div className="leading-tight">
-                <p className="text-[11px] text-[#667085]">Hotline:</p>
-                <p className="font-semibold">+(402) 763 282 46</p>
-              </div>
-            </div>
           </div>
 
           {activeMenu === 'categories' && (
@@ -501,7 +491,7 @@ function StorefrontFooter() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <Link href="/" className="font-display text-2xl font-semibold text-[var(--navy)]">
-              Lumina
+              Dhidi
             </Link>
             <p className="mt-4 max-w-sm text-sm text-[var(--muted)]">
               Curated fashion, beauty, and home decor for modern living. Quality you can trust, style that lasts.
@@ -548,7 +538,7 @@ function StorefrontFooter() {
           </div>
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[var(--border)] pt-8 sm:flex-row">
-          <p className="text-sm text-[var(--muted)]">© {new Date().getFullYear()} Lumina. All rights reserved.</p>
+          <p className="text-sm text-[var(--muted)]">© {new Date().getFullYear()} Dhidi. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <div className="flex gap-6 text-sm text-[var(--muted)]">
               <span>Visa</span>

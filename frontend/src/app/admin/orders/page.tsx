@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AdminPageShell } from '@/components/admin-shell';
 import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
+import { formatMoneyWhole } from '@/lib/format';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -47,15 +48,6 @@ const TABS: { id: ViewId; label: string; countKey: keyof TabCounts }[] = [
   { id: 'failed', label: 'Failed', countKey: 'failed' },
   { id: 'cancelled', label: 'Cancelled', countKey: 'cancelled' },
 ];
-
-function formatMoney(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 function formatOrderDate(iso: string): string {
   const d = new Date(iso);
@@ -357,7 +349,7 @@ export default function AdminOrdersPage() {
                           #{row.id}
                         </Link>
                       </td>
-                      <td className="p-4 font-medium text-[#1c2740]">{formatMoney(row.totalAmountCents)}</td>
+                      <td className="p-4 font-medium text-[#1c2740]">{formatMoneyWhole(row.totalAmountCents)}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eef4ff] text-xs font-semibold text-[#246bfd]">
@@ -435,7 +427,7 @@ export default function AdminOrdersPage() {
       </div>
 
       <footer className="mt-12 flex items-center justify-between border-t border-[#e4eaf5] pt-4 text-sm text-[#8ea0bf]">
-        <span>Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon</span>
+        <span>Thank you for creating with Dhidi | 2026 © ThemeWagon</span>
         <span>v1.0.0</span>
       </footer>
     </AdminPageShell>

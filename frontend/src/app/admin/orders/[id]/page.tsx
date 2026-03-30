@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { AdminPageShell } from '@/components/admin-shell';
 import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
+import { formatMoney, formatMoneyWhole } from '@/lib/format';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -54,28 +55,11 @@ type OrderDetail = {
   items: OrderItem[];
 };
 
-function formatMoney(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format(cents / 100);
-}
-
-function formatMoneyWhole(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
-
 function formatWhen(iso: string): string {
   return new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(iso));
 }
 
-/** e.g. "12 Nov, 2021" — matches Phoenix order detail */
+/** e.g. "12 Nov, 2021" — matches Dhidi order detail */
 function formatShippingDate(iso: string): string {
   const d = new Date(iso);
   const mon = d.toLocaleString('en-GB', { month: 'short' });
@@ -510,7 +494,7 @@ export default function AdminOrderDetailPage() {
 
           <div className="overflow-hidden rounded-admin border border-[#e5ebf5] bg-white">
             <div className="grid grid-cols-1 divide-y divide-[#e5ebf5] lg:grid-cols-3 lg:divide-x lg:divide-y-0">
-              {/* Billing details — Phoenix: icon + label + value; links in blue */}
+              {/* Billing details — Dhidi: icon + label + value; links in blue */}
               <section className="p-5 sm:p-6">
                 <h2 className="text-base font-semibold tracking-tight text-[#1c2740]">Billing details</h2>
                 {order.user && order.address ? (
@@ -683,7 +667,7 @@ export default function AdminOrderDetailPage() {
 
       <footer className="mt-12 hidden border-t border-[#e4eaf5] pt-4 text-sm text-[#8ea0bf] print:block print:mt-8">
         <div className="flex justify-between">
-          <span>Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon</span>
+          <span>Thank you for creating with Dhidi | 2026 © ThemeWagon</span>
           <span>v1.0.0</span>
         </div>
       </footer>

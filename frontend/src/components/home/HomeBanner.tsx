@@ -74,8 +74,8 @@ export function HomeBanner() {
         <div className="grid min-h-[20rem] items-center gap-[1.8rem] sm:min-h-[22rem] lg:h-[26rem] lg:max-h-[26rem] lg:min-h-[26rem] lg:grid-cols-2 lg:gap-[2.7rem] lg:items-center lg:overflow-hidden">
           <div className="flex min-h-0 flex-col justify-center text-white lg:max-h-full lg:overflow-y-auto lg:pr-1">
             <p className="text-sm text-white/90">
-              {slide.priceLine.split(/(\$[\d,.]+)/).map((part, i) =>
-                part.startsWith('$') ? (
+              {slide.priceLine.split(/(\$[\d,.]+|₹[\d,]+)/).map((part, i) =>
+                part.startsWith('$') || part.startsWith('₹') ? (
                   <strong key={i} className="font-semibold text-white">
                     {part}
                   </strong>

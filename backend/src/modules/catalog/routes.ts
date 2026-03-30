@@ -897,7 +897,10 @@ async function catalogRoutes(fastify) {
       restockQuantity: z.number().int().nonnegative().optional().default(0),
       stockInTransit: z.number().int().nonnegative().optional(),
       totalStockLifetime: z.number().int().nonnegative().optional(),
-      fulfillmentType: z.enum(['seller', 'phoenix']).optional().nullable(),
+      fulfillmentType: z.preprocess(
+        (v) => (v === 'phoenix' ? 'dhidi' : v),
+        z.enum(['seller', 'dhidi']).optional().nullable()
+      ),
       externalProductIdType: z.string().max(20).optional().nullable(),
       externalProductId: z.string().max(120).optional().nullable(),
       categoryId: z.number().int().positive('Category is required'),
@@ -934,7 +937,10 @@ async function catalogRoutes(fastify) {
       restockQuantity: z.number().int().nonnegative().optional().default(0),
       stockInTransit: z.number().int().nonnegative().optional(),
       totalStockLifetime: z.number().int().nonnegative().optional(),
-      fulfillmentType: z.enum(['seller', 'phoenix']).optional().nullable(),
+      fulfillmentType: z.preprocess(
+        (v) => (v === 'phoenix' ? 'dhidi' : v),
+        z.enum(['seller', 'dhidi']).optional().nullable()
+      ),
       externalProductIdType: z.string().max(20).optional().nullable(),
       externalProductId: z.string().max(120).optional().nullable(),
       categoryId: z.number().int().positive().optional().nullable(),

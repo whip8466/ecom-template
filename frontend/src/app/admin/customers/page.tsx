@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
+import { formatMoneyWhole } from '@/lib/format';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -47,11 +48,6 @@ const TABS: { id: ViewId; label: string; countKey: keyof Counts }[] = [
   { id: 'email_subscribers', label: 'Email subscribers', countKey: 'email_subscribers' },
   { id: 'top_reviews', label: 'Top reviews', countKey: 'top_reviews' },
 ];
-
-function formatMoney(cents: number): string {
-  const n = Math.round(cents / 100);
-  return `$ ${n.toLocaleString('en-US')}`;
-}
 
 function formatOrderDate(iso: string | null): string {
   if (!iso) return '—';
@@ -392,7 +388,7 @@ export default function AdminCustomersPage() {
                       </a>
                     </td>
                     <td className="p-3 tabular-nums text-[#31374a]">{r.orderCount}</td>
-                    <td className="p-3 tabular-nums text-[#31374a]">{formatMoney(r.totalSpentCents)}</td>
+                    <td className="p-3 tabular-nums text-[#31374a]">{formatMoneyWhole(r.totalSpentCents)}</td>
                     <td className="p-3 text-[#31374a]">{r.city}</td>
                     <td className="p-3 text-[#6e7891]">{relativeTime(r.lastSeenAt)}</td>
                     <td className="whitespace-nowrap p-3 text-[#6e7891]">{formatOrderDate(r.lastOrderAt)}</td>
@@ -448,11 +444,11 @@ export default function AdminCustomersPage() {
       </div>
 
       <footer className="mt-10 flex flex-col gap-2 border-t pt-6 text-sm sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: P.border, color: P.muted2 }}>
-        <span>Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon</span>
+        <span>Thank you for creating with Dhidi | 2026 © ThemeWagon</span>
         <span>v1.0.0</span>
       </footer>
 
-      {/* Floating UI (Phoenix reference) */}
+      {/* Floating UI (Dhidi reference) */}
       <div className="pointer-events-none fixed bottom-6 right-6 z-20 flex flex-col items-end gap-3">
         <div className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-l-admin border bg-white py-2 pl-2 pr-3 text-xs font-semibold uppercase tracking-wide text-[#6e7891] shadow-md" style={{ borderColor: P.border }}>
           <span className="rounded-admin bg-[#f5f7fa] p-1.5">

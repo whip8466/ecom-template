@@ -6,6 +6,10 @@ import { UserRole } from '../../constants/enums';
 
 const PRODUCT_STATUS = { PUBLISHED: 'PUBLISHED' } as const;
 
+function formatInrFromCents(cents: number): string {
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(cents / 100);
+}
+
 /** Same storefront shape as GET /api/products list (see catalog/routes mapProduct). */
 function mapProduct(product: Record<string, unknown>) {
   return {
@@ -316,7 +320,7 @@ async function dealOfDayRoutes(fastify: FastifyInstance) {
         const actual = effectiveListPriceCents(p);
         if (s.dealPriceCents >= actual) {
           return reply.code(400).send({
-            message: `Deal price must be less than the current price for "${p.name}" (#${p.id}). Current price is $${(actual / 100).toFixed(2)}.`,
+            message: `Deal price must be less than the current price for "${p.name}" (#${p.id}). Current price is ${formatInrFromCents(actual)}.`,
           });
         }
       }
@@ -430,7 +434,7 @@ async function dealOfDayRoutes(fastify: FastifyInstance) {
     const actual = effectiveListPriceCents(row.product);
     if (row.dealPriceCents >= actual) {
       return reply.code(400).send({
-        message: `Deal price must be less than the current price for "${row.product.name}" (#${row.product.id}). Current price is $${(actual / 100).toFixed(2)}. Update the deal or product price before activating.`,
+        message: `Deal price must be less than the current price for "${row.product.name}" (#${row.product.id}). Current price is ${formatInrFromCents(actual)}. Update the deal or product price before activating.`,
       });
     }
 

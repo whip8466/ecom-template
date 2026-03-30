@@ -1,4 +1,4 @@
-/** Convert integer dollars (0 … 999_999) to English words, title-cased. */
+/** Convert integer rupees (0 … 999_999) to English words, title-cased. */
 const SMALL: string[] = [
   'zero',
   'one',
@@ -67,9 +67,9 @@ function titleCaseInvoiceWords(s: string): string {
     .join(' ');
 }
 
-/** e.g. "Three Hundred And Ninety-Eight USD" for whole-dollar amounts from cents. */
+/** e.g. "Three Hundred And Ninety-Eight Rupees Only" for whole-rupee amounts from paise (cents). */
 export function grandTotalInWords(cents: number): string {
-  const dollars = Math.floor(cents / 100);
-  const words = dollarsToWords(dollars);
-  return `${titleCaseInvoiceWords(words)} USD`;
+  const rupees = Math.floor(cents / 100);
+  const words = dollarsToWords(rupees);
+  return `${titleCaseInvoiceWords(words)} Rupees Only`;
 }

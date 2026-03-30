@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AdminPageShell } from '@/components/admin-shell';
 import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { useAuthStore } from '@/store/auth-store';
+import { formatMoney } from '@/lib/format';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -53,10 +54,6 @@ type CustomerDetail = {
 };
 
 type Note = { id: number; body: string; createdAt: string };
-
-function formatMoney(cents: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
-}
 
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(iso));
@@ -502,7 +499,7 @@ export default function CustomerDetailPage() {
       </div>
 
       <footer className="mt-12 flex flex-col gap-2 border-t border-[#e3e6ed] pt-6 text-sm text-[#9aa3b8] sm:flex-row sm:items-center sm:justify-between">
-        <span>Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon</span>
+        <span>Thank you for creating with Dhidi | 2026 © ThemeWagon</span>
         <span>v1.0.0</span>
       </footer>
     </AdminPageShell>

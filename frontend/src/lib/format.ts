@@ -1,7 +1,21 @@
+/** Indian Rupee — all storefront and admin money display uses these. */
+export const MONEY_LOCALE = 'en-IN';
+export const MONEY_CURRENCY = 'INR';
+
 export function formatMoney(cents: number) {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat(MONEY_LOCALE, {
     style: 'currency',
-    currency: 'USD',
+    currency: MONEY_CURRENCY,
+  }).format(cents / 100);
+}
+
+/** Whole rupees (no fractional paisa in the formatted string). */
+export function formatMoneyWhole(cents: number) {
+  return new Intl.NumberFormat(MONEY_LOCALE, {
+    style: 'currency',
+    currency: MONEY_CURRENCY,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(cents / 100);
 }
 

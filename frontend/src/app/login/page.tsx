@@ -55,7 +55,7 @@ export default function LoginPage() {
       </div>
 
       <div className="relative mx-auto max-w-md rounded-md border border-[#e5ecf6] bg-white p-8 shadow-[0_12px_30px_rgba(16,24,40,0.08)]">
-        <h2 className="text-4xl font-semibold text-[#0f1f40]">Login to Lumina.</h2>
+        <h2 className="text-4xl font-semibold text-[#0f1f40]">Login to Dhidi.</h2>
         <p className="mt-2 text-sm text-[#667085]">
           Don&apos;t have an account?{' '}
           <Link href="/register" className="font-medium text-[#0989ff] hover:underline">

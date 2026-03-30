@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/auth-store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-/** Phoenix theme tokens */
+/** Dhidi theme tokens */
 const P = {
   primary: '#3874ff',
   primaryLight: '#b8d0ff',
@@ -106,14 +106,14 @@ const reviews = [
 ];
 
 const regions = [
-  { country: 'India', flag: '🇮🇳', users: '92,620', usersPct: '24.5%', transactions: '86', transPct: '36.4%', revenue: '$5,758', revPct: '36.5%', conv: '10.32%' },
-  { country: 'China', flag: '🇨🇳', users: '81,250', usersPct: '21.5%', transactions: '62', transPct: '26.3%', revenue: '$4,258', revPct: '27.0%', conv: '8.12%' },
-  { country: 'USA', flag: '🇺🇸', users: '64,830', usersPct: '17.2%', transactions: '42', transPct: '17.8%', revenue: '$2,845', revPct: '18.0%', conv: '6.48%' },
-  { country: 'South Korea', flag: '🇰🇷', users: '42,150', usersPct: '11.2%', transactions: '28', transPct: '11.9%', revenue: '$1,658', revPct: '10.5%', conv: '6.64%' },
-  { country: 'Vietnam', flag: '🇻🇳', users: '38,420', usersPct: '10.2%', transactions: '18', transPct: '7.6%', revenue: '$1,239', revPct: '7.9%', conv: '4.69%' },
+  { country: 'India', flag: '🇮🇳', users: '92,620', usersPct: '24.5%', transactions: '86', transPct: '36.4%', revenue: '₹5,758', revPct: '36.5%', conv: '10.32%' },
+  { country: 'China', flag: '🇨🇳', users: '81,250', usersPct: '21.5%', transactions: '62', transPct: '26.3%', revenue: '₹4,258', revPct: '27.0%', conv: '8.12%' },
+  { country: 'USA', flag: '🇺🇸', users: '64,830', usersPct: '17.2%', transactions: '42', transPct: '17.8%', revenue: '₹2,845', revPct: '18.0%', conv: '6.48%' },
+  { country: 'South Korea', flag: '🇰🇷', users: '42,150', usersPct: '11.2%', transactions: '28', transPct: '11.9%', revenue: '₹1,658', revPct: '10.5%', conv: '6.64%' },
+  { country: 'Vietnam', flag: '🇻🇳', users: '38,420', usersPct: '10.2%', transactions: '18', transPct: '7.6%', revenue: '₹1,239', revPct: '7.9%', conv: '4.69%' },
 ];
 
-/** Mar 15 – Mar 24 (Phoenix reference) */
+/** Mar 15 – Mar 24 (Dhidi reference) */
 const projectionData = [
   { date: '15', projected: 62, actual: 55 },
   { date: '16', projected: 58, actual: 62 },
@@ -229,7 +229,7 @@ function DualLineAreaChart({ a, b, height = 160 }: { a: number[]; b: number[]; h
   );
 }
 
-/** Radial gauge — dominant metric 72% (Phoenix “Top coupons”) */
+/** Radial gauge — dominant metric 72% (Dhidi “Top coupons”) */
 function RadialCouponGauge({ percent }: { percent: number }) {
   const r = 38;
   const cx = 50;
@@ -258,7 +258,7 @@ function RadialCouponGauge({ percent }: { percent: number }) {
   );
 }
 
-/** Semi-circle doughnut — paying vs non-paying (Phoenix-style arc) */
+/** Semi-circle doughnut — paying vs non-paying */
 function SemiDonutPaying({ paying, nonPaying }: { paying: number; nonPaying: number }) {
   const total = paying + nonPaying || 1;
   const sweep = (paying / total) * 180;
@@ -417,7 +417,7 @@ export function EcommerceDashboard() {
         </p>
       </div>
 
-      {/* Row 1: 3 status cards + 2 KPIs (Phoenix single band) */}
+      {/* Row 1: 3 status cards + 2 KPIs (Dhidi single band) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-12">
         {statusCards.map((card) => (
           <div
@@ -711,7 +711,7 @@ export function EcommerceDashboard() {
             {[
               { label: 'Users', value: '377,620' },
               { label: 'Transactions', value: '236' },
-              { label: 'Revenue', value: '$15,758' },
+              { label: 'Revenue', value: '₹15,758' },
               { label: 'Conv. rate', value: '10.32%' },
             ].map((k) => (
               <div key={k.label} className="rounded-admin px-3 py-2 text-center" style={{ backgroundColor: P.surface }}>
@@ -894,7 +894,7 @@ export function EcommerceDashboard() {
         className="flex flex-col gap-2 border-t pt-6 text-sm sm:flex-row sm:items-center sm:justify-between"
         style={{ borderColor: P.border, color: P.muted2 }}
       >
-        <span>Thank you for creating with Phoenix Tailwind | 2023 © ThemeWagon</span>
+        <span>Thank you for creating with Dhidi | 2023 © ThemeWagon</span>
         <span>v1.8.0</span>
       </footer>
     </div>

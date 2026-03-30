@@ -70,12 +70,12 @@ html {
     transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.2s ease;
   }
 
-  /** Inputs, buttons, selects, pagination — matches admin top bar / Phoenix controls */
+  /** Inputs, buttons, selects, pagination — matches admin top bar / Dhidi controls */
   .rounded-admin {
     border-radius: var(--admin-radius);
   }
 
-  /** Tables, modals, main panels — matches Phoenix dashboard cards */
+  /** Tables, modals, main panels — matches Dhidi dashboard cards */
   .rounded-admin-card {
     border-radius: var(--admin-radius-card);
   }

@@ -179,7 +179,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
   const [stockInTransit, setStockInTransit] = useState('');
   const [totalStockLifetime, setTotalStockLifetime] = useState('');
   const [lastRestockedAt, setLastRestockedAt] = useState<string | null>(null);
-  const [shippingType, setShippingType] = useState<'seller' | 'phoenix'>('phoenix');
+  const [shippingType, setShippingType] = useState<'seller' | 'dhidi'>('dhidi');
   const [productIdType, setProductIdType] = useState('ISBN');
   const [productId, setProductId] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
@@ -339,7 +339,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         setStockInTransit(String(p.stockInTransit ?? 0));
         setTotalStockLifetime(String(p.totalStockLifetime ?? p.stock ?? 0));
         setLastRestockedAt(p.lastRestockedAt ?? null);
-        setShippingType((p.fulfillmentType as 'seller' | 'phoenix') || 'phoenix');
+        setShippingType(p.fulfillmentType === 'seller' ? 'seller' : 'dhidi');
         setProductIdType(p.externalProductIdType || 'ISBN');
         setProductId(p.externalProductId || '');
         setCategoryId(p.category ? String(p.category.id) : '');
@@ -760,7 +760,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
       setStockInTransit('');
       setTotalStockLifetime('');
       setLastRestockedAt(null);
-      setShippingType('phoenix');
+      setShippingType('dhidi');
       setProductIdType('ISBN');
       setProductId('');
       setCategoryId('');
@@ -1156,13 +1156,13 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
                         <input
                           type="radio"
                           name="shippingType"
-                          checked={shippingType === 'phoenix'}
-                          onChange={() => setShippingType('phoenix')}
+                          checked={shippingType === 'dhidi'}
+                          onChange={() => setShippingType('dhidi')}
                           className="mt-1 h-4 w-4 border-[#e5ebf5] text-[#246bfd] focus:ring-[#246bfd]"
                         />
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-[#1c2740]">Fulfilled by Phoenix</span>
+                            <span className="text-sm font-medium text-[#1c2740]">Fulfilled by Dhidi</span>
                             <span className="rounded-admin border border-[#ea580c] bg-[#fff7ed] px-2 py-0.5 text-xs font-medium text-[#c2410c]">RECOMMENDED</span>
                           </div>
                           <p className="mt-1 text-sm text-[#64748b]">Your product, Our responsibility. For a measly fee, we will handle the delivery process for you.</p>
@@ -1645,7 +1645,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         )}
 
         <footer className="mt-12 border-t border-[#e4eaf5] py-4 text-center text-sm text-[#8ea0bf]">
-          Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon
+          Thank you for creating with Dhidi | 2026 © ThemeWagon
           <span className="ml-4 text-right">v1.0.0</span>
         </footer>
     </AdminPageShell>

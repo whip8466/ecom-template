@@ -16,7 +16,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Lumina | Premium Lifestyle & Home",
+  title: "Dhidi | Premium Lifestyle & Home",
   description: "Curated fashion, beauty, and home decor for modern living",
 };
 

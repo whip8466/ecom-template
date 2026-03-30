@@ -6,11 +6,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { AdminPageShell } from '@/components/admin-shell';
 import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
 import { grandTotalInWords } from '@/lib/amount-in-words';
+import { formatMoney, formatMoneyWhole } from '@/lib/format';
 import { useAuthStore } from '@/store/auth-store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-const STORE_NAME = process.env.NEXT_PUBLIC_STORE_NAME ?? 'PhoenixMart';
+const STORE_NAME = process.env.NEXT_PUBLIC_STORE_NAME ?? 'Dhidi';
 const STORE_ADDRESS = process.env.NEXT_PUBLIC_STORE_ADDRESS ?? '36 Greendown Road, California, USA';
 const STORE_GST = process.env.NEXT_PUBLIC_STORE_GST ?? '—';
 const STORE_PAN = process.env.NEXT_PUBLIC_STORE_PAN ?? '—';
@@ -49,23 +50,6 @@ type OrderDetail = {
   address: Address | null;
   items: OrderItem[];
 };
-
-function formatMoney(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format(cents / 100);
-}
-
-function formatMoneyWhole(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 function formatInvoiceDate(iso: string): string {
   const d = new Date(iso);
@@ -107,7 +91,7 @@ function buildInvoiceHtml(order: OrderDetail): string {
       <td>${formatMoneyWhole(line.productPriceSnapshotCents)}</td>
       <td>—</td>
       <td>—</td>
-      <td>$0.00</td>
+      <td>${formatMoney(0)}</td>
       <td>${formatMoneyWhole(line.subtotalCents)}</td>
     </tr>`
     )
@@ -289,7 +273,7 @@ export default function AdminOrderInvoicePage() {
       actions={actions}
     >
       <div className="mx-auto max-w-5xl bg-white print:max-w-none">
-        {/* Meta grid — Phoenix-style grey panel */}
+        {/* Meta grid — Dhidi-style grey panel */}
         <div className="rounded-admin border border-[#e5ebf5] bg-[#f8fafc] p-4 sm:p-6">
           <div className="grid gap-8 text-sm text-[#475569] lg:grid-cols-3">
             <div className="space-y-3">
@@ -458,7 +442,7 @@ export default function AdminOrderInvoicePage() {
         </div>
 
         <footer className="mt-10 flex flex-col gap-2 border-t border-[#e4eaf5] pt-4 text-sm text-[#8ea0bf] print:mt-8 sm:flex-row sm:items-center sm:justify-between">
-          <span>Thank you for creating with Phoenix Tailwind | 2026 © ThemeWagon</span>
+          <span>Thank you for creating with Dhidi | 2026 © ThemeWagon</span>
           <span>v1.0.0</span>
         </footer>
       </div>

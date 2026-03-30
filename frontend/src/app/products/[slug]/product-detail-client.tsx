@@ -43,7 +43,10 @@ function buildAdditionalRows(product: Product): { label: string; value: string }
     rows.push({ label: 'Tags', value: product.tags.map((t) => t.name).join(', ') });
   }
   if (product.fulfillmentType) {
-    rows.push({ label: 'Fulfillment', value: product.fulfillmentType });
+    const ft = product.fulfillmentType;
+    const display =
+      ft === 'seller' ? 'Seller' : ft === 'dhidi' || ft === 'phoenix' ? 'Dhidi' : ft;
+    rows.push({ label: 'Fulfillment', value: display });
   }
   return rows;
 }
