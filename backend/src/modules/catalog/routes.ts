@@ -62,6 +62,32 @@ function mapProduct(product) {
   };
 }
 
+/** Batch average star rating (1–5) per product for GET /products list payloads. */
+async function averageRatingsByProductId(prisma, productIds) {
+  const ids = [...new Set(productIds)].filter(
+    (id) => typeof id === 'number' && Number.isInteger(id) && id > 0,
+  );
+  const map = new Map();
+  if (ids.length === 0) return map;
+  const rows = await prisma.productReview.groupBy({
+    by: ['productId'],
+    where: { productId: { in: ids } },
+    _avg: { rating: true },
+  });
+  for (const r of rows) {
+    const v = r._avg.rating;
+    map.set(r.productId, v != null ? Number(v) : null);
+  }
+  return map;
+}
+
+function mapProductsWithAverageRating(products, avgMap) {
+  return products.map((p) => ({
+    ...mapProduct(p),
+    averageRating: avgMap.get(p.id) ?? null,
+  }));
+}
+
 async function optionalAuthUser(request) {
   const authHeader = request.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -316,8 +342,12 @@ async function catalogRoutes(fastify) {
       const skip = (query.page - 1) * limit;
       const products = matched.slice(skip, skip + limit);
 
+      const topAvg = await averageRatingsByProductId(
+        prisma,
+        products.map((p) => p.id),
+      );
       return {
-        data: products.map(mapProduct),
+        data: mapProductsWithAverageRating(products, topAvg),
         pagination: {
           page: query.page,
           limit,
@@ -338,8 +368,12 @@ async function catalogRoutes(fastify) {
       prisma.product.count({ where }),
     ]);
 
+    const listAvg = await averageRatingsByProductId(
+      prisma,
+      products.map((p) => p.id),
+    );
     return {
-      data: products.map(mapProduct),
+      data: mapProductsWithAverageRating(products, listAvg),
       pagination: {
         page: query.page,
         limit,

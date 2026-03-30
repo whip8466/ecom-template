@@ -28,6 +28,21 @@ const checkoutSchema = z.object({
     .min(1),
 });
 
+/** Include product images so storefront order list/detail can show thumbnails. */
+const orderDetailInclude = {
+  address: true,
+  user: true,
+  items: {
+    include: {
+      product: {
+        include: {
+          images: { orderBy: { id: 'asc' }, take: 1 },
+        },
+      },
+    },
+  },
+};
+
 function toOrderDto(order) {
   return {
     id: order.id,
@@ -561,7 +576,7 @@ async function ordersRoutes(fastify) {
 
         return tx.order.findUnique({
           where: { id: order.id },
-          include: { address: true, items: { include: { product: true } }, user: true },
+          include: orderDetailInclude,
         });
       });
 
@@ -574,7 +589,7 @@ async function ordersRoutes(fastify) {
   fastify.get('/user/orders', { preHandler: [fastify.authenticate] }, async (request) => {
     const orders = await fastify.prisma.order.findMany({
       where: { userId: request.authUser.userId },
-      include: { address: true, items: { include: { product: true } }, user: true },
+      include: orderDetailInclude,
       orderBy: { createdAt: 'desc' },
     });
 
@@ -585,7 +600,7 @@ async function ordersRoutes(fastify) {
     const id = Number(request.params.id);
     const order = await fastify.prisma.order.findFirst({
       where: { id, userId: request.authUser.userId },
-      include: { address: true, items: { include: { product: true } }, user: true },
+      include: orderDetailInclude,
     });
 
     if (!order) return reply.code(404).send({ message: 'Order not found' });

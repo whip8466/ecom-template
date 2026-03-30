@@ -94,7 +94,6 @@ function RatingCell({ rating }: { rating?: number | null }) {
           />
         ))}
       </span>
-      {hasScore ? <span className="text-xs tabular-nums text-[#64748b]">{clamped.toFixed(1)}</span> : null}
     </div>
   );
 }

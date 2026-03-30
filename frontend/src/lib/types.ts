@@ -102,6 +102,9 @@ export type OrderItem = {
   colorName?: string;
   quantity: number;
   subtotalCents: number;
+  /** Present when order list/detail includes product relation (storefront). */
+  productSlug?: string | null;
+  productImageUrl?: string | null;
 };
 
 export type Order = {
@@ -110,7 +113,7 @@ export type Order = {
   status: string;
   paymentStatus: string;
   createdAt: string;
-  user?: { id: number; name: string; email: string };
+  user?: { id: number; name: string; email: string; phone?: string | null };
   address: Address;
   items: OrderItem[];
 };

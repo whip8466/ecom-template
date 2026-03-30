@@ -285,6 +285,14 @@ function StorefrontHeader({
                     className="absolute right-0 top-full z-[100] mt-1 min-w-[200px] rounded-none border border-[var(--border)] bg-[var(--card-bg)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
                   >
                     <Link
+                      href="/account/profile"
+                      role="menuitem"
+                      className="block px-4 py-2.5 text-sm text-[var(--navy)] hover:bg-[var(--cream)]"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
                       href="/account/orders"
                       role="menuitem"
                       className="block px-4 py-2.5 text-sm text-[var(--navy)] hover:bg-[var(--cream)]"

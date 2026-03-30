@@ -1,29 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth-store';
-import { buildLoginRedirectHref } from '@/lib/auth-redirect';
+import { withAuth } from '@/components/auth';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { useCartStore } from '@/store/cart-store';
 import { formatMoney } from '@/lib/format';
 
-export default function WishlistPage() {
-  const router = useRouter();
-  const user = useAuthStore((state) => state.user);
+function WishlistPage() {
   const { items, toggleWishlist } = useWishlistStore();
   const addToCart = useCartStore((state) => state.addToCart);
-
-  useEffect(() => {
-    if (!user) {
-      router.replace(buildLoginRedirectHref('/wishlist'));
-    }
-  }, [router, user]);
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -99,3 +84,5 @@ export default function WishlistPage() {
     </div>
   );
 }
+
+export default withAuth(WishlistPage);

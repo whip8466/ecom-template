@@ -166,8 +166,13 @@ export default function AdminProductReviewsPage() {
                   <tr key={r.id} className="border-b border-[#f1f5f9] last:border-0">
                     <td className="p-4 align-top">
                       <Link
-                        href={`/admin/product/edit/${r.product.id}`}
+                        href={
+                          r.product.slug
+                            ? `/products/${encodeURIComponent(r.product.slug)}`
+                            : `/admin/product/edit/${r.product.id}`
+                        }
                         className="font-medium text-[#246bfd] hover:underline"
+                        title="View product on store"
                       >
                         {r.product.name}
                       </Link>

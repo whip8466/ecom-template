@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { apiRequest } from '@/lib/api';
 import type { User } from '@/lib/types';
 
@@ -14,6 +14,22 @@ type AuthState = {
   setHasHydrated: (value: boolean) => void;
   refreshMe: () => Promise<void>;
 };
+
+/** No-op storage so persist middleware always mounts (SSR / blocked localStorage). */
+const noopWebStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+} as unknown as Storage;
+
+function getStorage(): Storage {
+  if (typeof window === 'undefined') return noopWebStorage;
+  try {
+    return window.localStorage;
+  } catch {
+    return noopWebStorage;
+  }
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -33,7 +49,8 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'eco-auth',
-      onRehydrateStorage: () => (state) => {
+      storage: createJSONStorage(getStorage),
+      onRehydrateStorage: () => () => {
         useAuthStore.getState().setHasHydrated(true);
       },
       partialize: (s) => ({ token: s.token, user: s.user }),
