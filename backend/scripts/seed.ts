@@ -315,6 +315,31 @@ async function seed() {
     ],
   });
 
+  const defaultSitePages = [
+    {
+      slug: 'about-us',
+      title: 'About Us',
+      body: '<p>Tell your brand story here.</p>',
+    },
+    {
+      slug: 'privacy-policy',
+      title: 'Privacy Policy',
+      body: '<p>Describe how you collect and use customer data.</p>',
+    },
+    {
+      slug: 'terms-of-service',
+      title: 'Terms of Service',
+      body: '<p>Your store terms and conditions.</p>',
+    },
+  ];
+  for (const p of defaultSitePages) {
+    await prisma.sitePage.upsert({
+      where: { slug: p.slug },
+      create: p,
+      update: {},
+    });
+  }
+
   await prisma.$disconnect();
   console.log('Seed completed.');
 }

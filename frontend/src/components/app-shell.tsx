@@ -593,9 +593,9 @@ function StorefrontFooter() {
           <div>
             <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Company</h4>
             <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">About Us</Link></li>
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Privacy Policy</Link></li>
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Terms of Service</Link></li>
+              <li><Link href="/about-us" className="transition-premium hover:text-[var(--navy)]">About Us</Link></li>
+              <li><Link href="/privacy-policy" className="transition-premium hover:text-[var(--navy)]">Privacy Policy</Link></li>
+              <li><Link href="/terms-of-service" className="transition-premium hover:text-[var(--navy)]">Terms of Service</Link></li>
               <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Careers</Link></li>
             </ul>
           </div>

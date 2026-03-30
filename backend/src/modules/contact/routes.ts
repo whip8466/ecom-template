@@ -1,12 +1,14 @@
-const { z } = require('zod');
-const { UserRole } = require('../../constants/enums');
+import type { ContactSettings } from '@prisma/client';
+import type { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import { UserRole } from '../../constants/enums';
 
-function isStaff(authUser) {
+function isStaff(authUser: { role: string } | undefined): boolean {
   if (!authUser) return false;
   return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
 }
 
-function mapSettings(row) {
+function mapSettings(row: ContactSettings | null) {
   if (!row) return null;
   return {
     headline: row.headline,
@@ -42,8 +44,8 @@ const contactPostSchema = z.object({
   saveInfo: z.boolean().optional().default(false),
 });
 
-async function contactRoutes(fastify) {
-  fastify.get('/contact-settings', async (request, reply) => {
+async function contactRoutes(fastify: FastifyInstance): Promise<void> {
+  fastify.get('/contact-settings', async (_request, reply) => {
     const prisma = fastify.prisma;
     if (!prisma.contactSettings) {
       return reply.code(503).send({ message: 'Database client is out of date. Run prisma generate and restart the API.' });
@@ -66,7 +68,7 @@ async function contactRoutes(fastify) {
       if (!prisma.contactSettings) {
         return reply.code(503).send({ message: 'Database client is out of date.' });
       }
-      let body;
+      let body: z.infer<typeof settingsPutSchema>;
       try {
         body = settingsPutSchema.parse(request.body);
       } catch {
@@ -81,10 +83,10 @@ async function contactRoutes(fastify) {
           supportEmail: body.supportEmail,
           phone: body.phone,
           addressLine: body.addressLine,
-          mapEmbedUrl: body.mapEmbedUrl || null,
-          facebookUrl: body.facebookUrl || null,
-          twitterUrl: body.twitterUrl || null,
-          linkedinUrl: body.linkedinUrl || null,
+          mapEmbedUrl: body.mapEmbedUrl ?? null,
+          facebookUrl: body.facebookUrl ?? null,
+          twitterUrl: body.twitterUrl ?? null,
+          linkedinUrl: body.linkedinUrl ?? null,
         },
         update: {
           headline: body.headline,
@@ -92,10 +94,10 @@ async function contactRoutes(fastify) {
           supportEmail: body.supportEmail,
           phone: body.phone,
           addressLine: body.addressLine,
-          mapEmbedUrl: body.mapEmbedUrl || null,
-          facebookUrl: body.facebookUrl || null,
-          twitterUrl: body.twitterUrl || null,
-          linkedinUrl: body.linkedinUrl || null,
+          mapEmbedUrl: body.mapEmbedUrl ?? null,
+          facebookUrl: body.facebookUrl ?? null,
+          twitterUrl: body.twitterUrl ?? null,
+          linkedinUrl: body.linkedinUrl ?? null,
         },
       });
       return { data: mapSettings(row) };
@@ -107,7 +109,7 @@ async function contactRoutes(fastify) {
     if (!prisma.contactMessage) {
       return reply.code(503).send({ message: 'Database client is out of date.' });
     }
-    let body;
+    let body: z.infer<typeof contactPostSchema>;
     try {
       body = contactPostSchema.parse(request.body);
     } catch {
@@ -172,4 +174,4 @@ async function contactRoutes(fastify) {
   );
 }
 
-module.exports = contactRoutes;
+export = contactRoutes;

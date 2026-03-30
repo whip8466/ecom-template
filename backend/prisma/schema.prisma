@@ -426,3 +426,14 @@ model ProductReview {
   @@index([userId])
   @@map("product_reviews")
 }
+
+/// Storefront static content (About, Privacy, Terms) — edited in admin.
+model SitePage {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique @db.VarChar(64)
+  title     String   @db.VarChar(500)
+  body      String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("site_pages")
+}
