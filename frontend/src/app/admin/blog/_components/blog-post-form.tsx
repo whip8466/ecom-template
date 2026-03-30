@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { BlogBodyEditor } from '@/components/blog/BlogBodyEditor';
+import { isBodyEmpty, normalizeBodyForEditor } from '@/lib/blog-body-html';
 import type { BlogCategory, BlogPost } from '@/lib/blog';
 import { slugFromTitle } from '@/lib/slugify-title';
 
@@ -67,7 +69,7 @@ export function BlogPostForm({
             title: title.trim(),
             ...(slugTrim ? { slug: slugTrim } : {}),
             excerpt: excerptVal,
-            body: body.trim(),
+            body: body.trim() || '<p></p>',
             coverImageUrl: coverVal,
             publish,
             blogCategoryId,
@@ -85,7 +87,7 @@ export function BlogPostForm({
           title: title.trim(),
           ...(slugTrim ? { slug: slugTrim } : {}),
           excerpt: excerptVal,
-          body: body.trim(),
+          body: body.trim() || '<p></p>',
           coverImageUrl: coverVal,
           publish,
           blogCategoryId,
@@ -161,16 +163,18 @@ export function BlogPostForm({
           placeholder="Short summary for listings"
         />
       </label>
-      <label className="block text-xs font-medium text-[#60759b]">
-        Content
-        <textarea
-          className="mt-1 min-h-[220px] w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#1c2740]"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="Article body (plain text or HTML)"
-          required
-        />
-      </label>
+      <div className="block">
+        <span className="text-xs font-medium text-[#60759b]">Content</span>
+        <div className="mt-1">
+          <BlogBodyEditor
+            key={initial?.id ?? 'new'}
+            initialBody={initial?.body ?? ''}
+            onChange={setBody}
+            disabled={saving}
+          />
+        </div>
+        <p className="mt-1 text-[11px] text-[#94a3b8]">Rich text (TipTap). Shown on the public blog as HTML.</p>
+      </div>
       <label className="block text-xs font-medium text-[#60759b]">
         Cover image URL
         <input
@@ -192,7 +196,7 @@ export function BlogPostForm({
       </label>
       <button
         type="button"
-        disabled={saving || !title.trim() || !body.trim()}
+        disabled={saving || !title.trim() || isBodyEmpty(body)}
         onClick={() => void submit()}
         className="rounded-admin bg-[#3874ff] px-4 py-2 text-sm font-medium text-white hover:bg-[#2d5fd6] disabled:opacity-50"
       >

@@ -6,7 +6,9 @@ import { useAuthStore } from '@/store/auth-store';
 import { messageFromApiErrorPayload } from '@/lib/api-error';
 import { apiRequest } from '@/lib/api';
 import { handleInvalidTokenIfNeeded } from '@/lib/invalidate-session';
+import { BlogBodyEditor } from '@/components/blog/BlogBodyEditor';
 import { AdminPageShell } from '@/components/admin-shell';
+import { isBodyEmpty, normalizeBodyForEditor, plainTextFromHtml } from '@/lib/blog-body-html';
 
 type Category = { id: number; name: string; slug: string; depth?: number };
 type Vendor = { id: number; name: string; slug: string };
@@ -329,7 +331,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
         const p = res.data;
         setSavedProductId(p.id);
         setTitle(p.name);
-        setDescription((p.description ?? p.shortDescription) || '');
+        setDescription(normalizeBodyForEditor((p.description ?? p.shortDescription) || ''));
         setImageUrls((p.images || []).map((i) => i.imageUrl));
         setRegularPrice((p.priceCents / 100).toFixed(2));
         setSalePrice(p.salePriceCents != null ? (p.salePriceCents / 100).toFixed(2) : '');
@@ -696,8 +698,11 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
     return {
       status: 'draft' as const,
       name: title.trim(),
-      shortDescription: description.trim().slice(0, 255) || undefined,
-      description: description.trim() || undefined,
+      shortDescription: (() => {
+        const plain = plainTextFromHtml(description);
+        return plain ? plain.slice(0, 255) : undefined;
+      })(),
+      description: !isBodyEmpty(description) ? description.trim() : undefined,
       priceCents: parsePriceToCents(regularPrice, true),
       salePriceCents,
       stock: stockNum,
@@ -720,8 +725,11 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
     return {
       status: 'published' as const,
       name: title.trim(),
-      shortDescription: description.trim().slice(0, 255) || undefined,
-      description: description.trim() || undefined,
+      shortDescription: (() => {
+        const plain = plainTextFromHtml(description);
+        return plain ? plain.slice(0, 255) : undefined;
+      })(),
+      description: !isBodyEmpty(description) ? description.trim() : undefined,
       priceCents,
       salePriceCents,
       stock: stockNum,
@@ -741,7 +749,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
   const handleDiscard = () => {
     if (confirm('Discard changes?')) {
       setTitle('');
-      setDescription('');
+      setDescription(normalizeBodyForEditor(''));
       setImageUrls([]);
       setRegularPrice('');
       setSalePrice('');
@@ -913,30 +921,22 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
 
             <div>
               <label className="block text-sm font-medium text-[#1c2740]">Product Description</label>
-              <div className="mt-2 flex flex-wrap gap-1 rounded-t-admin border border-b-0 border-[#e5ebf5] bg-[#f9fbff] px-2 py-1">
-                <ToolbarButton title="Undo">↶</ToolbarButton>
-                <ToolbarButton title="Redo">↷</ToolbarButton>
-                <ToolbarButton title="Bold">B</ToolbarButton>
-                <ToolbarButton title="Italic">I</ToolbarButton>
-                <ToolbarButton title="Underline">U</ToolbarButton>
-                <ToolbarButton title="Strikethrough">S</ToolbarButton>
-                <span className="border-l border-[#e5ebf5] pl-1" />
-                <ToolbarButton title="Align left">≡</ToolbarButton>
-                <ToolbarButton title="Align center">≡</ToolbarButton>
-                <ToolbarButton title="Align right">≡</ToolbarButton>
-                <ToolbarButton title="Justify">≡</ToolbarButton>
-                <span className="border-l border-[#e5ebf5] pl-1" />
-                <ToolbarButton title="Bullet list">•</ToolbarButton>
-                <ToolbarButton title="Numbered list">1.</ToolbarButton>
-                <ToolbarButton title="Link">🔗</ToolbarButton>
+              <p className="mt-1 text-xs text-[#64748b]">Rich text (TipTap). Shown on the product page as HTML.</p>
+              <div className="mt-2">
+                {editIdParam && !draftLoaded ? (
+                  <div className="rounded-admin border border-[#e5ebf5] bg-[#f9fbff] px-4 py-8 text-sm text-[#64748b]">
+                    Loading product…
+                  </div>
+                ) : (
+                  <BlogBodyEditor
+                    key={editIdParam ?? 'new'}
+                    initialBody={description}
+                    onChange={setDescription}
+                    disabled={isSavingDraft || isSubmitting}
+                    showRichBlocks={false}
+                  />
+                )}
               </div>
-              <textarea
-                placeholder="Write a description here..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={6}
-                className="w-full rounded-b-admin border border-[#e5ebf5] bg-[#f9fbff] px-4 py-3 text-[#1c2740] placeholder:text-[#8ea0bf] focus:border-[#246bfd] focus:outline-none"
-              />
             </div>
 
             <div>
@@ -1652,10 +1652,3 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
   );
 }
 
-function ToolbarButton({ children, title }: { children: React.ReactNode; title: string }) {
-  return (
-    <button type="button" title={title} className="rounded-admin p-1.5 text-[#4f607f] hover:bg-[#e5ebf5] hover:text-[#1c2740]">
-      {children}
-    </button>
-  );
-}

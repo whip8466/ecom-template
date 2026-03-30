@@ -154,6 +154,166 @@ html {
   box-shadow: 0 0 0 1px #0989ff;
 }
 
+/* Blog / TipTap: override Tailwind preflight (h* font-size inherit, ul/ol list-style none) */
+.blog-html-content {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #1c2740;
+}
+
+.blog-html-content p {
+  margin: 0 0 0.75rem;
+}
+
+.blog-html-content h1 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 0.75rem;
+}
+
+.blog-html-content h2 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin: 1rem 0 0.5rem;
+}
+
+.blog-html-content h3 {
+  font-size: 1.0625rem !important;
+  font-weight: 600 !important;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.blog-html-content h4,
+.blog-html-content h5,
+.blog-html-content h6 {
+  font-weight: 600 !important;
+  margin: 0.5rem 0;
+}
+
+.blog-html-content ul,
+.blog-html-content ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.blog-html-content ul {
+  list-style-type: disc !important;
+  list-style-position: outside;
+}
+
+.blog-html-content ol {
+  list-style-type: decimal !important;
+  list-style-position: outside;
+}
+
+.blog-html-content li {
+  margin-bottom: 0.25rem;
+  display: list-item;
+}
+
+/* TipTap wraps list items in <p> */
+.blog-html-content li > p {
+  margin: 0 0 0.25rem;
+}
+
+.blog-html-content blockquote {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0 0.5rem 1rem;
+  border-left: 4px solid #cbd5e1;
+  color: #475467;
+}
+
+.blog-html-content pre {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border-radius: 0.25rem;
+  background: #f1f5f9;
+  font-size: 0.8125rem;
+}
+
+.blog-html-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125em;
+}
+
+.blog-html-content pre code {
+  font-size: inherit;
+}
+
+.blog-html-content hr {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid #e3e6ed;
+}
+
+.blog-html-content a {
+  color: #3874ff;
+  text-decoration: underline;
+}
+
+.blog-html-content strong {
+  font-weight: 600;
+}
+
+/* TipTap: images */
+.blog-html-content img.blog-content-image,
+.blog-html-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.25rem;
+  vertical-align: middle;
+}
+
+/* TipTap: emoji nodes */
+.blog-html-content span[data-type='emoji'] {
+  display: inline;
+  vertical-align: middle;
+}
+.blog-html-content span[data-type='emoji'] img {
+  display: inline-block;
+  vertical-align: middle;
+  max-height: 1.25em;
+  width: auto;
+}
+
+/* TipTap: tables */
+.blog-html-content .tableWrapper {
+  overflow-x: auto;
+  margin: 0 0 0.75rem;
+  max-width: 100%;
+}
+.blog-html-content table.blog-content-table,
+.blog-html-content table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875rem;
+}
+.blog-html-content th,
+.blog-html-content td {
+  border: 1px solid #e3e6ed;
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+  min-width: 2.5rem;
+}
+.blog-html-content th {
+  background: #f8fafc;
+  font-weight: 600;
+  text-align: left;
+}
+.blog-html-content .column-resize-handle {
+  background: #3874ff;
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
+}
+.blog-html-content .selectedCell {
+  background: #f0f5ff;
+}
+
 /* Admin order invoice: hide chrome when printing */
 @media print {
   body[data-invoice-print='1'] .admin-app-sidebar,

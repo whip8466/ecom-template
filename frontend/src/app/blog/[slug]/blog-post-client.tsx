@@ -73,9 +73,10 @@ export function BlogPostClient() {
           aria-hidden
         />
       ) : null}
-      <div className="mt-8 whitespace-pre-wrap text-base leading-relaxed text-[#334155]">
-        {post.body}
-      </div>
+      <div
+        className="blog-html-content mt-8 text-base leading-relaxed text-[#334155]"
+        dangerouslySetInnerHTML={{ __html: post.body }}
+      />
     </article>
   );
 }

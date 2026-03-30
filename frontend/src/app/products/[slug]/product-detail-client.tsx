@@ -23,6 +23,7 @@ import {
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
+import { looksLikeHtmlMarkup, plainTextFromHtml } from '@/lib/blog-body-html';
 
 type Props = {
   product: Product;
@@ -171,10 +172,17 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
     });
   };
 
-  const descriptionText =
-    product.description?.trim() ||
-    product.shortDescription?.trim() ||
+  const rawDescription = product.description?.trim() || '';
+  const rawShort = product.shortDescription?.trim() || '';
+  const summaryPlain =
+    rawShort ||
+    (rawDescription
+      ? looksLikeHtmlMarkup(rawDescription)
+        ? plainTextFromHtml(rawDescription)
+        : rawDescription
+      : '') ||
     'No description has been added for this product yet.';
+  const tabDescriptionRaw = rawDescription || rawShort;
 
   const additionalRows = buildAdditionalRows(product);
 
@@ -244,7 +252,7 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
             </div>
           )}
           <p className="mt-3 text-sm leading-relaxed text-[#667085]">
-            {product.shortDescription || descriptionText}
+            {summaryPlain}
           </p>
 
           {hasVariants && filteredOptionGroups.length > 0 && (
@@ -444,11 +452,21 @@ export function ProductDetailClient({ product, relatedProducts, slug }: Props) {
           </button>
         </div>
 
-        {activeTab === 'description' && (
-          <p className="mt-5 text-sm leading-relaxed text-[#475467] whitespace-pre-wrap">
-            {descriptionText}
-          </p>
-        )}
+        {activeTab === 'description' &&
+          (tabDescriptionRaw ? (
+            looksLikeHtmlMarkup(tabDescriptionRaw) ? (
+              <div
+                className="blog-html-content mt-5 text-sm leading-relaxed text-[#475467]"
+                dangerouslySetInnerHTML={{ __html: tabDescriptionRaw }}
+              />
+            ) : (
+              <p className="mt-5 text-sm leading-relaxed text-[#475467] whitespace-pre-wrap">{tabDescriptionRaw}</p>
+            )
+          ) : (
+            <p className="mt-5 text-sm leading-relaxed text-[#475467]">
+              No description has been added for this product yet.
+            </p>
+          ))}
 
         {activeTab === 'additional' && (
           <div className="mt-5 overflow-hidden rounded-md border border-[#e8eef7]">
