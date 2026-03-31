@@ -301,17 +301,21 @@ model NewsletterSubscription {
 
 /** Singleton row (id = 1): storefront contact page + footer copy. */
 model ContactSettings {
-  id           Int      @id @default(1)
-  headline     String   @default("Keep In Touch with Us") @db.VarChar(200)
-  primaryEmail String   @map("primary_email") @db.VarChar(320)
-  supportEmail String   @map("support_email") @db.VarChar(320)
-  phone        String   @db.VarChar(80)
-  addressLine  String   @map("address_line") @db.VarChar(500)
-  mapEmbedUrl  String?  @map("map_embed_url") @db.Text
-  facebookUrl  String?  @map("facebook_url") @db.VarChar(500)
-  twitterUrl   String?  @map("twitter_url") @db.VarChar(500)
-  linkedinUrl  String?  @map("linkedin_url") @db.VarChar(500)
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id             Int      @id @default(1)
+  headline       String   @default("Keep In Touch with Us") @db.VarChar(200)
+  brandName      String   @default("Dhidi") @map("brand_name") @db.VarChar(120)
+  footerTagline  String   @default("Curated fashion, beauty, and home decor for modern living. Quality you can trust, style that lasts.") @map("footer_tagline") @db.Text
+  primaryEmail   String   @map("primary_email") @db.VarChar(320)
+  supportEmail   String   @map("support_email") @db.VarChar(320)
+  phone          String   @db.VarChar(80)
+  addressLine    String   @map("address_line") @db.VarChar(500)
+  mapEmbedUrl    String?  @map("map_embed_url") @db.Text
+  facebookUrl    String?  @map("facebook_url") @db.VarChar(500)
+  instagramUrl   String?  @map("instagram_url") @db.VarChar(500)
+  pinterestUrl   String?  @map("pinterest_url") @db.VarChar(500)
+  twitterUrl     String?  @map("twitter_url") @db.VarChar(500)
+  linkedinUrl    String?  @map("linkedin_url") @db.VarChar(500)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("contact_settings")
 }

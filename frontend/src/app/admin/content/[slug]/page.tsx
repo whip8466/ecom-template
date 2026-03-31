@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams, notFound } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { SitePageBodyEditor } from '@/components/admin/site-page-body-editor';
 import { AdminPageShell } from '@/components/admin-shell';
 import { apiRequest } from '@/lib/api';
 import type { SitePageDto } from '@/lib/site-pages';
@@ -116,27 +117,20 @@ export default function AdminContentEditPage() {
             />
           </div>
           <div>
-            <label htmlFor="site-page-body" className="mb-1 block text-sm font-medium text-[#1c2740]">
-              Body (HTML)
-            </label>
-            <textarea
-              id="site-page-body"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={18}
-              className="w-full rounded-admin border border-[#e5ebf5] bg-white px-4 py-3 font-mono text-sm text-[#1c2740] outline-none focus:border-[#246bfd]"
-              placeholder="<p>Your content…</p>"
+            <span className="mb-1 block text-sm font-medium text-[#1c2740]">Body</span>
+            <p className="mb-2 text-xs text-[#94a3b8]">
+              Rich text editor. Content is stored as HTML and shown on the public page.
+            </p>
+            <SitePageBodyEditor
+              key={slug}
+              initialHtml={body}
+              onChange={setBody}
+              disabled={saving}
             />
-            <p className="mt-1 text-xs text-[#94a3b8]">
+            <p className="mt-2 text-xs text-[#94a3b8]">
               Public URL:{' '}
               <a
-                href={
-                  slug === 'about-us'
-                    ? '/about-us'
-                    : slug === 'privacy-policy'
-                      ? '/privacy-policy'
-                      : '/terms-of-service'
-                }
+                href={slug === 'privacy-policy' ? '/privacy-policy' : '/terms-of-service'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#246bfd] hover:underline"

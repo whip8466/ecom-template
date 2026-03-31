@@ -1,11 +1,15 @@
 export type ContactSettings = {
   headline: string;
+  brandName: string;
+  footerTagline: string;
   primaryEmail: string;
   supportEmail: string;
   phone: string;
   addressLine: string;
   mapEmbedUrl: string | null;
   facebookUrl: string | null;
+  instagramUrl: string | null;
+  pinterestUrl: string | null;
   twitterUrl: string | null;
   linkedinUrl: string | null;
   updatedAt: string;

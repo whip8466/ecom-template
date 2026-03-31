@@ -12,7 +12,7 @@ export default function AdminContentIndexPage() {
       title="Site pages"
     >
       <p className="mt-2 text-sm text-[#64748b]">
-        Edit storefront content for About Us, Privacy Policy, and Terms of Service. HTML is supported in the body.
+        Edit storefront content for Privacy Policy and Terms of Service. HTML is supported in the body.
       </p>
       <ul className="mt-8 space-y-3">
         {SITE_PAGE_SLUGS.map((slug) => (

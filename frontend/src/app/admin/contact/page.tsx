@@ -8,24 +8,33 @@ import { useAuthStore } from '@/store/auth-store';
 
 type FormState = {
   headline: string;
+  brandName: string;
+  footerTagline: string;
   primaryEmail: string;
   supportEmail: string;
   phone: string;
   addressLine: string;
   mapEmbedUrl: string;
   facebookUrl: string;
+  instagramUrl: string;
+  pinterestUrl: string;
   twitterUrl: string;
   linkedinUrl: string;
 };
 
 const emptyForm: FormState = {
   headline: '',
+  brandName: 'Dhidi',
+  footerTagline:
+    'Curated fashion, beauty, and home decor for modern living.\nQuality you can trust, style that lasts.',
   primaryEmail: '',
   supportEmail: '',
   phone: '',
   addressLine: '',
   mapEmbedUrl: '',
   facebookUrl: '',
+  instagramUrl: '',
+  pinterestUrl: '',
   twitterUrl: '',
   linkedinUrl: '',
 };
@@ -33,12 +42,18 @@ const emptyForm: FormState = {
 function toForm(s: ContactSettings): FormState {
   return {
     headline: s.headline,
+    brandName: s.brandName ?? 'Dhidi',
+    footerTagline:
+      s.footerTagline ??
+      'Curated fashion, beauty, and home decor for modern living.\nQuality you can trust, style that lasts.',
     primaryEmail: s.primaryEmail,
     supportEmail: s.supportEmail,
     phone: s.phone,
     addressLine: s.addressLine,
     mapEmbedUrl: s.mapEmbedUrl ?? '',
     facebookUrl: s.facebookUrl ?? '',
+    instagramUrl: s.instagramUrl ?? '',
+    pinterestUrl: s.pinterestUrl ?? '',
     twitterUrl: s.twitterUrl ?? '',
     linkedinUrl: s.linkedinUrl ?? '',
   };
@@ -111,12 +126,16 @@ export default function AdminContactPage() {
     try {
       const payload = {
         headline: form.headline.trim(),
+        brandName: form.brandName.trim(),
+        footerTagline: form.footerTagline,
         primaryEmail: form.primaryEmail.trim(),
         supportEmail: form.supportEmail.trim(),
         phone: form.phone.trim(),
         addressLine: form.addressLine.trim(),
         mapEmbedUrl: form.mapEmbedUrl.trim() || null,
         facebookUrl: form.facebookUrl.trim() || null,
+        instagramUrl: form.instagramUrl.trim() || null,
+        pinterestUrl: form.pinterestUrl.trim() || null,
         twitterUrl: form.twitterUrl.trim() || null,
         linkedinUrl: form.linkedinUrl.trim() || null,
       };
@@ -138,7 +157,7 @@ export default function AdminContactPage() {
 
   if (!mounted) {
     return (
-      <AdminPageShell breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Contact page' }]} title="Contact page" description="Storefront contact content and inbound messages.">
+      <AdminPageShell breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Contact Us' }]} title="Contact Us" description="Storefront Contact Us content and inbound messages.">
         <p className="text-sm text-[#64748b]">Loading…</p>
       </AdminPageShell>
     );
@@ -146,7 +165,7 @@ export default function AdminContactPage() {
 
   if (!token) {
     return (
-      <AdminPageShell breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Contact page' }]} title="Contact page" description="Storefront contact content and inbound messages.">
+      <AdminPageShell breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Contact Us' }]} title="Contact Us" description="Storefront Contact Us content and inbound messages.">
         <p className="text-sm text-[#64748b]">Sign in as admin to edit contact settings.</p>
       </AdminPageShell>
     );
@@ -156,10 +175,10 @@ export default function AdminContactPage() {
     <AdminPageShell
       breadcrumbs={[
         { label: 'Home', href: '/admin' },
-        { label: 'Contact page' },
+        { label: 'Contact Us' },
       ]}
-      title="Contact page"
-      description="Edit the public contact page (headline, emails, phone, address, map embed URL, social links). Messages from the contact form appear below."
+      title="Contact Us"
+      description="Edit the public Contact Us page (headline, emails, phone, address, map embed URL, social links). Messages from the contact form appear below."
       actions={
         <button
           type="button"
@@ -177,6 +196,27 @@ export default function AdminContactPage() {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
         <div className="max-w-2xl space-y-4 rounded-admin border border-[#e3e6ed] bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Storefront footer</p>
+          <label className="block">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Brand name</span>
+            <input
+              type="text"
+              value={form.brandName}
+              onChange={(e) => patch({ brandName: e.target.value })}
+              className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
+              maxLength={120}
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Footer tagline</span>
+            <p className="mt-0.5 text-xs text-[#94a3b8]">Shown under the brand in the site footer. Use line breaks for multiple lines.</p>
+            <textarea
+              value={form.footerTagline}
+              onChange={(e) => patch({ footerTagline: e.target.value })}
+              rows={3}
+              className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
+            />
+          </label>
           <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Page headline</span>
             <input
@@ -233,13 +273,31 @@ export default function AdminContactPage() {
               className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 font-mono text-xs text-[#31374a]"
             />
           </label>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="block">
               <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Facebook URL</span>
               <input
                 type="url"
                 value={form.facebookUrl}
                 onChange={(e) => patch({ facebookUrl: e.target.value })}
+                className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Instagram URL</span>
+              <input
+                type="url"
+                value={form.instagramUrl}
+                onChange={(e) => patch({ instagramUrl: e.target.value })}
+                className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Pinterest URL</span>
+              <input
+                type="url"
+                value={form.pinterestUrl}
+                onChange={(e) => patch({ pinterestUrl: e.target.value })}
                 className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
               />
             </label>

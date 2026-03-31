@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { UserRole } from '../../constants/enums';
 
-const ALLOWED_SLUGS = ['about-us', 'privacy-policy', 'terms-of-service'] as const;
+const ALLOWED_SLUGS = ['privacy-policy', 'terms-of-service'] as const;
 
 function isStaff(authUser: { role: string } | undefined): boolean {
   if (!authUser) return false;

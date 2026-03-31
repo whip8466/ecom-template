@@ -1,4 +1,4 @@
-export const SITE_PAGE_SLUGS = ['about-us', 'privacy-policy', 'terms-of-service'] as const;
+export const SITE_PAGE_SLUGS = ['privacy-policy', 'terms-of-service'] as const;
 
 export type SitePageSlug = (typeof SITE_PAGE_SLUGS)[number];
 
@@ -10,7 +10,6 @@ export type SitePageDto = {
 };
 
 export const SITE_PAGE_LABELS: Record<SitePageSlug, string> = {
-  'about-us': 'About Us',
   'privacy-policy': 'Privacy Policy',
   'terms-of-service': 'Terms of Service',
 };
