@@ -122,10 +122,11 @@ export function AdminSidebar() {
                       <li key={child.href}>
                         <Link
                           href={child.href}
-                          className={`flex items-center rounded-admin py-2 pl-2 pr-3 text-sm font-medium transition ${
+                          className={`flex items-center gap-2.5 rounded-admin py-2 pl-2 pr-3 text-sm font-medium transition ${
                             active ? 'bg-[#edf5ff] text-[#3874ff]' : 'text-[#6e7891] hover:bg-[#f5f7fa] hover:text-[#31374a]'
                           }`}
                         >
+                          <AdminNavIcon d={child.icon} className="h-4 w-4" />
                           {child.label}
                         </Link>
                       </li>
