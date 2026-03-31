@@ -473,3 +473,55 @@ model FaqItem {
   @@index([categoryId])
   @@map("faq_items")
 }
+
+/// Filter / tab for Social Feed grid (Videos = YouTube, Reels = Instagram, etc.).
+enum SocialFeedContentType {
+  VIDEO
+  REEL
+  POST
+  TIPS
+  CUSTOMER_STORY
+}
+
+enum SocialFeedPlatform {
+  YOUTUBE
+  INSTAGRAM
+  FACEBOOK
+}
+
+/// Singleton (id = 1): hero and mid-page CTAs.
+model SocialFeedSettings {
+  id   Int @id @default(1)
+  /// Hero title, e.g. “Our Journey”
+  heroTitle       String  @default("Our Journey") @map("hero_title") @db.VarChar(200)
+  heroSubtitle    String  @map("hero_subtitle") @db.Text
+  ctaSectionTitle   String? @map("cta_section_title") @db.VarChar(200)
+  ctaShopUrl        String? @map("cta_shop_url") @db.VarChar(500)
+  ctaFollowUrl      String? @map("cta_follow_url") @db.VarChar(500)
+  ctaCommunityUrl   String? @map("cta_community_url") @db.VarChar(500)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("social_feed_settings")
+}
+
+model SocialFeedPost {
+  id            Int                  @id @default(autoincrement())
+  contentType   SocialFeedContentType  @map("content_type")
+  platform      SocialFeedPlatform
+  title         String                 @db.VarChar(300)
+  description   String                 @db.Text
+  thumbnailUrl  String?                @map("thumbnail_url") @db.VarChar(2000)
+  externalUrl   String                 @map("external_url") @db.VarChar(2000)
+  /// Optional override; otherwise derived from platform (Watch on YouTube, etc.).
+  ctaLabel      String?                @map("cta_label") @db.VarChar(120)
+  sortOrder     Int                    @default(0) @map("sort_order")
+  isFeatured    Boolean                @default(false) @map("is_featured")
+  isPublished   Boolean                @default(true) @map("is_published")
+  publishedAt   DateTime?              @map("published_at") @db.Timestamptz(6)
+  createdAt     DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([contentType, isPublished])
+  @@index([isFeatured])
+  @@map("social_feed_posts")
+}

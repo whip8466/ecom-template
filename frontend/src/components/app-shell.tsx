@@ -631,6 +631,7 @@ function StorefrontFooter() {
             <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
               <li><Link href="/contact" className="transition-premium hover:text-[var(--navy)]">Contact Us</Link></li>
               <li><Link href="/faq" className="transition-premium hover:text-[var(--navy)]">FAQ</Link></li>
+              <li><Link href="/social-feed" className="transition-premium hover:text-[var(--navy)]">Social feed</Link></li>
             </ul>
           </div>
           <div>
