@@ -107,6 +107,7 @@ export default function AdminPromoBannersPage() {
   };
 
   const removeBanner = (i: number) => {
+    if (!window.confirm('Remove this promo banner from the list? Save changes to apply on the store.')) return;
     userEditedRef.current = true;
     setBanners((prev) => prev.filter((_, j) => j !== i).map((s, order) => ({ ...s, sortOrder: order })));
   };

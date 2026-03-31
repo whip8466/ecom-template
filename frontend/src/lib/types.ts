@@ -105,6 +105,8 @@ export type OrderItem = {
   /** Present when order list/detail includes product relation (storefront). */
   productSlug?: string | null;
   productImageUrl?: string | null;
+  /** True when this order line already has a submitted product review. */
+  hasReview?: boolean;
 };
 
 export type Order = {

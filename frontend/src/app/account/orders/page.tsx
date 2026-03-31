@@ -113,8 +113,19 @@ function ProductThumb({ imageUrl }: { imageUrl: string | null | undefined }) {
   );
 }
 
-function OrderLineItem({ item, showDivider }: { item: OrderItem; showDivider: boolean }) {
+function OrderLineItem({
+  item,
+  showDivider,
+  order,
+}: {
+  item: OrderItem;
+  showDivider: boolean;
+  order: Order;
+}) {
   const href = item.productSlug ? `/products/${item.productSlug}` : '/shop';
+  const reviewHref = item.productSlug ? `/products/${item.productSlug}#reviews` : '/shop';
+  const canReview =
+    order.paymentStatus === 'PAID' && order.status === 'DELIVERED';
 
   return (
     <div
@@ -131,13 +142,21 @@ function OrderLineItem({ item, showDivider }: { item: OrderItem; showDivider: bo
           {item.colorName && <span>Colour: {item.colorName} · </span>}
           Qty: {item.quantity} · {formatMoney(item.subtotalCents)}
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href={href}
             className="inline-flex rounded-md bg-[#0989ff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0476df]"
           >
             Buy it again
           </Link>
+          {canReview && item.productSlug && !item.hasReview ? (
+            <Link
+              href={reviewHref}
+              className="inline-flex rounded-md border border-[#d7e4f6] bg-white px-4 py-2 text-sm font-semibold text-[#0f1f40] transition hover:bg-[#f8fafc]"
+            >
+              Add review
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>
@@ -200,7 +219,7 @@ function OrderCard({ order }: { order: Order }) {
         {order.items.length > 0 && (
           <div className="pt-2">
             {order.items.map((item, index) => (
-              <OrderLineItem key={item.id} item={item} showDivider={index > 0} />
+              <OrderLineItem key={item.id} item={item} order={order} showDivider={index > 0} />
             ))}
           </div>
         )}

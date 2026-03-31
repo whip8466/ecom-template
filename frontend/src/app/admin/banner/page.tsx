@@ -109,6 +109,7 @@ export default function AdminHomeBannerPage() {
   };
 
   const removeSlide = (i: number) => {
+    if (!window.confirm('Remove this slide from the home banner? Save changes to apply on the store.')) return;
     userEditedRef.current = true;
     setSlides((prev) => prev.filter((_, j) => j !== i).map((s, order) => ({ ...s, sortOrder: order })));
   };

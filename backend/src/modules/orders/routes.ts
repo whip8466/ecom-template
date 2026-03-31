@@ -39,6 +39,7 @@ const orderDetailInclude = {
           images: { orderBy: { id: 'asc' }, take: 1 },
         },
       },
+      review: { select: { id: true } },
     },
   },
 };
@@ -69,6 +70,7 @@ function toOrderDto(order) {
       subtotalCents: item.subtotalCents,
       productSlug: item.product?.slug ?? null,
       productImageUrl: item.product?.images?.[0]?.imageUrl ?? null,
+      hasReview: item.review != null,
     })),
   };
 }

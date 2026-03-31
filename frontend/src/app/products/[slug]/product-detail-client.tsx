@@ -104,6 +104,16 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
   const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'reviews'>('description');
   const [message, setMessage] = useState('');
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash !== '#reviews') return;
+    setActiveTab('reviews');
+    const id = 'product-reviews-panel';
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+
   const displayUnitPrice = effectiveVariantUnitPriceCents(product, matchedVariant);
   const dealOn =
     product.activeDeal != null && new Date(product.activeDeal.endsAt).getTime() > Date.now();
@@ -450,7 +460,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
         </div>
       </div>
 
-      <section className="mt-12 rounded-md border border-[#e4ebf5] bg-white p-6">
+      <section id="product-reviews-panel" className="mt-12 scroll-mt-24 rounded-md border border-[#e4ebf5] bg-white p-6">
         <div className="flex flex-wrap items-center justify-center gap-8 border-b border-[#ebf0f7] pb-3 text-sm">
           <button
             type="button"

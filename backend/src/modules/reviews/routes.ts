@@ -2,6 +2,8 @@ const { z } = require('zod');
 const { PaymentStatus, OrderStatus, UserRole } = require('../../constants/enums');
 
 const PRODUCT_PUBLISHED = 'PUBLISHED';
+const REVIEW_PENDING = 'PENDING';
+const REVIEW_APPROVED = 'APPROVED';
 
 function formatAuthorLabel(user) {
   const fn = (user.firstName || '').trim();
@@ -9,6 +11,27 @@ function formatAuthorLabel(user) {
   if (!fn && !ln) return 'Customer';
   if (!ln) return fn;
   return `${fn} ${ln.charAt(0)}.`;
+}
+
+function formatFullName(user) {
+  const fn = (user.firstName || '').trim();
+  const ln = (user.lastName || '').trim();
+  if (fn && ln) return `${fn} ${ln}`;
+  if (fn) return fn;
+  if (ln) return ln;
+  return 'Customer';
+}
+
+function customerInitial(user) {
+  const fn = (user.firstName || '').trim();
+  if (fn) return fn.charAt(0).toUpperCase();
+  const em = (user.email || '').trim();
+  if (em) return em.charAt(0).toUpperCase();
+  return '?';
+}
+
+function isStaff(authUser) {
+  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
 }
 
 async function reviewsRoutes(fastify) {
@@ -27,7 +50,7 @@ async function reviewsRoutes(fastify) {
     }
 
     const rows = await fastify.prisma.productReview.findMany({
-      where: { productId },
+      where: { productId, status: REVIEW_APPROVED },
       orderBy: { createdAt: 'desc' },
       include: {
         user: { select: { firstName: true, lastName: true } },
@@ -65,7 +88,7 @@ async function reviewsRoutes(fastify) {
           order: {
             userId,
             paymentStatus: PaymentStatus.PAID,
-            status: { not: OrderStatus.CANCELLED },
+            status: OrderStatus.DELIVERED,
           },
           review: null,
         },
@@ -86,7 +109,7 @@ async function reviewsRoutes(fastify) {
           })),
         },
       };
-    }
+    },
   );
 
   fastify.post('/reviews', { preHandler: [fastify.authenticate] }, async (request, reply) => {
@@ -123,6 +146,9 @@ async function reviewsRoutes(fastify) {
     if (item.order.status === OrderStatus.CANCELLED) {
       return reply.code(400).send({ message: 'Cannot review a cancelled order' });
     }
+    if (item.order.status !== OrderStatus.DELIVERED) {
+      return reply.code(400).send({ message: 'You can only review after your order has been delivered' });
+    }
     if (item.review) {
       return reply.code(409).send({ message: 'You already submitted a review for this purchase' });
     }
@@ -141,6 +167,7 @@ async function reviewsRoutes(fastify) {
         productId: item.productId,
         rating: body.rating,
         body: body.body,
+        status: REVIEW_PENDING,
       },
       include: {
         user: { select: { firstName: true, lastName: true } },
@@ -159,7 +186,7 @@ async function reviewsRoutes(fastify) {
   });
 
   fastify.get('/admin/product-reviews', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    if (request.authUser.role !== UserRole.ADMIN && request.authUser.role !== UserRole.MANAGER) {
+    if (!isStaff(request.authUser)) {
       return reply.code(403).send({ message: 'Forbidden' });
     }
 
@@ -168,17 +195,28 @@ async function reviewsRoutes(fastify) {
         page: z.coerce.number().int().min(1).default(1),
         limit: z.coerce.number().int().min(1).max(100).default(20),
         q: z.string().optional(),
+        status: z.enum(['all', 'pending', 'approved']).optional().default('all'),
       })
       .parse(request.query);
 
     const q = query.q?.trim();
-    const where = q
-      ? {
-          product: {
-            name: { contains: q, mode: 'insensitive' },
-          },
-        }
-      : {};
+    const statusFilter =
+      query.status === 'pending'
+        ? { status: REVIEW_PENDING }
+        : query.status === 'approved'
+          ? { status: REVIEW_APPROVED }
+          : {};
+
+    const where = {
+      ...statusFilter,
+      ...(q
+        ? {
+            product: {
+              name: { contains: q, mode: 'insensitive' },
+            },
+          }
+        : {}),
+    };
 
     const [total, rows] = await Promise.all([
       fastify.prisma.productReview.count({ where }),
@@ -188,7 +226,15 @@ async function reviewsRoutes(fastify) {
         take: query.limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          product: { select: { id: true, name: true, slug: true } },
+          product: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              category: { select: { name: true } },
+              images: { take: 1, orderBy: { id: 'asc' }, select: { imageUrl: true } },
+            },
+          },
           user: { select: { id: true, email: true, firstName: true, lastName: true } },
           orderItem: { select: { orderId: true } },
         },
@@ -200,19 +246,75 @@ async function reviewsRoutes(fastify) {
         id: r.id,
         rating: r.rating,
         body: r.body,
+        status: r.status,
         createdAt: r.createdAt.toISOString(),
-        product: r.product,
+        product: {
+          id: r.product.id,
+          name: r.product.name,
+          slug: r.product.slug,
+          categoryName: r.product.category?.name ?? null,
+          imageUrl: r.product.images[0]?.imageUrl ?? null,
+        },
         orderId: r.orderItem.orderId,
         customer: {
           id: r.user.id,
           email: r.user.email,
-          displayName: formatAuthorLabel(r.user),
+          displayName: formatFullName(r.user),
+          initial: customerInitial(r.user),
         },
       })),
       total,
       page: query.page,
       limit: query.limit,
     };
+  });
+
+  const idsBodySchema = z.object({
+    ids: z.array(z.number().int().positive()).min(1).max(200),
+  });
+
+  fastify.post(
+    '/admin/product-reviews/bulk-approve',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      if (!isStaff(request.authUser)) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const body = idsBodySchema.parse(request.body);
+      const result = await fastify.prisma.productReview.updateMany({
+        where: { id: { in: body.ids }, status: REVIEW_PENDING },
+        data: { status: REVIEW_APPROVED },
+      });
+      return { data: { updated: result.count } };
+    },
+  );
+
+  fastify.post(
+    '/admin/product-reviews/bulk-delete',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      if (!isStaff(request.authUser)) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const body = idsBodySchema.parse(request.body);
+      const result = await fastify.prisma.productReview.deleteMany({
+        where: { id: { in: body.ids } },
+      });
+      return { data: { deleted: result.count } };
+    },
+  );
+
+  fastify.delete('/admin/product-reviews/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    if (!isStaff(request.authUser)) {
+      return reply.code(403).send({ message: 'Forbidden' });
+    }
+    const params = z.object({ id: z.coerce.number().int().positive() }).parse(request.params);
+    const existing = await fastify.prisma.productReview.findUnique({ where: { id: params.id } });
+    if (!existing) {
+      return reply.code(404).send({ message: 'Review not found' });
+    }
+    await fastify.prisma.productReview.delete({ where: { id: params.id } });
+    return reply.code(204).send();
   });
 }
 

@@ -71,7 +71,7 @@ async function averageRatingsByProductId(prisma, productIds) {
   if (ids.length === 0) return map;
   const rows = await prisma.productReview.groupBy({
     by: ['productId'],
-    where: { productId: { in: ids } },
+    where: { productId: { in: ids }, status: 'APPROVED' },
     _avg: { rating: true },
   });
   for (const r of rows) {

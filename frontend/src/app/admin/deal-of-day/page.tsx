@@ -127,6 +127,7 @@ export default function AdminDealOfDayPage() {
   };
 
   const removeSlot = (i: number) => {
+    if (!window.confirm('Remove this deal row? Click Save to update the server.')) return;
     setForms((prev) => prev.filter((_, j) => j !== i));
   };
 
@@ -213,6 +214,7 @@ export default function AdminDealOfDayPage() {
 
   const activate = async (productId: number) => {
     if (!token) return;
+    if (!window.confirm('Activate this deal? The timer will start and the offer will show on the home page.')) return;
     setBusyProductId(productId);
     setMessage(null);
     setError(null);
@@ -233,6 +235,7 @@ export default function AdminDealOfDayPage() {
 
   const deactivate = async (productId: number) => {
     if (!token) return;
+    if (!window.confirm('Stop this deal for the product? The offer will end on the storefront.')) return;
     setBusyProductId(productId);
     setMessage(null);
     setError(null);

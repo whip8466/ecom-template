@@ -135,7 +135,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
           <Link href={loginHref} className="font-medium text-[#0989ff] hover:underline">
             Sign in
           </Link>{' '}
-          to write a review after you purchase this product (one review per paid order).
+          to write a review after this product is delivered to you (one review per delivered order line).
         </p>
       )}
 
@@ -147,7 +147,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
             <form onSubmit={handleSubmit} className="rounded-md border border-[#e4ebf5] bg-[#fafcff] p-4">
               <h3 className="text-sm font-semibold text-[#0f1f40]">Write a review</h3>
               <p className="mt-1 text-xs text-[#7b8aa3]">
-                Verified purchase only — one review per order line. Your name will appear as on your account.
+                Delivered orders only — one review per order line. Your name will appear as on your account.
               </p>
               {eligible.length > 1 && (
                 <label className="mt-3 block text-sm text-[#475467]">
@@ -208,12 +208,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
                 {submitting ? 'Submitting…' : 'Submit review'}
               </button>
             </form>
-          ) : (
-            <p className="text-sm text-[#7b8aa3]">
-              You can submit a review here after you buy this product and your order is paid. Each paid order can
-              include one review for this item.
-            </p>
-          )}
+          ) : null}
         </>
       )}
 

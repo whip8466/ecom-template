@@ -384,6 +384,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
   };
 
   const removeImageUrl = (index: number) => {
+    if (!window.confirm('Remove this image URL from the product?')) return;
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -392,6 +393,7 @@ export function ProductEditor({ editProductId }: ProductEditorProps) {
     if (firstTypeId != null) setVariants((prev) => [...prev, { optionTypeId: firstTypeId, values: [] }]);
   };
   const removeVariant = (index: number) => {
+    if (!window.confirm('Remove this variant option row?')) return;
     setVariants((prev) => prev.filter((_, i) => i !== index));
     setVariantValueDropdownOpen(null);
   };
