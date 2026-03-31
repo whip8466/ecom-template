@@ -19,7 +19,7 @@ type FormState = {
   instagramUrl: string;
   pinterestUrl: string;
   twitterUrl: string;
-  linkedinUrl: string;
+  youtubeUrl: string;
 };
 
 const emptyForm: FormState = {
@@ -36,7 +36,7 @@ const emptyForm: FormState = {
   instagramUrl: '',
   pinterestUrl: '',
   twitterUrl: '',
-  linkedinUrl: '',
+  youtubeUrl: '',
 };
 
 function toForm(s: ContactSettings): FormState {
@@ -55,7 +55,7 @@ function toForm(s: ContactSettings): FormState {
     instagramUrl: s.instagramUrl ?? '',
     pinterestUrl: s.pinterestUrl ?? '',
     twitterUrl: s.twitterUrl ?? '',
-    linkedinUrl: s.linkedinUrl ?? '',
+    youtubeUrl: s.youtubeUrl ?? '',
   };
 }
 
@@ -137,7 +137,7 @@ export default function AdminContactPage() {
         instagramUrl: form.instagramUrl.trim() || null,
         pinterestUrl: form.pinterestUrl.trim() || null,
         twitterUrl: form.twitterUrl.trim() || null,
-        linkedinUrl: form.linkedinUrl.trim() || null,
+        youtubeUrl: form.youtubeUrl.trim() || null,
       };
       const res = await apiRequest<{ data: ContactSettings }>('/api/admin/contact-settings', {
         method: 'PUT',
@@ -311,11 +311,11 @@ export default function AdminContactPage() {
               />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">LinkedIn URL</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">YouTube URL</span>
               <input
                 type="url"
-                value={form.linkedinUrl}
-                onChange={(e) => patch({ linkedinUrl: e.target.value })}
+                value={form.youtubeUrl}
+                onChange={(e) => patch({ youtubeUrl: e.target.value })}
                 className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
               />
             </label>

@@ -314,7 +314,7 @@ model ContactSettings {
   instagramUrl   String?  @map("instagram_url") @db.VarChar(500)
   pinterestUrl   String?  @map("pinterest_url") @db.VarChar(500)
   twitterUrl     String?  @map("twitter_url") @db.VarChar(500)
-  linkedinUrl    String?  @map("linkedin_url") @db.VarChar(500)
+  youtubeUrl     String?  @map("youtube_url") @db.VarChar(500)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("contact_settings")

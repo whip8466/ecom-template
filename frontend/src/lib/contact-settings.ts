@@ -11,7 +11,7 @@ export type ContactSettings = {
   instagramUrl: string | null;
   pinterestUrl: string | null;
   twitterUrl: string | null;
-  linkedinUrl: string | null;
+  youtubeUrl: string | null;
   updatedAt: string;
 };
 

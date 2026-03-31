@@ -23,7 +23,7 @@ function mapSettings(row: ContactSettings | null) {
     instagramUrl: row.instagramUrl,
     pinterestUrl: row.pinterestUrl,
     twitterUrl: row.twitterUrl,
-    linkedinUrl: row.linkedinUrl,
+    youtubeUrl: row.youtubeUrl,
     updatedAt: row.updatedAt.toISOString(),
   };
 }
@@ -41,7 +41,7 @@ const settingsPutSchema = z.object({
   instagramUrl: z.string().max(500).optional().nullable(),
   pinterestUrl: z.string().max(500).optional().nullable(),
   twitterUrl: z.string().max(500).optional().nullable(),
-  linkedinUrl: z.string().max(500).optional().nullable(),
+  youtubeUrl: z.string().max(500).optional().nullable(),
 });
 
 const contactPostSchema = z.object({
@@ -98,7 +98,7 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
           instagramUrl: body.instagramUrl ?? null,
           pinterestUrl: body.pinterestUrl ?? null,
           twitterUrl: body.twitterUrl ?? null,
-          linkedinUrl: body.linkedinUrl ?? null,
+          youtubeUrl: body.youtubeUrl ?? null,
         },
         update: {
           headline: body.headline,
@@ -113,7 +113,7 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
           instagramUrl: body.instagramUrl ?? null,
           pinterestUrl: body.pinterestUrl ?? null,
           twitterUrl: body.twitterUrl ?? null,
-          linkedinUrl: body.linkedinUrl ?? null,
+          youtubeUrl: body.youtubeUrl ?? null,
         },
       });
       return { data: mapSettings(row) };
