@@ -9,7 +9,9 @@ export async function apiRequest<T>(
   const headers = new Headers(options?.headers || {});
   // Avoid Content-Type: application/json on DELETE/GET with no body — Fastify can reject the request.
   if (options?.body != null && options.body !== '') {
-    headers.set('Content-Type', 'application/json');
+    if (!(options.body instanceof FormData)) {
+      headers.set('Content-Type', 'application/json');
+    }
   }
 
   if (options?.token) {

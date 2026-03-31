@@ -1,7 +1,28 @@
+import { randomUUID } from 'crypto';
+import { mkdir, unlink, writeFile } from 'fs/promises';
+import path from 'path';
 import type { ContactSettings } from '@prisma/client';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { UserRole } from '../../constants/enums';
+
+const BRAND_MIME_TO_EXT: Record<string, string> = {
+  'image/png': '.png',
+  'image/jpeg': '.jpg',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+  'image/svg+xml': '.svg',
+};
+
+async function unlinkStoredBrandLogo(brandLogoUrl: string | null | undefined) {
+  if (!brandLogoUrl || !brandLogoUrl.startsWith('/uploads/brand/')) return;
+  const abs = path.join(process.cwd(), brandLogoUrl.replace(/^\//, ''));
+  try {
+    await unlink(abs);
+  } catch {
+    /* ignore missing file */
+  }
+}
 
 function isStaff(authUser: { role: string } | undefined): boolean {
   if (!authUser) return false;
@@ -13,6 +34,9 @@ function mapSettings(row: ContactSettings | null) {
   return {
     headline: row.headline,
     brandName: row.brandName,
+    brandLogoUrl: row.brandLogoUrl ?? null,
+    showBrandLogo: row.showBrandLogo,
+    showBrandName: row.showBrandName,
     footerTagline: row.footerTagline,
     primaryEmail: row.primaryEmail,
     supportEmail: row.supportEmail,
@@ -42,6 +66,16 @@ const settingsPutSchema = z.object({
   pinterestUrl: z.string().max(500).optional().nullable(),
   twitterUrl: z.string().max(500).optional().nullable(),
   youtubeUrl: z.string().max(500).optional().nullable(),
+  brandLogoUrl: z.union([z.string().max(500), z.null()]).optional(),
+  showBrandLogo: z.boolean().optional(),
+  showBrandName: z.boolean().optional(),
+});
+
+const brandPatchSchema = z.object({
+  brandName: z.string().min(1).max(120),
+  footerTagline: z.string().min(1).max(5000),
+  showBrandLogo: z.boolean(),
+  showBrandName: z.boolean(),
 });
 
 const contactPostSchema = z.object({
@@ -99,6 +133,9 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
           pinterestUrl: body.pinterestUrl ?? null,
           twitterUrl: body.twitterUrl ?? null,
           youtubeUrl: body.youtubeUrl ?? null,
+          brandLogoUrl: body.brandLogoUrl ?? null,
+          showBrandLogo: body.showBrandLogo ?? true,
+          showBrandName: body.showBrandName ?? true,
         },
         update: {
           headline: body.headline,
@@ -114,7 +151,115 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
           pinterestUrl: body.pinterestUrl ?? null,
           twitterUrl: body.twitterUrl ?? null,
           youtubeUrl: body.youtubeUrl ?? null,
+          ...(body.brandLogoUrl !== undefined ? { brandLogoUrl: body.brandLogoUrl } : {}),
+          ...(body.showBrandLogo !== undefined ? { showBrandLogo: body.showBrandLogo } : {}),
+          ...(body.showBrandName !== undefined ? { showBrandName: body.showBrandName } : {}),
         },
+      });
+      return { data: mapSettings(row) };
+    },
+  );
+
+  fastify.patch(
+    '/admin/brand-settings',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      if (!isStaff(request.authUser)) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const prisma = fastify.prisma;
+      if (!prisma.contactSettings) {
+        return reply.code(503).send({ message: 'Database client is out of date.' });
+      }
+      let body: z.infer<typeof brandPatchSchema>;
+      try {
+        body = brandPatchSchema.parse(request.body);
+      } catch {
+        return reply.code(400).send({ message: 'Invalid brand settings payload.' });
+      }
+      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      if (!existing) {
+        return reply.code(404).send({ message: 'Contact settings not found' });
+      }
+      const row = await prisma.contactSettings.update({
+        where: { id: 1 },
+        data: {
+          brandName: body.brandName.trim(),
+          footerTagline: body.footerTagline,
+          showBrandLogo: body.showBrandLogo,
+          showBrandName: body.showBrandName,
+        },
+      });
+      return { data: mapSettings(row) };
+    },
+  );
+
+  fastify.post(
+    '/admin/brand-logo',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      if (!isStaff(request.authUser)) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const prisma = fastify.prisma;
+      if (!prisma.contactSettings) {
+        return reply.code(503).send({ message: 'Database client is out of date.' });
+      }
+      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      if (!existing) {
+        return reply.code(404).send({ message: 'Contact settings not found' });
+      }
+      const req = request as unknown as {
+        file: () => Promise<{ mimetype: string; toBuffer: () => Promise<Buffer> } | undefined>;
+      };
+      const data = await req.file();
+      if (!data) {
+        return reply.code(400).send({ message: 'No file uploaded' });
+      }
+      const mime = data.mimetype;
+      const ext = BRAND_MIME_TO_EXT[mime];
+      if (!ext) {
+        return reply
+          .code(400)
+          .send({ message: 'Unsupported image type. Use PNG, JPEG, WebP, GIF, or SVG.' });
+      }
+      const buffer = await data.toBuffer();
+      const filename = `${randomUUID()}${ext}`;
+      const brandDir = path.join(process.cwd(), 'uploads', 'brand');
+      await mkdir(brandDir, { recursive: true });
+      const absPath = path.join(brandDir, filename);
+      await writeFile(absPath, buffer);
+      const publicPath = `/uploads/brand/${filename}`;
+
+      await unlinkStoredBrandLogo(existing.brandLogoUrl);
+
+      const row = await prisma.contactSettings.update({
+        where: { id: 1 },
+        data: { brandLogoUrl: publicPath },
+      });
+      return { data: mapSettings(row) };
+    },
+  );
+
+  fastify.delete(
+    '/admin/brand-logo',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      if (!isStaff(request.authUser)) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const prisma = fastify.prisma;
+      if (!prisma.contactSettings) {
+        return reply.code(503).send({ message: 'Database client is out of date.' });
+      }
+      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      if (!existing) {
+        return reply.code(404).send({ message: 'Contact settings not found' });
+      }
+      await unlinkStoredBrandLogo(existing.brandLogoUrl);
+      const row = await prisma.contactSettings.update({
+        where: { id: 1 },
+        data: { brandLogoUrl: null },
       });
       return { data: mapSettings(row) };
     },

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { ADMIN_SIDEBAR_MENU, type AdminSidebarGroupChild } from './constants';
+import { AdminBrandMark, type AdminBrand } from './admin-brand-mark';
 import { AdminNavIcon } from './nav-icon';
 
 function linkActive(pathname: string, href: string, isAddProduct: boolean): boolean {
@@ -23,7 +24,11 @@ function groupChildActive(pathname: string, child: AdminSidebarGroupChild): bool
   return childActive(pathname, child.href);
 }
 
-export function AdminSidebar() {
+type AdminSidebarProps = {
+  brand: AdminBrand | null;
+};
+
+export function AdminSidebar({ brand }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
@@ -43,13 +48,8 @@ export function AdminSidebar() {
 
   return (
     <aside className="admin-app-sidebar flex min-h-screen w-[260px] shrink-0 flex-col border-r border-[#e3e6ed] bg-white">
-      <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-[#e3e6ed] px-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-admin bg-[#fff5f0]">
-          <svg className="h-5 w-5 text-[#fa6238]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <path d="M12 2c1.2 3.2 3.8 5.2 6.5 6.2-.4 1.8-1.2 3.4-2.4 4.7 1.1.3 2.3.5 3.5.4-.9 2.1-2.6 3.7-4.8 4.5.5 1.4.4 2.9-.2 4.2-2.1-.8-3.8-2.4-4.8-4.5-1 .3-2 .4-3 .3 1.5-1.8 2.4-4.1 2.4-6.6 0-3.5-1.2-6.7-3.2-9.2z" />
-          </svg>
-        </div>
-        <span className="text-[1.125rem] font-semibold lowercase tracking-tight text-[#31374a]">dhidi</span>
+      <div className="flex h-16 shrink-0 items-center border-b border-[#e3e6ed] px-4">
+        <AdminBrandMark brand={brand} />
       </div>
       <nav className="min-h-0 flex-1 overflow-y-auto py-3">
         <ul className="space-y-0.5 px-2">

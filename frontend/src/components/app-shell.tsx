@@ -10,6 +10,8 @@ import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { NewsletterFooterForm } from '@/components/newsletter-footer-form';
+import { apiAssetUrl } from '@/lib/api-asset-url';
+import { brandVisibilityFromSettings } from '@/lib/brand-visibility';
 import type { ContactSettings } from '@/lib/contact-settings';
 
 /** True when `pathname` is exactly `href` or a nested route (e.g. `/blog/post`). */
@@ -24,12 +26,20 @@ function StorefrontHeader({
   pathname,
   logout,
   router,
+  brandName,
+  brandLogoUrl,
+  showBrandLogo,
+  showBrandName,
 }: {
   cartCount: number;
   user: User | null;
   pathname: string;
   logout: () => void;
   router: ReturnType<typeof useRouter>;
+  brandName: string;
+  brandLogoUrl: string | null;
+  showBrandLogo: boolean;
+  showBrandName: boolean;
 }) {
   const [activeMenu, setActiveMenu] = useState<'none' | 'categories' | 'shop' | 'blog'>('none');
   const [categories, setCategories] = useState<StorefrontCategory[]>([]);
@@ -167,6 +177,10 @@ function StorefrontHeader({
   const navInactive = `${navItemBase} text-[#101828] hover:text-[#0989ff]`;
   const navActive = `${navItemBase} text-[#0989ff]`;
 
+  const displayLogo = showBrandLogo && Boolean(brandLogoUrl);
+  const displayName = showBrandName;
+  const hasVisibleBrand = displayLogo || displayName;
+
   return (
     <>
       {/* Sticky storefront header: logo, search, category menu (promo bar above scrolls away) */}
@@ -178,12 +192,22 @@ function StorefrontHeader({
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className={`font-display text-xl font-semibold transition-premium hover:opacity-90 ${
+            className={`flex max-w-[min(100%,20rem)] items-center gap-2 font-display text-xl font-semibold transition-premium hover:opacity-90 sm:max-w-none ${
               pathname === '/' ? 'text-[#0989ff]' : 'text-[var(--navy)]'
             }`}
             aria-current={pathname === '/' ? 'page' : undefined}
           >
-            Dhidi
+            {displayLogo ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- dynamic CMS URL from API */
+              <img
+                src={apiAssetUrl(brandLogoUrl!)}
+                alt=""
+                className="h-8 w-auto max-w-[120px] shrink-0 object-contain object-left"
+                aria-hidden
+              />
+            ) : null}
+            {displayName ? <span className="min-w-0 truncate">{brandName}</span> : null}
+            {!hasVisibleBrand ? <span className="sr-only">{brandName}</span> : null}
           </Link>
 
           <div className="hidden flex-1 justify-center lg:flex">
@@ -625,33 +649,34 @@ function StorefrontHeader({
 const FOOTER_TAGLINE_FALLBACK =
   'Curated fashion, beauty, and home decor for modern living. Quality you can trust, style that lasts.';
 
-function StorefrontFooter() {
-  const [settings, setSettings] = useState<ContactSettings | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    apiRequest<{ data: ContactSettings }>('/api/contact-settings')
-      .then((res) => {
-        if (!cancelled) setSettings(res.data ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setSettings(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+function StorefrontFooter({ settings }: { settings: ContactSettings | null }) {
   const brandName = settings?.brandName?.trim() || 'Dhidi';
   const footerTagline = settings?.footerTagline?.trim() || FOOTER_TAGLINE_FALLBACK;
+  const { showBrandLogo, showBrandName } = brandVisibilityFromSettings(settings);
+  const displayLogo = showBrandLogo && Boolean(settings?.brandLogoUrl?.trim());
+  const displayName = showBrandName;
+  const hasVisibleBrand = displayLogo || displayName;
 
   return (
     <footer className="mt-24 border-t border-[var(--border)] bg-[var(--cream)]">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <Link href="/" className="font-display text-2xl font-semibold text-[var(--navy)]">
-              {brandName}
+            <Link
+              href="/"
+              className="inline-flex max-w-full flex-wrap items-center gap-3 font-display text-2xl font-semibold text-[var(--navy)]"
+            >
+              {displayLogo && settings?.brandLogoUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element -- dynamic CMS URL from API */
+                <img
+                  src={apiAssetUrl(settings.brandLogoUrl)}
+                  alt=""
+                  className="h-10 w-auto max-w-[200px] shrink-0 object-contain object-left"
+                  aria-hidden
+                />
+              ) : null}
+              {displayName ? <span className="min-w-0 leading-tight">{brandName}</span> : null}
+              {!hasVisibleBrand ? <span className="sr-only">{brandName}</span> : null}
             </Link>
             <p className="mt-4 max-w-sm whitespace-pre-line text-sm text-[var(--muted)]">{footerTagline}</p>
             <div className="mt-6 flex flex-wrap gap-4">
@@ -718,7 +743,8 @@ function StorefrontFooter() {
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[var(--border)] pt-8 sm:flex-row">
           <p className="text-sm text-[var(--muted)]">
-            © {new Date().getFullYear()} {brandName}. All rights reserved.
+            © {new Date().getFullYear()}
+            {showBrandName ? ` ${brandName}.` : '.'} All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <div className="flex gap-6 text-sm text-[var(--muted)]">
@@ -753,6 +779,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const fetchWishlist = useWishlistStore((s) => s.fetchWishlist);
   const clearWishlist = useWishlistStore((s) => s.clearWishlist);
   const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0));
+  const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null);
+
   useEffect(() => {
     if (!hasHydrated) return;
     if (token) {
@@ -762,8 +790,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [hasHydrated, token, fetchWishlist, clearWishlist]);
 
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: ContactSettings }>('/api/contact-settings')
+      .then((res) => {
+        if (!cancelled) setContactSettings(res.data ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setContactSettings(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const isAdminRoute = pathname.startsWith('/admin');
   const isHome = pathname === '/';
+  const headerBrandName = contactSettings?.brandName?.trim() || 'Dhidi';
+  const headerBrandLogoUrl = contactSettings?.brandLogoUrl?.trim()
+    ? contactSettings.brandLogoUrl
+    : null;
+  const { showBrandLogo: headerShowBrandLogo, showBrandName: headerShowBrandName } =
+    brandVisibilityFromSettings(contactSettings);
 
   if (isAdminRoute) {
     return <>{children}</>;
@@ -777,6 +825,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         pathname={pathname}
         logout={logout}
         router={router}
+        brandName={headerBrandName}
+        brandLogoUrl={headerBrandLogoUrl}
+        showBrandLogo={headerShowBrandLogo}
+        showBrandName={headerShowBrandName}
       />
       <main className="min-h-screen">
         {isHome ? children : (
@@ -785,7 +837,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
       </main>
-      <StorefrontFooter />
+      <StorefrontFooter settings={contactSettings} />
     </div>
   );
 }

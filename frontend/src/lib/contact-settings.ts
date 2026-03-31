@@ -1,6 +1,12 @@
 export type ContactSettings = {
   headline: string;
   brandName: string;
+  /** Path on the API host, e.g. `/uploads/brand/{id}.png` */
+  brandLogoUrl: string | null;
+  /** Storefront: show uploaded logo when true and a logo URL exists. */
+  showBrandLogo: boolean;
+  /** Storefront: show brand name text. */
+  showBrandName: boolean;
   footerTagline: string;
   primaryEmail: string;
   supportEmail: string;

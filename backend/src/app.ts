@@ -1,6 +1,10 @@
+const fs = require('fs');
+const path = require('path');
 const Fastify = require('fastify');
 const cors = require('@fastify/cors');
 const sensible = require('@fastify/sensible');
+const multipart = require('@fastify/multipart');
+const fastifyStatic = require('@fastify/static');
 const authPlugin = require('./plugins/auth');
 const authRoutes = require('./modules/auth/routes');
 const catalogRoutes = require('./modules/catalog/routes');
@@ -45,6 +49,19 @@ async function buildApp(prisma) {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   await fastify.register(authPlugin);
+
+  const uploadRoot = path.join(process.cwd(), 'uploads');
+  const brandUploadDir = path.join(uploadRoot, 'brand');
+  fs.mkdirSync(brandUploadDir, { recursive: true });
+
+  await fastify.register(multipart, {
+    limits: { fileSize: 2 * 1024 * 1024 },
+  });
+
+  await fastify.register(fastifyStatic, {
+    root: uploadRoot,
+    prefix: '/uploads/',
+  });
 
   fastify.setErrorHandler((error, request, reply) => {
     if (error?.name === 'ZodError') {

@@ -3,7 +3,10 @@
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { buildLoginRedirectHref } from '@/lib/auth-redirect';
+import { apiRequest } from '@/lib/api';
+import type { ContactSettings } from '@/lib/contact-settings';
 import { useEffect, useState } from 'react';
+import type { AdminBrand } from './admin-brand-mark';
 import { AdminSidebar } from './admin-sidebar';
 import { AdminTopBar } from './admin-top-bar';
 
@@ -21,10 +24,31 @@ export function AdminShell({ children, mainClassName }: AdminShellProps) {
   const router = useRouter();
   const { user, _hasHydrated } = useAuthStore();
   const [clientReady, setClientReady] = useState(false);
+  const [brand, setBrand] = useState<AdminBrand | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setClientReady(true), 0);
     return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiRequest<{ data: ContactSettings }>('/api/contact-settings')
+      .then((res) => {
+        if (cancelled || !res.data) return;
+        setBrand({
+          name: res.data.brandName?.trim() || 'Store',
+          logoUrl: res.data.brandLogoUrl?.trim() ? res.data.brandLogoUrl : null,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBrand({ name: 'Store', logoUrl: null });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const isReady = _hasHydrated || clientReady;
@@ -55,9 +79,9 @@ export function AdminShell({ children, mainClassName }: AdminShellProps) {
 
   return (
     <div className="flex min-h-screen bg-[#f9fafb] text-[#31374a]">
-      <AdminSidebar />
+      <AdminSidebar brand={brand} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AdminTopBar user={user} />
+        <AdminTopBar user={user} brand={brand} />
         <main className={`admin-app-main ${mainClasses}`}>{children}</main>
       </div>
     </div>

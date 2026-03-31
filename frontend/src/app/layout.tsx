@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
+import { buildRootMetadata } from "@/lib/brand-metadata";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -15,10 +15,7 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Dhidi | Premium Lifestyle & Home",
-  description: "Curated fashion, beauty, and home decor for modern living",
-};
+export const generateMetadata = buildRootMetadata;
 
 export default function RootLayout({
   children,

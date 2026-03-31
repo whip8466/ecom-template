@@ -304,6 +304,12 @@ model ContactSettings {
   id             Int      @id @default(1)
   headline       String   @default("Keep In Touch with Us") @db.VarChar(200)
   brandName      String   @default("Dhidi") @map("brand_name") @db.VarChar(120)
+  /// Public URL path served by the API, e.g. `/uploads/brand/{uuid}.png`
+  brandLogoUrl   String?  @map("brand_logo_url") @db.VarChar(500)
+  /// When true, storefront header/footer may show the logo (if uploaded).
+  showBrandLogo  Boolean  @default(true) @map("show_brand_logo")
+  /// When true, storefront header/footer may show the brand name text.
+  showBrandName  Boolean  @default(true) @map("show_brand_name")
   footerTagline  String   @default("Curated fashion, beauty, and home decor for modern living. Quality you can trust, style that lasts.") @map("footer_tagline") @db.Text
   primaryEmail   String   @map("primary_email") @db.VarChar(320)
   supportEmail   String   @map("support_email") @db.VarChar(320)

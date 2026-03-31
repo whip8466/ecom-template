@@ -1,14 +1,19 @@
 'use client';
 
 import type { User } from '@/lib/types';
+import { AdminBrandMark, type AdminBrand } from './admin-brand-mark';
 
 type Props = {
   user: User;
+  brand: AdminBrand | null;
 };
 
-export function AdminTopBar({ user }: Props) {
+export function AdminTopBar({ user, brand }: Props) {
   return (
     <header className="admin-app-topbar relative flex h-16 shrink-0 items-center border-b border-[#e3e6ed] bg-white px-4 lg:px-6">
+      <div className="relative z-10 mr-2 min-w-0 max-w-[100px] shrink-0 sm:mr-3 sm:max-w-[200px] lg:max-w-[240px]">
+        <AdminBrandMark brand={brand} compact />
+      </div>
       <div className="pointer-events-none absolute inset-x-0 flex justify-center px-4">
         <div className="pointer-events-auto relative w-full max-w-xl">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa3b8]">

@@ -25,6 +25,9 @@
 **/*.tsbuildinfo
 next-env.d.ts
 
+# API user uploads (brand logos, etc.)
+/backend/uploads/
+
 # logs / runtime temp
 *.log
 npm-debug.log*

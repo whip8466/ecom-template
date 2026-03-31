@@ -1,14 +1,19 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { AdminPageShell } from '@/components/admin-shell';
 import { apiRequest } from '@/lib/api';
+import { coerceBool } from '@/lib/brand-visibility';
 import type { ContactMessageRow, ContactSettings } from '@/lib/contact-settings';
 import { useAuthStore } from '@/store/auth-store';
 
 type FormState = {
   headline: string;
   brandName: string;
+  brandLogoUrl: string | null;
+  showBrandLogo: boolean;
+  showBrandName: boolean;
   footerTagline: string;
   primaryEmail: string;
   supportEmail: string;
@@ -25,6 +30,9 @@ type FormState = {
 const emptyForm: FormState = {
   headline: '',
   brandName: 'Dhidi',
+  brandLogoUrl: null,
+  showBrandLogo: true,
+  showBrandName: true,
   footerTagline:
     'Curated fashion, beauty, and home decor for modern living.\nQuality you can trust, style that lasts.',
   primaryEmail: '',
@@ -43,6 +51,9 @@ function toForm(s: ContactSettings): FormState {
   return {
     headline: s.headline,
     brandName: s.brandName ?? 'Dhidi',
+    brandLogoUrl: s.brandLogoUrl ?? null,
+    showBrandLogo: coerceBool(s.showBrandLogo, true),
+    showBrandName: coerceBool(s.showBrandName, true),
     footerTagline:
       s.footerTagline ??
       'Curated fashion, beauty, and home decor for modern living.\nQuality you can trust, style that lasts.',
@@ -138,6 +149,9 @@ export default function AdminContactPage() {
         pinterestUrl: form.pinterestUrl.trim() || null,
         twitterUrl: form.twitterUrl.trim() || null,
         youtubeUrl: form.youtubeUrl.trim() || null,
+        brandLogoUrl: form.brandLogoUrl,
+        showBrandLogo: form.showBrandLogo,
+        showBrandName: form.showBrandName,
       };
       const res = await apiRequest<{ data: ContactSettings }>('/api/admin/contact-settings', {
         method: 'PUT',
@@ -195,28 +209,16 @@ export default function AdminContactPage() {
         {message ? <p className="text-sm text-green-700">{message}</p> : null}
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
+        <p className="max-w-2xl text-sm text-[#64748b]">
+          Brand name and footer tagline are managed on the{' '}
+          <Link href="/admin/brand" className="font-medium text-[#3874ff] hover:underline">
+            Brand
+          </Link>{' '}
+          page.
+        </p>
+
         <div className="max-w-2xl space-y-4 rounded-admin border border-[#e3e6ed] bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Storefront footer</p>
-          <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Brand name</span>
-            <input
-              type="text"
-              value={form.brandName}
-              onChange={(e) => patch({ brandName: e.target.value })}
-              className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
-              maxLength={120}
-            />
-          </label>
-          <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Footer tagline</span>
-            <p className="mt-0.5 text-xs text-[#94a3b8]">Shown under the brand in the site footer. Use line breaks for multiple lines.</p>
-            <textarea
-              value={form.footerTagline}
-              onChange={(e) => patch({ footerTagline: e.target.value })}
-              rows={3}
-              className="mt-1 w-full rounded-admin border border-[#e3e6ed] px-3 py-2 text-sm text-[#31374a]"
-            />
-          </label>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Contact page content</p>
           <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">Page headline</span>
             <input
