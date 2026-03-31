@@ -133,7 +133,7 @@ export default function AdminBrandPage() {
   if (!mounted) {
     return (
       <AdminPageShell
-        breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Brand' }]}
+        breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Settings' }, { label: 'Brand' }]}
         title="Brand"
         description="Store name and footer copy shown across the public site."
       >
@@ -145,7 +145,7 @@ export default function AdminBrandPage() {
   if (!token) {
     return (
       <AdminPageShell
-        breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Brand' }]}
+        breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Settings' }, { label: 'Brand' }]}
         title="Brand"
         description="Store name and footer copy shown across the public site."
       >
@@ -156,7 +156,7 @@ export default function AdminBrandPage() {
 
   return (
     <AdminPageShell
-      breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Brand' }]}
+      breadcrumbs={[{ label: 'Home', href: '/admin' }, { label: 'Settings' }, { label: 'Brand' }]}
       title="Brand"
       description="These values power the storefront logo label, footer, and default page title. Contact emails, phone, and address are still managed on the Contact Us page."
       actions={
