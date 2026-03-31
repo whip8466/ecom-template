@@ -12,6 +12,12 @@ import { useWishlistStore } from '@/store/wishlist-store';
 import { NewsletterFooterForm } from '@/components/newsletter-footer-form';
 import type { ContactSettings } from '@/lib/contact-settings';
 
+/** True when `pathname` is exactly `href` or a nested route (e.g. `/blog/post`). */
+function isNavSectionActive(pathname: string, href: string): boolean {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function StorefrontHeader({
   cartCount,
   user,
@@ -36,6 +42,8 @@ function StorefrontHeader({
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  /** Secondary nav + mega dropdowns (categories / shop / blog) — used to close on outside click. */
+  const megaNavRef = useRef<HTMLDivElement>(null);
   const wishlistCount = useWishlistStore((state) => state.items.length);
 
   const firstName = user?.name?.split(' ')[0] || 'Account';
@@ -50,6 +58,18 @@ function StorefrontHeader({
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [userMenuOpen]);
+
+  useEffect(() => {
+    if (activeMenu === 'none') return;
+    const onDocMouseDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (megaNavRef.current && !megaNavRef.current.contains(t)) {
+        setActiveMenu('none');
+      }
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [activeMenu]);
 
   useEffect(() => {
     const onScroll = () => setHeaderScrolled(window.scrollY > 4);
@@ -143,18 +163,25 @@ function StorefrontHeader({
     setIsSearchCategoryOpen(false);
   };
 
+  const navItemBase = 'transition-premium';
+  const navInactive = `${navItemBase} text-[#101828] hover:text-[#0989ff]`;
+  const navActive = `${navItemBase} text-[#0989ff]`;
+
   return (
     <>
       {/* Sticky storefront header: logo, search, category menu (promo bar above scrolls away) */}
       <header
-        className={`sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--card-bg)] transition-shadow duration-200 ${
-          headerScrolled ? 'shadow-md' : 'shadow-[var(--shadow-sm)]'
-        }`}
+        className={`sticky top-0 w-full border-b border-[var(--border)] bg-[var(--card-bg)] transition-shadow duration-200 ${
+          activeMenu !== 'none' ? 'z-[70]' : 'z-50'
+        } ${headerScrolled ? 'shadow-md' : 'shadow-[var(--shadow-sm)]'}`}
       >
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className="font-display text-xl font-semibold text-[var(--navy)] transition-premium hover:opacity-90"
+            className={`font-display text-xl font-semibold transition-premium hover:opacity-90 ${
+              pathname === '/' ? 'text-[#0989ff]' : 'text-[var(--navy)]'
+            }`}
+            aria-current={pathname === '/' ? 'page' : undefined}
           >
             Dhidi
           </Link>
@@ -233,7 +260,10 @@ function StorefrontHeader({
             {user && (
               <Link
                 href="/wishlist"
-                className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
+                aria-current={isNavSectionActive(pathname, '/wishlist') ? 'page' : undefined}
+                className={`relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-premium hover:bg-[var(--cream)] ${
+                  isNavSectionActive(pathname, '/wishlist') ? 'text-[#0989ff]' : 'text-[var(--navy)]'
+                }`}
               >
                 <span className="sr-only">Wishlist</span>
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +278,10 @@ function StorefrontHeader({
             )}
             <Link
               href="/cart"
-              className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--navy)] transition-premium hover:bg-[var(--cream)]"
+              aria-current={isNavSectionActive(pathname, '/cart') ? 'page' : undefined}
+              className={`relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-premium hover:bg-[var(--cream)] ${
+                isNavSectionActive(pathname, '/cart') ? 'text-[#0989ff]' : 'text-[var(--navy)]'
+              }`}
             >
               <span className="sr-only">Cart</span>
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,8 +361,12 @@ function StorefrontHeader({
           </nav>
         </div>
 
-        {/* Secondary nav strip with hover submenus */}
-        <div className="relative border-t border-[var(--border)] bg-white" onMouseLeave={() => setActiveMenu('none')}>
+        {/* Secondary nav strip with hover submenus; megaNavRef includes dropdown panels for outside-click close */}
+        <div
+          ref={megaNavRef}
+          className="relative border-t border-[var(--border)] bg-white"
+          onMouseLeave={() => setActiveMenu('none')}
+        >
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-0 sm:px-6 lg:px-8">
             <button
               type="button"
@@ -347,67 +384,96 @@ function StorefrontHeader({
               </svg>
             </button>
 
-            <nav className="flex flex-1 items-center gap-7 px-2 text-sm font-semibold text-[#101828]">
-              <button type="button" onMouseEnter={() => setActiveMenu('shop')} className="flex items-center gap-1 py-3 text-[#0989ff]">
-                Shop
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {blogCategories.length > 0 ? (
-                <div className="relative" onMouseEnter={() => setActiveMenu('blog')}>
-                  <button type="button" className="flex items-center gap-1 py-3 hover:text-[#0989ff]">
-                    Blog
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {activeMenu === 'blog' && (
-                    <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-none border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
-                      <ul className="space-y-3 text-sm text-[#475467]">
-                        <li>
-                          <Link href="/blog" className="hover:text-[#0989ff]" onClick={() => setActiveMenu('none')}>
-                            All posts
-                          </Link>
-                        </li>
-                        {blogCategories.map((c) => (
-                          <li key={c.id}>
-                            <Link
-                              href={`/blog?category=${encodeURIComponent(c.slug)}`}
-                              className="hover:text-[#0989ff]"
-                              onClick={() => setActiveMenu('none')}
-                            >
-                              {c.name}
+            <nav className="flex min-w-0 flex-1 items-center justify-between gap-4 px-2 text-sm font-semibold text-[#101828]">
+              <div className="flex min-w-0 flex-wrap items-center gap-7">
+                <button
+                  type="button"
+                  onMouseEnter={() => setActiveMenu('shop')}
+                  className={`flex items-center gap-1 py-3 ${isNavSectionActive(pathname, '/shop') ? navActive : navInactive}`}
+                >
+                  Shop
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {blogCategories.length > 0 ? (
+                  <div className="relative" onMouseEnter={() => setActiveMenu('blog')}>
+                    <button
+                      type="button"
+                      className={`flex items-center gap-1 py-3 ${isNavSectionActive(pathname, '/blog') ? navActive : navInactive}`}
+                    >
+                      Blog
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {activeMenu === 'blog' && (
+                      <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-none border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                        <ul className="space-y-3 text-sm text-[#475467]">
+                          <li>
+                            <Link href="/blog" className="hover:text-[#0989ff]" onClick={() => setActiveMenu('none')}>
+                              All posts
                             </Link>
                           </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ) : (
+                          {blogCategories.map((c) => (
+                            <li key={c.id}>
+                              <Link
+                                href={`/blog?category=${encodeURIComponent(c.slug)}`}
+                                className="hover:text-[#0989ff]"
+                                onClick={() => setActiveMenu('none')}
+                              >
+                                {c.name}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href="/blog"
+                    onMouseEnter={() => setActiveMenu('none')}
+                    aria-current={isNavSectionActive(pathname, '/blog') ? 'page' : undefined}
+                    className={`py-3 ${isNavSectionActive(pathname, '/blog') ? navActive : navInactive}`}
+                  >
+                    Blog
+                  </Link>
+                )}
                 <Link
-                  href="/blog"
+                  href="/social-feed"
                   onMouseEnter={() => setActiveMenu('none')}
-                  className="py-3 hover:text-[#0989ff]"
+                  aria-current={isNavSectionActive(pathname, '/social-feed') ? 'page' : undefined}
+                  className={`py-3 ${isNavSectionActive(pathname, '/social-feed') ? navActive : navInactive}`}
                 >
-                  Blog
+                  Social feed
                 </Link>
-              )}
-              <Link
-                href="/contact"
-                onMouseEnter={() => setActiveMenu('none')}
-                className="py-3 hover:text-[#0989ff]"
-              >
-                Contact Us
-              </Link>
+              </div>
+              <div className="flex shrink-0 items-center gap-7">
+                <Link
+                  href="/faq"
+                  onMouseEnter={() => setActiveMenu('none')}
+                  aria-current={isNavSectionActive(pathname, '/faq') ? 'page' : undefined}
+                  className={`py-3 ${isNavSectionActive(pathname, '/faq') ? navActive : navInactive}`}
+                >
+                  FAQ
+                </Link>
+                <Link
+                  href="/contact"
+                  onMouseEnter={() => setActiveMenu('none')}
+                  aria-current={isNavSectionActive(pathname, '/contact') ? 'page' : undefined}
+                  className={`py-3 ${isNavSectionActive(pathname, '/contact') ? navActive : navInactive}`}
+                >
+                  Contact Us
+                </Link>
+              </div>
             </nav>
           </div>
 
           {activeMenu === 'categories' && (
-            <div className="absolute left-0 right-0 top-full z-[70]">
+            <div className="absolute left-0 right-0 top-full z-[70] pointer-events-none">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="relative w-[300px] rounded-b-md bg-white shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                <div className="relative w-[300px] rounded-b-md bg-white shadow-[0_12px_24px_rgba(16,24,40,0.12)] pointer-events-auto">
                   {rootCategories.length === 0 ? (
                     <div className="px-4 py-6 text-sm text-[#667085]">
                       {categories.length === 0 ? 'Loading categories…' : 'No top-level categories.'}
@@ -471,7 +537,7 @@ function StorefrontHeader({
 
                   {activeCategoryItem && subcategoriesForActive.length > 0 ? (
                     <div
-                      className="absolute left-full min-w-[200px] max-w-sm max-h-[min(320px,70vh)] overflow-y-auto bg-white px-3 py-2 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
+                      className="pointer-events-auto absolute left-full min-w-[200px] max-w-sm max-h-[min(320px,70vh)] overflow-y-auto bg-white px-3 py-2 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
                       style={{ top: `${submenuTop}px` }}
                     >
                       <ul className="space-y-0.5">
@@ -494,9 +560,9 @@ function StorefrontHeader({
           )}
 
           {activeMenu === 'shop' && (
-            <div className="absolute left-0 right-0 top-full z-[70]">
+            <div className="absolute left-0 right-0 top-full z-[70] pointer-events-none">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-5 gap-4 bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                <div className="pointer-events-auto grid grid-cols-5 gap-4 bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
                   <div>
                     <h4 className="mb-3 text-lg font-semibold text-[#101828]">Categories</h4>
                     <ul className="max-h-52 space-y-2 overflow-y-auto text-sm text-[#475467]">
@@ -544,6 +610,14 @@ function StorefrontHeader({
           )}
         </div>
       </header>
+      {/* Below header (z-50/70); closes mega menus on click without needing to hit page content far away */}
+      {activeMenu !== 'none' ? (
+        <div
+          className="fixed inset-0 z-[60] bg-transparent"
+          aria-hidden
+          onMouseDown={() => setActiveMenu('none')}
+        />
+      ) : null}
     </>
   );
 }

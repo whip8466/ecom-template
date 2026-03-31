@@ -16,6 +16,16 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+const updateProfileSchema = z.object({
+  firstName: z.string().min(2).max(120),
+  lastName: z.string().min(2).max(120),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(6),
+});
+
 function userDto(user) {
   return {
     id: user.id,
@@ -91,6 +101,40 @@ async function authRoutes(fastify) {
     }
 
     return { user: userDto(user) };
+  });
+
+  fastify.patch('/profile', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const input = updateProfileSchema.parse(request.body);
+    const prisma = fastify.prisma;
+    const firstName = input.firstName.trim();
+    const lastName = input.lastName.trim();
+    const user = await prisma.user.update({
+      where: { id: request.authUser.userId },
+      data: {
+        firstName,
+        lastName,
+        name: `${firstName} ${lastName}`,
+      },
+    });
+    return { user: userDto(user) };
+  });
+
+  fastify.patch('/password', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const input = changePasswordSchema.parse(request.body);
+    const prisma = fastify.prisma;
+    const user = await prisma.user.findUnique({ where: { id: request.authUser.userId } });
+    if (!user) {
+      return reply.code(404).send({ message: 'User not found' });
+    }
+    const valid = await comparePassword(input.currentPassword, user.passwordHash);
+    if (!valid) {
+      return reply.code(401).send({ message: 'Current password is incorrect' });
+    }
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await hashPassword(input.newPassword) },
+    });
+    return { message: 'Password updated successfully' };
   });
 }
 

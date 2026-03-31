@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth-store';
 
 function ProfilePage() {
   const user = useAuthStore((s) => s.user);
+
   const displayName =
     user?.name?.trim() ||
     [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() ||
@@ -27,7 +28,7 @@ function ProfilePage() {
         <h2 className="text-lg font-semibold text-[#0f1f40]">Account details</h2>
         <dl className="mt-4 space-y-4 text-sm">
           <div>
-            <dt className="text-[#64748b]">Name</dt>
+            <dt className="text-[#64748b]">Display name</dt>
             <dd className="mt-0.5 font-medium text-[#0f1f40]">{displayName}</dd>
           </div>
           <div>
@@ -42,18 +43,18 @@ function ProfilePage() {
           ) : null}
         </dl>
 
-        <div className="mt-8 flex flex-wrap gap-3 border-t border-[#edf2f8] pt-6">
+        <div className="mt-8 flex flex-col gap-3 border-t border-[#edf2f8] pt-6 sm:flex-row sm:flex-wrap">
           <Link
-            href="/account/orders"
-            className="inline-flex items-center justify-center rounded-md border border-[#d7e4f6] bg-white px-4 py-2 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc]"
+            href="/account/profile/edit"
+            className="inline-flex items-center justify-center rounded-md bg-[#0989ff] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0476df]"
           >
-            My orders
+            Edit profile
           </Link>
           <Link
-            href="/account/addresses"
-            className="inline-flex items-center justify-center rounded-md border border-[#d7e4f6] bg-white px-4 py-2 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc]"
+            href="/account/reset-password"
+            className="inline-flex items-center justify-center rounded-md border border-[#d7e4f6] bg-white px-4 py-2.5 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc]"
           >
-            Addresses
+            Reset password
           </Link>
         </div>
       </section>
