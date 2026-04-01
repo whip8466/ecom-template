@@ -204,11 +204,11 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-[#7b8aa3]">
-        <Link href="/" className="hover:text-[#0989ff]">
+        <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">
           Home
         </Link>
         <span>/</span>
-        <Link href="/shop" className="hover:text-[#0989ff]">
+        <Link href="/shop" className="hover:text-[var(--sf-btn-primary-bg)]">
           Shop
         </Link>
         <span>/</span>
@@ -223,7 +223,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
               type="button"
               onClick={() => setActiveImageIndex(index)}
               className={`overflow-hidden rounded border ${
-                index === activeImageIndex ? 'border-[#0989ff]' : 'border-[#dbe5f3]'
+                index === activeImageIndex ? 'border-[var(--sf-btn-primary-bg)]' : 'border-[#dbe5f3]'
               }`}
             >
               <div
@@ -269,7 +269,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
             )}
           </div>
           <div className="mt-3 flex flex-wrap items-baseline gap-2">
-            <p className="text-3xl font-semibold text-[#0f1f40]">{formatMoney(displayUnitPrice)}</p>
+            <p className="text-3xl font-semibold text-[var(--sf-btn-primary-bg)]">{formatMoney(displayUnitPrice)}</p>
             {strikePrice != null && (
               <p className="text-lg text-[#94a3b8] line-through">{formatMoney(strikePrice)}</p>
             )}
@@ -310,7 +310,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                               title={val.label}
                               onClick={() => handleOptionSelect(group.optionTypeId, val.id)}
                               className={`h-8 w-8 rounded-full border-2 ${
-                                selected ? 'border-[#0f1f40]' : 'border-white ring-1 ring-[#d6e2f1]'
+                                selected ? 'border-[var(--sf-btn-primary-bg)]' : 'border-white ring-1 ring-[var(--sf-input-border)]'
                               }`}
                               style={{ backgroundColor: swatch }}
                             />
@@ -323,8 +323,8 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                             onClick={() => handleOptionSelect(group.optionTypeId, val.id)}
                             className={`min-w-[44px] rounded border px-3 py-1.5 text-sm ${
                               selected
-                                ? 'border-[#0f1f40] bg-[#0f1f40] text-white'
-                                : 'border-[#d6e2f1] bg-white text-[#0f1f40] hover:border-[#0989ff]'
+                                ? 'border-[var(--sf-btn-primary-bg)] bg-[var(--sf-btn-primary-bg)] text-white'
+                                : 'border-[var(--sf-input-border)] bg-white text-[var(--sf-label-text)] hover:border-[var(--sf-btn-primary-bg)]'
                             } ${asSize ? 'font-medium' : ''}`}
                           >
                             {val.label || val.value}
@@ -351,7 +351,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                       title={color.colorName}
                       onClick={() => setSelectedColor(color.colorName)}
                       className={`h-6 w-6 rounded-full border-2 ${
-                        isSelected ? 'border-[#0f1f40]' : 'border-white ring-1 ring-[#d6e2f1]'
+                        isSelected ? 'border-[var(--sf-btn-primary-bg)]' : 'border-white ring-1 ring-[var(--sf-input-border)]'
                       }`}
                       style={{
                         backgroundColor: resolveSwatchColor(color.colorName, color.colorCode || color.colorName),
@@ -364,22 +364,22 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
           )}
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <div className="flex h-10 items-center rounded border border-[#d7e4f6]">
+            <div className="flex h-10 items-center rounded border border-[var(--sf-input-border)] bg-[var(--sf-input-bg)]">
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="h-full w-9 text-[#0f1f40]"
+                className="h-full w-9 text-[var(--sf-input-text)]"
               >
                 -
               </button>
-              <span className="w-10 text-center text-sm font-semibold text-[#0f1f40]">{quantity}</span>
+              <span className="w-10 text-center text-sm font-semibold text-[var(--sf-input-text)]">{quantity}</span>
               <button
                 type="button"
                 disabled={quantity >= effectiveAvailableStock}
                 onClick={() =>
                   setQuantity((q) => Math.min(effectiveAvailableStock, Math.max(1, q + 1)))
                 }
-                className="h-full w-9 text-[#0f1f40] disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-full w-9 text-[var(--sf-input-text)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 +
               </button>
@@ -387,7 +387,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
 
             <button
               disabled={shouldShowOutOfStock || effectiveAvailableStock < 1}
-              className="h-10 rounded bg-[#0f1f40] px-6 text-sm font-semibold text-white hover:bg-[#102b57] disabled:cursor-not-allowed disabled:opacity-50"
+              className="sf-btn-primary h-10 px-6 text-sm disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => {
                 if (shouldShowOutOfStock || effectiveAvailableStock < 1) return;
                 const variantLabel = matchedVariant
@@ -416,7 +416,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
             <button
               type="button"
               onClick={() => router.push('/checkout')}
-              className="h-10 w-full max-w-[320px] rounded bg-[#0989ff] px-6 text-sm font-semibold text-white hover:bg-[#0476df]"
+              className="sf-btn-primary h-10 w-full max-w-[320px] px-6 text-sm"
             >
               Buy Now
             </button>
@@ -430,8 +430,8 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
               aria-pressed={isCurrentProductInWishlist}
               className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition ${
                 isCurrentProductInWishlist
-                  ? 'border-[#0989ff] bg-[#0989ff]/10 text-[#0989ff]'
-                  : 'border-[#e6edf6] bg-white text-[#0f1f40] hover:border-[#0989ff] hover:text-[#0989ff]'
+                  ? 'border-[var(--sf-btn-primary-bg)] bg-[var(--sf-btn-primary-bg)]/10 text-[var(--sf-btn-primary-bg)]'
+                  : 'border-[#e6edf6] bg-white text-[#0f1f40] hover:border-[var(--sf-btn-primary-bg)] hover:text-[var(--sf-btn-primary-bg)]'
               }`}
             >
               {isCurrentProductInWishlist ? (
@@ -465,21 +465,27 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
           <button
             type="button"
             onClick={() => setActiveTab('description')}
-            className={activeTab === 'description' ? 'font-semibold text-[#0f1f40]' : 'text-[#7b8aa3]'}
+            className={
+              activeTab === 'description' ? 'font-semibold text-[var(--sf-btn-primary-bg)]' : 'text-[#7b8aa3]'
+            }
           >
             Description
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('additional')}
-            className={activeTab === 'additional' ? 'font-semibold text-[#0f1f40]' : 'text-[#7b8aa3]'}
+            className={
+              activeTab === 'additional' ? 'font-semibold text-[var(--sf-btn-primary-bg)]' : 'text-[#7b8aa3]'
+            }
           >
             Additional Information
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('reviews')}
-            className={activeTab === 'reviews' ? 'font-semibold text-[#0f1f40]' : 'text-[#7b8aa3]'}
+            className={
+              activeTab === 'reviews' ? 'font-semibold text-[var(--sf-btn-primary-bg)]' : 'text-[#7b8aa3]'
+            }
           >
             Reviews
           </button>
@@ -527,7 +533,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
       </section>
 
       <section className="mt-14">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#0989ff]">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-[var(--sf-btn-primary-bg)]">
           Next Day Products
         </p>
         <h2 className="mt-1 text-center text-3xl font-semibold text-[#0f1f40]">Related Products</h2>
@@ -581,8 +587,8 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                         }}
                         className={`group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] transition ${
                           cartItems.some((cartItem) => cartItem.productId === item.id)
-                            ? 'bg-[#0989ff] text-white'
-                            : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                            ? 'bg-[var(--sf-btn-primary-bg)] text-white'
+                            : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
                         }`}
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -593,7 +599,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                             d="M3 3h2l.4 2m0 0L7 13h10l1.6-8H5.4zM9 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z"
                           />
                         </svg>
-                        <span className="pointer-events-none absolute -left-[86px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                        <span className="pointer-events-none absolute -left-[86px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[var(--sf-btn-primary-hover)] px-2 py-1 text-[10px] text-white group-hover/item:block">
                           {cartItems.some((cartItem) => cartItem.productId === item.id)
                             ? 'View Cart'
                             : 'Add To Cart'}
@@ -603,7 +609,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                         type="button"
                         title="Quick View"
                         onClick={() => router.push(`/products/${item.slug}`)}
-                        className="group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
+                        className="group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path
@@ -619,7 +625,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                           />
                         </svg>
-                        <span className="pointer-events-none absolute -left-[76px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                        <span className="pointer-events-none absolute -left-[76px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[var(--sf-btn-primary-hover)] px-2 py-1 text-[10px] text-white group-hover/item:block">
                           Quick View
                         </span>
                       </button>
@@ -629,8 +635,8 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                         onClick={() => handleWishlistToggle(item)}
                         className={`group/item relative grid h-11 w-11 place-items-center transition ${
                           wishlistItems.some((wishlistItem) => wishlistItem.productId === item.id)
-                            ? 'bg-[#0989ff] text-white'
-                            : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                            ? 'bg-[var(--sf-btn-primary-bg)] text-white'
+                            : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
                         }`}
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -641,7 +647,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                           />
                         </svg>
-                        <span className="pointer-events-none absolute -left-[104px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[#0f1f40] px-2 py-1 text-[10px] text-white group-hover/item:block">
+                        <span className="pointer-events-none absolute -left-[104px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded bg-[var(--sf-btn-primary-hover)] px-2 py-1 text-[10px] text-white group-hover/item:block">
                           Add to Wishlist
                         </span>
                       </button>
@@ -651,11 +657,11 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                     {item.category?.name}
                   </p>
                   <h3 className="mt-1 text-sm font-semibold text-[#0f1f40]">
-                    <Link href={`/products/${item.slug}`} className="hover:text-[#0989ff]">
+                    <Link href={`/products/${item.slug}`} className="hover:text-[var(--sf-btn-primary-bg)]">
                       {item.name}
                     </Link>
                   </h3>
-                  <p className="mt-1 text-sm font-semibold text-[#0f1f40]">{formatMoney(itemPrice)}</p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--sf-btn-primary-bg)]">{formatMoney(itemPrice)}</p>
                 </article>
               );
             })

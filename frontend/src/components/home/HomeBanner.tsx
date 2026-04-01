@@ -61,11 +61,11 @@ export function HomeBanner() {
   const ctaIsExternal = /^https?:\/\//i.test(cta);
 
   const shopNowClassName =
-    'mt-7 inline-flex w-fit shrink-0 items-center gap-2 rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-[#0d6f8f] shadow-lg transition hover:bg-[#f0f9ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+    'sf-btn-primary mt-7 inline-flex w-fit shrink-0 items-center gap-2 px-5 py-2.5 text-sm no-underline shadow-lg transition-premium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
 
   return (
     <section
-      className="group relative overflow-hidden bg-gradient-to-br from-[#0a5a72] via-[#0d6f8f] to-[#0a4d63]"
+      className="group relative overflow-hidden bg-gradient-to-br from-[color-mix(in_srgb,var(--sf-btn-primary-hover)_55%,#0f172a)] via-[var(--sf-btn-primary-bg)] to-[color-mix(in_srgb,var(--sf-btn-primary-bg)_40%,#0f172a)]"
       role="region"
       aria-roledescription="carousel"
       aria-label="Featured promotions"

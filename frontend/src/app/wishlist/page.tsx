@@ -14,7 +14,7 @@ function WishlistPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-semibold text-[#0f1f40]">Wishlist</h1>
       <p className="mt-2 text-sm text-[#7c8ea6]">
-        <Link href="/" className="hover:text-[#0989ff]">Home</Link> / Wishlist
+        <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">Home</Link> / Wishlist
       </p>
 
       {items.length === 0 ? (
@@ -22,7 +22,7 @@ function WishlistPage() {
           <p className="text-base text-[#475467]">Your wishlist is empty.</p>
           <Link
             href="/shop"
-            className="mt-4 inline-flex rounded bg-[#0989ff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df]"
+            className="sf-btn-primary mt-4 inline-flex px-5 py-2.5 text-sm no-underline"
           >
             Continue Shopping
           </Link>
@@ -38,11 +38,11 @@ function WishlistPage() {
                 />
               </Link>
               <h3 className="mt-3 text-sm font-semibold text-[#0f1f40]">
-                <Link href={`/products/${item.slug}`} className="hover:text-[#0989ff]">
+                <Link href={`/products/${item.slug}`} className="hover:text-[var(--sf-btn-primary-bg)]">
                   {item.name}
                 </Link>
               </h3>
-              <p className="mt-1 text-sm font-semibold text-[#0989ff]">{formatMoney(item.priceCents)}</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--sf-btn-primary-bg)]">{formatMoney(item.priceCents)}</p>
 
               <div className="mt-4 flex gap-2">
                 <button
@@ -57,7 +57,7 @@ function WishlistPage() {
                       quantity: 1,
                     })
                   }
-                  className="flex-1 rounded bg-[#0f1f40] px-3 py-2 text-xs font-semibold text-white hover:bg-[#102b57]"
+                  className="sf-btn-primary flex-1 px-3 py-2 text-xs"
                 >
                   Add To Cart
                 </button>
@@ -72,7 +72,7 @@ function WishlistPage() {
                       imageUrl: item.imageUrl,
                     })
                   }
-                  className="rounded border border-[#d7e4f6] px-3 py-2 text-xs font-semibold text-[#344054] hover:bg-[#f7f9fc]"
+                  className="sf-btn-secondary px-3 py-2 text-xs font-medium"
                 >
                   Remove
                 </button>

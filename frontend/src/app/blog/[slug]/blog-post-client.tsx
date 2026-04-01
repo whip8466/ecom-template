@@ -46,7 +46,7 @@ export function BlogPostClient() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
         <p className="text-sm text-red-600">{error ?? 'Post not found.'}</p>
-        <Link href="/blog" className="mt-4 inline-block text-sm text-[#0989ff] hover:underline">
+        <Link href="/blog" className="mt-4 inline-block text-sm text-[var(--sf-btn-primary-bg)] hover:underline">
           ← Back to blog
         </Link>
       </div>
@@ -55,11 +55,11 @@ export function BlogPostClient() {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <Link href="/blog" className="text-sm font-medium text-[#0989ff] hover:underline">
+      <Link href="/blog" className="text-sm font-medium text-[var(--sf-btn-primary-bg)] hover:underline">
         ← Blog
       </Link>
       {post.category ? (
-        <p className="mt-4 text-xs font-medium uppercase tracking-wide text-[#0989ff]">{post.category.name}</p>
+        <p className="mt-4 text-xs font-medium uppercase tracking-wide text-[var(--sf-btn-primary-bg)]">{post.category.name}</p>
       ) : null}
       <h1 className="mt-2 text-3xl font-semibold text-[#1b2a4e]">{post.title}</h1>
       {post.publishedAt ? (

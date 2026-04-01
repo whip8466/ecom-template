@@ -9,7 +9,7 @@ export function RequireAuthLoading() {
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
       <div
-        className="h-9 w-9 animate-spin rounded-full border-2 border-[#0989ff] border-t-transparent"
+        className="h-9 w-9 animate-spin rounded-full border-2 border-[var(--sf-btn-primary-bg)] border-t-transparent"
         aria-hidden
       />
       <span className="sr-only">Loading session…</span>

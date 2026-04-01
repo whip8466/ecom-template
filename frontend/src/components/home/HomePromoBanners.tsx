@@ -9,7 +9,7 @@ function CtaLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href || '/shop'}
-      className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#0989ff] transition hover:text-[#0670cc]"
+      className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--sf-btn-primary-bg)] transition hover:text-[var(--sf-btn-primary-hover)]"
     >
       {label || 'Shop Now'}
       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -64,7 +64,7 @@ export function HomePromoBanners({ initialBanners }: Props) {
               >
                 <div className="flex flex-1 flex-col justify-center p-6 sm:p-7">
                   {b.eyebrowLabel ? (
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0989ff]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sf-btn-primary-bg)]">
                       {b.eyebrowLabel}
                     </p>
                   ) : null}
@@ -106,7 +106,7 @@ export function HomePromoBanners({ initialBanners }: Props) {
               <div className="relative z-1 flex flex-1 flex-col p-6 sm:flex-row sm:items-center sm:gap-6 sm:p-8 md:pl-10">
                 <div className="min-w-0 flex-1">
                   {b.eyebrowLabel ? (
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0989ff]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sf-btn-primary-bg)]">
                       {b.eyebrowLabel}
                     </p>
                   ) : null}

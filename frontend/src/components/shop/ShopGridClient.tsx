@@ -230,7 +230,7 @@ export function ShopGridClient() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-semibold text-[#12213f]">Shop Grid</h1>
       <p className="mt-1 text-sm text-[#67748a]">
-        <Link href="/" className="hover:text-[#0989ff]">Home</Link> / Shop Grid
+        <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">Home</Link> / Shop Grid
       </p>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -240,7 +240,7 @@ export function ShopGridClient() {
             <div className="mt-3 relative h-10">
               <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded bg-[#dbe2ec]" />
               <div
-                className="absolute top-1/2 h-2 -translate-y-1/2 rounded bg-[#0989ff]"
+                className="absolute top-1/2 h-2 -translate-y-1/2 rounded bg-[var(--sf-btn-primary-bg)]"
                 style={{
                   left: `${minPercent}%`,
                   width: `${Math.max(maxPercent - minPercent, 0)}%`,
@@ -290,6 +290,7 @@ export function ShopGridClient() {
             <label className="mt-3 flex items-center gap-2 text-sm text-[#475467]">
               <input
                 type="checkbox"
+                className="sf-checkbox"
                 checked={urlSale}
                 onChange={(e) => pushParams({ sale: e.target.checked ? '1' : null, page: '1' })}
               />
@@ -298,6 +299,7 @@ export function ShopGridClient() {
             <label className="mt-2 flex items-center gap-2 text-sm text-[#475467]">
               <input
                 type="checkbox"
+                className="sf-checkbox"
                 checked={urlInStock}
                 onChange={(e) => pushParams({ inStock: e.target.checked ? '1' : null, page: '1' })}
               />
@@ -312,7 +314,9 @@ export function ShopGridClient() {
                 type="button"
                 onClick={() => pushParams({ category: null, page: '1' })}
                 className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left ${
-                  urlCategory ? 'text-[#344054] hover:bg-[#f5f9ff]' : 'bg-[#0989ff]/10 font-semibold text-[#0989ff]'
+                  urlCategory
+                    ? 'text-[#344054] hover:bg-[#f5f9ff]'
+                    : 'bg-[color-mix(in_srgb,var(--sf-btn-primary-bg)_12%,transparent)] font-semibold text-[var(--sf-btn-primary-bg)]'
                 }`}
               >
                 <span>All Categories</span>
@@ -325,7 +329,7 @@ export function ShopGridClient() {
                   onClick={() => pushParams({ category: category.slug, page: '1' })}
                   className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left ${
                     urlCategory.toLowerCase() === category.slug.toLowerCase()
-                      ? 'bg-[#0989ff]/10 font-semibold text-[#0989ff]'
+                      ? 'bg-[color-mix(in_srgb,var(--sf-btn-primary-bg)_12%,transparent)] font-semibold text-[var(--sf-btn-primary-bg)]'
                       : 'text-[#344054] hover:bg-[#f5f9ff]'
                   }`}
                 >
@@ -354,7 +358,7 @@ export function ShopGridClient() {
                     <div>
                       <p className="text-[11px] text-[#f5a623]">★★★★★</p>
                       <p className="text-xs font-semibold text-[#12213f]">{product.name}</p>
-                      <p className="text-xs text-[#0989ff]">{formatMoney(product.priceCents)}</p>
+                      <p className="text-xs text-[var(--sf-btn-primary-bg)]">{formatMoney(product.priceCents)}</p>
                     </div>
                   </Link>
                 ))
@@ -435,7 +439,7 @@ export function ShopGridClient() {
                 <button
                   type="button"
                   onClick={() => router.replace('/shop', { scroll: false })}
-                  className="ml-auto text-xs font-semibold text-[#0989ff] hover:text-[#0476df]"
+                  className="ml-auto text-xs font-semibold text-[var(--sf-btn-primary-bg)] hover:text-[var(--sf-btn-primary-hover)]"
                 >
                   Clear all filters
                 </button>
@@ -452,7 +456,7 @@ export function ShopGridClient() {
               onChange={(e) =>
                 pushParams({ sort: e.target.value === 'default' ? null : e.target.value, page: '1' })
               }
-              className="rounded border border-[#dfe8f5] bg-white px-3 py-1.5 text-sm text-[#344054] outline-none"
+              className="sf-field h-auto min-h-0 w-auto py-1.5 text-sm"
             >
               <option value="default">Default sorting</option>
               <option value="low">Price: low to high</option>
@@ -512,7 +516,7 @@ export function ShopGridClient() {
                           });
                         }}
                         className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${
-                          inCart ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                          inCart ? 'bg-[var(--sf-btn-primary-bg)] text-white' : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
                         }`}
                       >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -526,7 +530,7 @@ export function ShopGridClient() {
                         type="button"
                         title="Quick View"
                         onClick={() => router.push(`/products/${product.slug}`)}
-                        className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
+                        className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
                       >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -541,7 +545,7 @@ export function ShopGridClient() {
                         title="Add to Wishlist"
                         onClick={() => handleWishlistToggle(product, imageUrl)}
                         className={`group/item relative grid h-12 w-12 place-items-center transition ${
-                          inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+                          inWishlist ? 'bg-[var(--sf-btn-primary-bg)] text-white' : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
                         }`}
                       >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -556,10 +560,10 @@ export function ShopGridClient() {
 
                     <p className="mt-3 text-xs text-[#667085]">{product.category?.name || 'Uncategorized'}</p>
                     <h3 className="mt-1 text-sm font-semibold text-[#12213f]">
-                      <Link href={`/products/${product.slug}`} className="hover:text-[#0989ff]">{product.name}</Link>
+                      <Link href={`/products/${product.slug}`} className="hover:text-[var(--sf-btn-primary-bg)]">{product.name}</Link>
                     </h3>
                     <p className="mt-1 text-xs text-[#f5a623]">★★★★★</p>
-                    <p className="mt-1 text-sm font-semibold text-[#0989ff]">{formatMoney(product.priceCents)}</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--sf-btn-primary-bg)]">{formatMoney(product.priceCents)}</p>
                   </article>
                 );
               })}
@@ -581,7 +585,7 @@ export function ShopGridClient() {
                     onClick={() => pushParams({ page: String(page) })}
                     className={`rounded px-3 py-1.5 text-sm ${
                       page === currentPage
-                        ? 'bg-[#0989ff] font-semibold text-white'
+                        ? 'bg-[var(--sf-btn-primary-bg)] font-semibold text-white'
                         : 'border border-[#d7e4f6] text-[#344054] hover:bg-[#f5f9ff]'
                     }`}
                   >

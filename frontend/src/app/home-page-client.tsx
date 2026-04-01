@@ -104,7 +104,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
           {product.badge && (
             <span
               className={`absolute left-2 top-2 rounded px-2 py-0.5 text-[10px] font-semibold text-white ${product.badge === 'New'
-                  ? 'bg-[#0989ff]'
+                  ? 'bg-[var(--sf-btn-primary-bg)]'
                   : product.badge === 'Deal'
                     ? 'bg-[#c2410c]'
                     : 'bg-[#eb5757]'
@@ -135,7 +135,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
                 availableStock: cap,
               });
             }}
-            className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${inCart ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+            className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${inCart ? 'bg-[var(--sf-btn-primary-bg)] text-white' : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
               }`}
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
             type="button"
             title="Quick View"
             onClick={() => router.push(`/products/${product.slug}`)}
-            className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[#0989ff] hover:text-white"
+            className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -163,7 +163,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
             type="button"
             title="Add to Wishlist"
             onClick={handleWishlistToggle}
-            className={`group/item relative grid h-12 w-12 place-items-center transition ${inWishlist ? 'bg-[#0989ff] text-white' : 'text-[#0f1f40] hover:bg-[#0989ff] hover:text-white'
+            className={`group/item relative grid h-12 w-12 place-items-center transition ${inWishlist ? 'bg-[var(--sf-btn-primary-bg)] text-white' : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
               }`}
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,11 +177,11 @@ function ProductCard({ product }: { product: ProductCardData }) {
       </div>
       <p className="mt-3 text-[11px] uppercase tracking-wide text-[#7c8ea6]">{product.category}</p>
       <h3 className="mt-1 text-sm font-semibold text-[#1b2a4e]">
-        <Link href={`/products/${product.slug}`} className="hover:text-[#0989ff]">{product.name}</Link>
+        <Link href={`/products/${product.slug}`} className="hover:text-[var(--sf-btn-primary-bg)]">{product.name}</Link>
       </h3>
       <p className="mt-2 text-xs text-[#f5a623]">★★★★★</p>
       <div className="mt-1 flex items-center gap-2 text-sm">
-        <span className="font-semibold text-[#0989ff]">{product.price}</span>
+        <span className="font-semibold text-[var(--sf-btn-primary-bg)]">{product.price}</span>
         {product.oldPrice && <span className="text-[#7c8ea6] line-through">{product.oldPrice}</span>}
       </div>
       {product.dealEndsAt && (
@@ -396,7 +396,7 @@ export function HomePageClient({
                           aria-hidden
                         />
                       ) : (
-                        <span className="text-xs font-semibold text-[#0989ff] sm:text-sm">
+                        <span className="text-xs font-semibold text-[var(--sf-btn-primary-bg)] sm:text-sm">
                           {categoryInitials(item.name)}
                         </span>
                       )}
@@ -426,7 +426,7 @@ export function HomePageClient({
                   type="button"
                   onClick={() => setTrendingTab(value)}
                   className={
-                    trendingTab === value ? 'font-semibold text-[#0989ff]' : 'text-[#6f829f] hover:text-[#1b2a4e]'
+                    trendingTab === value ? 'font-semibold text-[var(--sf-btn-primary-bg)]' : 'text-[#6f829f] hover:text-[#1b2a4e]'
                   }
                 >
                   {label}
@@ -454,7 +454,7 @@ export function HomePageClient({
               <div>
                 <h2 className="text-2xl font-semibold text-[#1b2a4e]">Deal of The Day</h2>
               </div>
-              <Link href="/shop" className="shrink-0 text-sm font-semibold text-[#0989ff] sm:pt-1">
+              <Link href="/shop" className="shrink-0 text-sm font-semibold text-[var(--sf-btn-primary-bg)] sm:pt-1">
                 View All
               </Link>
             </div>
@@ -474,7 +474,7 @@ export function HomePageClient({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-6 flex items-center justify-between gap-3">
             <h2 className="text-2xl font-semibold text-[#1b2a4e]">Latest News &amp; Articles</h2>
-            <Link href="/blog" className="shrink-0 text-sm font-semibold text-[#0989ff] hover:underline">
+            <Link href="/blog" className="shrink-0 text-sm font-semibold text-[var(--sf-btn-primary-bg)] hover:underline">
               View All Blog
             </Link>
           </div>

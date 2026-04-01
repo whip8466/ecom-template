@@ -21,7 +21,7 @@
   --admin-radius: 0;
   --admin-radius-card: 0;
 
-  /* Storefront form theme — defaults; overridden by `StorefrontThemeInjector` from DB */
+  /* Storefront form theme — defaults; overridden from DB on `<html>` (layout) + `StorefrontThemeInjector` */
   --sf-btn-primary-bg: #0989ff;
   --sf-btn-primary-hover: #0476df;
   --sf-btn-secondary-bg: #ffffff;
@@ -268,8 +268,8 @@ html {
   height: 20px;
   border-radius: 9999px;
   border: 2px solid #ffffff;
-  background: #0989ff;
-  box-shadow: 0 0 0 1px #0989ff;
+  background: var(--sf-btn-primary-bg);
+  box-shadow: 0 0 0 1px var(--sf-btn-primary-bg);
   margin-top: calc((8px - 20px) / 2);
 }
 
@@ -286,8 +286,8 @@ html {
   height: 20px;
   border-radius: 9999px;
   border: 2px solid #ffffff;
-  background: #0989ff;
-  box-shadow: 0 0 0 1px #0989ff;
+  background: var(--sf-btn-primary-bg);
+  box-shadow: 0 0 0 1px var(--sf-btn-primary-bg);
 }
 
 /* Blog / TipTap: override Tailwind preflight (h* font-size inherit, ul/ol list-style none) */

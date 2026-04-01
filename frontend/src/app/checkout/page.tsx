@@ -171,7 +171,7 @@ function CheckoutPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-semibold text-[#0f1f40]">Checkout</h1>
       <p className="mt-2 text-sm text-[#7c8ea6]">
-        <Link href="/" className="hover:text-[#0989ff]">
+        <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">
           Home
         </Link>{' '}
         / Checkout
@@ -187,14 +187,14 @@ function CheckoutPage() {
                 key={address.id}
                 className={`flex cursor-pointer gap-3 rounded border p-4 text-sm transition ${
                   selectedAddressId === address.id
-                    ? 'border-[#0989ff] bg-[#f0f9ff]'
+                    ? 'border-[var(--sf-input-focus)] bg-[#f0f9ff]'
                     : 'border-[#dce6f4] hover:border-[#b8d4f0]'
                 }`}
               >
                 <input
                   type="radio"
                   name="checkout-address"
-                  className="mt-1"
+                  className="mt-1 accent-[var(--sf-checkbox-accent)]"
                   checked={selectedAddressId === address.id}
                   onChange={() => setSelectedAddressId(address.id)}
                 />
@@ -232,7 +232,7 @@ function CheckoutPage() {
               <button
                 type="button"
                 onClick={startAddAddress}
-                className="rounded-md border border-[#0989ff] bg-white px-4 py-2.5 text-sm font-semibold text-[#0989ff] hover:bg-[#f0f9ff]"
+                className="sf-btn-secondary rounded-md px-4 py-2.5 text-sm"
               >
                 Add new address
               </button>
@@ -263,7 +263,7 @@ function CheckoutPage() {
                   type="button"
                   disabled={savingAddress}
                   onClick={cancelAddAddress}
-                  className="rounded-md border border-[#d0d7e2] bg-white px-6 py-2.5 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc] disabled:opacity-60"
+                  className="sf-btn-secondary rounded-md px-6 py-2.5 text-sm disabled:opacity-60"
                 >
                   Cancel
                 </button>
@@ -298,11 +298,16 @@ function CheckoutPage() {
 
           <div className="mt-4 flex items-center justify-between border-t border-[#edf2f8] pt-4 text-xl font-semibold text-[#0f1f40]">
             <span>Total</span>
-            <span className="text-[#0989ff]">{formatMoney(subtotal)}</span>
+            <span className="text-[var(--sf-btn-primary-bg)]">{formatMoney(subtotal)}</span>
           </div>
 
           <label className="mt-4 flex items-center gap-2 text-sm text-[#475467]">
-            <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} />
+            <input
+              type="checkbox"
+              className="sf-checkbox"
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
+            />
             I have read and agree to the website terms.
           </label>
 

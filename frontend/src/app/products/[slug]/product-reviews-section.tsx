@@ -132,7 +132,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
 
       {!user && (
         <p className="rounded-md border border-[#e4ebf5] bg-[#f8fbff] px-4 py-3 text-sm text-[#475467]">
-          <Link href={loginHref} className="font-medium text-[#0989ff] hover:underline">
+          <Link href={loginHref} className="font-medium text-[var(--sf-btn-primary-bg)] hover:underline">
             Sign in
           </Link>{' '}
           to write a review after this product is delivered to you (one review per delivered order line).
@@ -155,7 +155,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
                   <select
                     value={selectedOrderItemId ?? ''}
                     onChange={(e) => setSelectedOrderItemId(Number(e.target.value))}
-                    className="mt-1 w-full max-w-md rounded border border-[#d6e2f1] bg-white px-3 py-2 text-sm text-[#0f1f40]"
+                    className="sf-field mt-1 max-w-md"
                   >
                     {eligible.map((row) => (
                       <option key={row.orderItemId} value={row.orderItemId}>
@@ -176,8 +176,8 @@ export function ProductReviewsSection({ productId, initial }: Props) {
                       onClick={() => setRating(n)}
                       className={`rounded border px-3 py-1.5 text-sm font-medium transition ${
                         rating === n
-                          ? 'border-[#0989ff] bg-[#0989ff] text-white'
-                          : 'border-[#d6e2f1] bg-white text-[#0f1f40] hover:border-[#0989ff]'
+                          ? 'border-[var(--sf-btn-primary-bg)] bg-[var(--sf-btn-primary-bg)] text-white'
+                          : 'border-[var(--sf-input-border)] bg-white text-[#0f1f40] hover:border-[var(--sf-input-focus)]'
                       }`}
                     >
                       {n}
@@ -195,7 +195,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
                   minLength={1}
                   maxLength={5000}
                   placeholder="Share your experience with this product…"
-                  className="mt-1 w-full rounded border border-[#d6e2f1] bg-white px-3 py-2 text-sm text-[#0f1f40] placeholder:text-[#94a3b8]"
+                  className="sf-field mt-1 w-full py-2"
                 />
               </label>
               {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -203,7 +203,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
               <button
                 type="submit"
                 disabled={submitting || !body.trim()}
-                className="mt-4 rounded bg-[#0f1f40] px-5 py-2 text-sm font-semibold text-white hover:bg-[#102b57] disabled:cursor-not-allowed disabled:opacity-50"
+                className="sf-btn-primary mt-4 px-5 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? 'Submitting…' : 'Submit review'}
               </button>

@@ -50,7 +50,7 @@ export default function LoginPage() {
       <div className="mb-8 text-center">
         <h1 className="text-5xl font-semibold text-[#0f1f40]">My account</h1>
         <p className="mt-2 text-sm text-[#7c8ea6]">
-          <Link href="/" className="hover:text-[#0989ff]">Home</Link> / My account
+          <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">Home</Link> / My account
         </p>
       </div>
 
@@ -58,7 +58,7 @@ export default function LoginPage() {
         <h2 className="text-4xl font-semibold text-[#0f1f40]">Login to Dhidi.</h2>
         <p className="mt-2 text-sm text-[#667085]">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-[#0989ff] hover:underline">
+          <Link href="/register" className="font-medium text-[var(--sf-btn-primary-bg)] hover:underline">
             Create a free account
           </Link>
         </p>
@@ -137,7 +137,7 @@ export default function LoginPage() {
               />
               Remember me
             </label>
-            <button type="button" className="text-[#0989ff] hover:underline">
+            <button type="button" className="text-[var(--sf-btn-primary-bg)] hover:underline">
               Forgot Password?
             </button>
           </div>

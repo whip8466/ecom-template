@@ -10,6 +10,10 @@ import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { NewsletterFooterForm } from '@/components/newsletter-footer-form';
+import {
+  StorefrontSettingsProvider,
+  useStorefrontSettings,
+} from '@/components/storefront-settings-provider';
 import { StorefrontThemeInjector } from '@/components/storefront-theme-injector';
 import { apiAssetUrl } from '@/lib/api-asset-url';
 import { brandVisibilityFromSettings } from '@/lib/brand-visibility';
@@ -175,8 +179,8 @@ function StorefrontHeader({
   };
 
   const navItemBase = 'transition-premium';
-  const navInactive = `${navItemBase} text-[#101828] hover:text-[#0989ff]`;
-  const navActive = `${navItemBase} text-[#0989ff]`;
+  const navInactive = `${navItemBase} text-[#101828] hover:text-[var(--sf-btn-primary-bg)]`;
+  const navActive = `${navItemBase} text-[var(--sf-btn-primary-bg)]`;
 
   const displayLogo = showBrandLogo && Boolean(brandLogoUrl);
   const displayName = showBrandName;
@@ -194,7 +198,7 @@ function StorefrontHeader({
           <Link
             href="/"
             className={`flex max-w-[min(100%,20rem)] items-center gap-2 font-display text-xl font-semibold transition-premium hover:opacity-90 sm:max-w-none ${
-              pathname === '/' ? 'text-[#0989ff]' : 'text-[var(--navy)]'
+              pathname === '/' ? 'text-[var(--sf-btn-primary-bg)]' : 'text-[var(--navy)]'
             }`}
             aria-current={pathname === '/' ? 'page' : undefined}
           >
@@ -212,18 +216,21 @@ function StorefrontHeader({
           </Link>
 
           <div className="hidden flex-1 justify-center lg:flex">
-            <form onSubmit={handleSearchSubmit} className="flex w-full max-w-xl items-center rounded-none border border-[#0989ff] bg-white">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex w-full max-w-xl items-center rounded-none border border-[var(--sf-btn-primary-bg)] bg-[var(--sf-input-bg)]"
+            >
               <input
                 type="search"
                 placeholder="Search for Products..."
-                className="h-10 w-full bg-transparent px-4 text-sm outline-none placeholder:text-[#8c9db6]"
+                className="h-10 w-full bg-transparent px-4 text-sm text-[var(--sf-input-text)] outline-none placeholder:text-[var(--sf-input-placeholder)]"
                 aria-label="Search"
                 onFocus={() => setIsSearchCategoryOpen(false)}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
               <div
-                className="relative h-10 w-[180px] border-l border-[#d9e4f3]"
+                className="relative h-10 w-[180px] border-l border-[var(--sf-input-border)]"
                 onBlur={(e) => {
                   if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
                     setIsSearchCategoryOpen(false);
@@ -249,7 +256,7 @@ function StorefrontHeader({
                         setSearchCategorySlug(null);
                         setIsSearchCategoryOpen(false);
                       }}
-                      className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-[#111827] transition hover:bg-[#f8fbff] hover:text-[#0989ff]"
+                      className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-[#111827] transition hover:bg-[#f8fbff] hover:text-[var(--sf-btn-primary-bg)]"
                     >
                       All Categories
                     </button>
@@ -261,7 +268,7 @@ function StorefrontHeader({
                           setSearchCategorySlug(c.slug);
                           setIsSearchCategoryOpen(false);
                         }}
-                        className="block w-full px-4 py-2.5 text-left text-sm text-[#344054] transition hover:bg-[#f8fbff] hover:text-[#0989ff]"
+                        className="block w-full px-4 py-2.5 text-left text-sm text-[#344054] transition hover:bg-[#f8fbff] hover:text-[var(--sf-btn-primary-bg)]"
                       >
                         {c.name}
                       </button>
@@ -271,7 +278,7 @@ function StorefrontHeader({
               </div>
               <button
                 type="submit"
-                className="flex h-10 w-16 items-center justify-center bg-[#0989ff] text-white transition-premium hover:bg-[#0476df]"
+                className="sf-btn-primary flex h-10 w-16 shrink-0 items-center justify-center rounded-none border-0 px-0"
                 aria-label="Search"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,7 +294,7 @@ function StorefrontHeader({
                 href="/wishlist"
                 aria-current={isNavSectionActive(pathname, '/wishlist') ? 'page' : undefined}
                 className={`relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-premium hover:bg-[var(--cream)] ${
-                  isNavSectionActive(pathname, '/wishlist') ? 'text-[#0989ff]' : 'text-[var(--navy)]'
+                  isNavSectionActive(pathname, '/wishlist') ? 'text-[var(--sf-btn-primary-bg)]' : 'text-[var(--navy)]'
                 }`}
               >
                 <span className="sr-only">Wishlist</span>
@@ -305,7 +312,7 @@ function StorefrontHeader({
               href="/cart"
               aria-current={isNavSectionActive(pathname, '/cart') ? 'page' : undefined}
               className={`relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-premium hover:bg-[var(--cream)] ${
-                isNavSectionActive(pathname, '/cart') ? 'text-[#0989ff]' : 'text-[var(--navy)]'
+                isNavSectionActive(pathname, '/cart') ? 'text-[var(--sf-btn-primary-bg)]' : 'text-[var(--navy)]'
               }`}
             >
               <span className="sr-only">Cart</span>
@@ -319,7 +326,10 @@ function StorefrontHeader({
               )}
             </Link>
             {!user ? (
-              <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white">
+              <Link
+                href={`/login?redirect=${encodeURIComponent(pathname)}`}
+                className="sf-btn-primary rounded-md px-3 py-1.5 text-xs no-underline"
+              >
                 Login
               </Link>
             ) : (
@@ -396,7 +406,7 @@ function StorefrontHeader({
             <button
               type="button"
               onMouseEnter={() => setActiveMenu('categories')}
-              className="flex h-12 min-w-[230px] items-center justify-between bg-[#0989ff] px-4 text-sm font-semibold text-white"
+              className="flex h-12 min-w-[230px] items-center justify-between bg-[var(--sf-btn-primary-bg)] px-4 text-sm font-semibold text-white hover:bg-[var(--sf-btn-primary-hover)]"
             >
               <span className="flex items-center gap-3">
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,7 +446,7 @@ function StorefrontHeader({
                       <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-none border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
                         <ul className="space-y-3 text-sm text-[#475467]">
                           <li>
-                            <Link href="/blog" className="hover:text-[#0989ff]" onClick={() => setActiveMenu('none')}>
+                            <Link href="/blog" className="hover:text-[var(--sf-btn-primary-bg)]" onClick={() => setActiveMenu('none')}>
                               All posts
                             </Link>
                           </li>
@@ -444,7 +454,7 @@ function StorefrontHeader({
                             <li key={c.id}>
                               <Link
                                 href={`/blog?category=${encodeURIComponent(c.slug)}`}
-                                className="hover:text-[#0989ff]"
+                                className="hover:text-[var(--sf-btn-primary-bg)]"
                                 onClick={() => setActiveMenu('none')}
                               >
                                 {c.name}
@@ -508,7 +518,7 @@ function StorefrontHeader({
                       const hasChildren = categoryIdsWithChildren.has(item.id);
                       const isActive = activeCategorySlug === item.slug;
                       const rowClass = `flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
-                        isActive ? 'bg-[#f8fbff] text-[#0989ff]' : 'text-[#344054] hover:bg-[#f8fbff]'
+                        isActive ? 'bg-[#f8fbff] text-[var(--sf-btn-primary-bg)]' : 'text-[#344054] hover:bg-[#f8fbff]'
                       }`;
                       const rowInner = (
                         <>
@@ -570,7 +580,7 @@ function StorefrontHeader({
                           <li key={sub.id}>
                             <Link
                               href={`/shop?category=${encodeURIComponent(sub.slug)}`}
-                              className="block rounded-sm px-1 py-1.5 text-sm font-medium text-[#344054] hover:bg-[#f8fbff] hover:text-[#0989ff]"
+                              className="block rounded-sm px-1 py-1.5 text-sm font-medium text-[#344054] hover:bg-[#f8fbff] hover:text-[var(--sf-btn-primary-bg)]"
                             >
                               {sub.name}
                             </Link>
@@ -596,7 +606,7 @@ function StorefrontHeader({
                       ) : (
                         categories.map((c) => (
                           <li key={c.id}>
-                            <Link href={`/shop?category=${encodeURIComponent(c.slug)}`} className="hover:text-[#0989ff]">
+                            <Link href={`/shop?category=${encodeURIComponent(c.slug)}`} className="hover:text-[var(--sf-btn-primary-bg)]">
                               {'\u2014 '.repeat(c.depth ?? 0)}
                               {c.name}
                             </Link>
@@ -609,7 +619,7 @@ function StorefrontHeader({
                     <h4 className="mb-3 text-lg font-semibold text-[#101828]">Features</h4>
                     <ul className="space-y-2 text-sm text-[#475467]">
                       {['Filter Dropdown', 'Filters Offcanvas', 'Filters Sidebar', 'Load More button', '1600px Layout', 'Collections list', 'Hidden search', 'Search Full screen'].map((item) => (
-                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                        <li key={item}><Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">{item}</Link></li>
                       ))}
                     </ul>
                   </div>
@@ -617,17 +627,17 @@ function StorefrontHeader({
                     <h4 className="mb-3 text-lg font-semibold text-[#101828]">Hover Style</h4>
                     <ul className="space-y-2 text-sm text-[#475467]">
                       {['Hover Style 1', 'Hover Style 2', 'Hover Style 3', 'Hover Style 4'].map((item) => (
-                        <li key={item}><Link href="/" className="hover:text-[#0989ff]">{item}</Link></li>
+                        <li key={item}><Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">{item}</Link></li>
                       ))}
                     </ul>
                   </div>
                   <div className="rounded bg-[#f4f6fb] p-3">
                     <div className="mb-3 aspect-[4/3] rounded bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=800&q=80)' }} />
-                    <Link href="/" className="inline-flex rounded bg-[#0989ff] px-4 py-2 text-xs font-semibold text-white">Phones</Link>
+                    <Link href="/" className="sf-btn-primary inline-flex rounded px-4 py-2 text-xs">Phones</Link>
                   </div>
                   <div className="rounded bg-[#f4f6fb] p-3">
                     <div className="mb-3 aspect-[4/3] rounded bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80)' }} />
-                    <Link href="/" className="inline-flex rounded bg-[#0989ff] px-4 py-2 text-xs font-semibold text-white">Headphones</Link>
+                    <Link href="/" className="sf-btn-primary inline-flex rounded px-4 py-2 text-xs">Headphones</Link>
                   </div>
                 </div>
               </div>
@@ -720,25 +730,25 @@ function StorefrontFooter({ settings }: { settings: ContactSettings | null }) {
           <div>
             <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Shop</h4>
             <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">New Arrivals</Link></li>
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Best Sellers</Link></li>
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Collections</Link></li>
-              <li><Link href="/" className="transition-premium hover:text-[var(--navy)]">Sale</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">New Arrivals</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">Best Sellers</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">Collections</Link></li>
+              <li><Link href="/" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">Sale</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Support</h4>
             <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-              <li><Link href="/contact" className="transition-premium hover:text-[var(--navy)]">Contact Us</Link></li>
-              <li><Link href="/faq" className="transition-premium hover:text-[var(--navy)]">FAQ</Link></li>
-              <li><Link href="/social-feed" className="transition-premium hover:text-[var(--navy)]">Social feed</Link></li>
+              <li><Link href="/contact" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">Contact Us</Link></li>
+              <li><Link href="/faq" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">FAQ</Link></li>
+              <li><Link href="/social-feed" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">Social feed</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-display text-sm font-semibold uppercase tracking-wider text-[var(--navy)]">Company</h4>
             <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-              <li><Link href="/privacy-policy" className="transition-premium hover:text-[var(--navy)]">Privacy Policy</Link></li>
-              <li><Link href="/terms-of-service" className="transition-premium hover:text-[var(--navy)]">Terms of Service</Link></li>
+              <li><Link href="/privacy-policy" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">Privacy Policy</Link></li>
+              <li><Link href="/terms-of-service" className="transition-premium hover:text-[var(--sf-btn-primary-bg)]">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
@@ -757,7 +767,7 @@ function StorefrontFooter({ settings }: { settings: ContactSettings | null }) {
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-premium hover:bg-[var(--cream)] hover:text-[var(--navy)]"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-premium hover:bg-[var(--cream)] hover:text-[var(--sf-btn-primary-bg)]"
               aria-label="Scroll to top"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -771,41 +781,17 @@ function StorefrontFooter({ settings }: { settings: ContactSettings | null }) {
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+function StorefrontShellBody({
+  children,
+  pathname,
+}: {
+  children: React.ReactNode;
+  pathname: string;
+}) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const token = useAuthStore((s) => s.token);
-  const hasHydrated = useAuthStore((s) => s._hasHydrated);
-  const fetchWishlist = useWishlistStore((s) => s.fetchWishlist);
-  const clearWishlist = useWishlistStore((s) => s.clearWishlist);
   const cartCount = useCartStore((state) => state.items.reduce((acc, item) => acc + item.quantity, 0));
-  const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null);
-
-  useEffect(() => {
-    if (!hasHydrated) return;
-    if (token) {
-      void fetchWishlist(token);
-    } else {
-      clearWishlist();
-    }
-  }, [hasHydrated, token, fetchWishlist, clearWishlist]);
-
-  useEffect(() => {
-    let cancelled = false;
-    apiRequest<{ data: ContactSettings }>('/api/contact-settings')
-      .then((res) => {
-        if (!cancelled) setContactSettings(res.data ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setContactSettings(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const isAdminRoute = pathname.startsWith('/admin');
+  const { contactSettings } = useStorefrontSettings();
   const isHome = pathname === '/';
   const headerBrandName = contactSettings?.brandName?.trim() || 'Dhidi';
   const headerBrandLogoUrl = contactSettings?.brandLogoUrl?.trim()
@@ -813,10 +799,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     : null;
   const { showBrandLogo: headerShowBrandLogo, showBrandName: headerShowBrandName } =
     brandVisibilityFromSettings(contactSettings);
-
-  if (isAdminRoute) {
-    return <>{children}</>;
-  }
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -841,5 +823,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
       <StorefrontFooter settings={contactSettings} />
     </div>
+  );
+}
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const token = useAuthStore((s) => s.token);
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const fetchWishlist = useWishlistStore((s) => s.fetchWishlist);
+  const clearWishlist = useWishlistStore((s) => s.clearWishlist);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (token) {
+      void fetchWishlist(token);
+    } else {
+      clearWishlist();
+    }
+  }, [hasHydrated, token, fetchWishlist, clearWishlist]);
+
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  if (isAdminRoute) {
+    return <>{children}</>;
+  }
+
+  return (
+    <StorefrontSettingsProvider>
+      <StorefrontShellBody pathname={pathname}>{children}</StorefrontShellBody>
+    </StorefrontSettingsProvider>
   );
 }

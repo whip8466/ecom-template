@@ -1,6 +1,7 @@
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { buildRootMetadata } from "@/lib/brand-metadata";
+import { getStorefrontThemeRootStyle } from "@/lib/contact-settings-public";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -17,13 +18,14 @@ const dmSans = DM_Sans({
 
 export const generateMetadata = buildRootMetadata;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const storefrontThemeStyle = await getStorefrontThemeRootStyle();
   return (
-    <html lang="en">
+    <html lang="en" style={storefrontThemeStyle}>
       <body
         className={`${playfair.variable} ${dmSans.variable} font-sans antialiased`}
       >

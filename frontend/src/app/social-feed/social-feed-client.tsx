@@ -61,7 +61,7 @@ function PlatformIcon({ platform, className }: { platform: SocialFeedPlatform; c
 
 function PostCard({ post }: { post: SocialFeedPost }) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-md border border-[#e5ecf6] bg-white shadow-[var(--shadow-sm)] transition-premium hover:border-[#0989ff]/40">
+    <article className="group flex flex-col overflow-hidden rounded-md border border-[#e5ecf6] bg-white shadow-[var(--shadow-sm)] transition-premium hover:border-[color-mix(in_srgb,var(--sf-btn-primary-bg)_40%,transparent)]">
       <div className="relative aspect-[16/10] overflow-hidden bg-[#f1f5f9]">
         {post.thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -86,7 +86,7 @@ function PostCard({ post }: { post: SocialFeedPost }) {
           href={post.externalUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-[#0989ff] transition-premium hover:underline"
+          className="mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-[var(--sf-btn-primary-bg)] transition-premium hover:underline"
         >
           {post.ctaLabel}
           <span aria-hidden>→</span>
@@ -193,7 +193,7 @@ export function SocialFeedClient() {
                 href={featured.externalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-6 inline-flex w-fit items-center gap-2 rounded-md bg-[#0989ff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df]"
+                className="sf-btn-primary mt-6 inline-flex w-fit items-center gap-2 px-5 py-2.5 text-sm no-underline"
               >
                 {featured.ctaLabel}
               </a>
@@ -212,8 +212,8 @@ export function SocialFeedClient() {
               onClick={() => setFilter(tab.key)}
               className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-premium ${
                 filter === tab.key
-                  ? 'border-[#0989ff] bg-[#0989ff] text-white'
-                  : 'border-[#e5ecf6] bg-white text-[#475467] hover:border-[#0989ff]/50'
+                  ? 'border-[var(--sf-btn-primary-bg)] bg-[var(--sf-btn-primary-bg)] text-white'
+                  : 'border-[#e5ecf6] bg-white text-[#475467] hover:border-[color-mix(in_srgb,var(--sf-btn-primary-bg)_50%,transparent)]'
               }`}
             >
               {tab.label}
@@ -240,26 +240,17 @@ export function SocialFeedClient() {
         <h2 className="font-display text-xl font-semibold text-[#0f1f40]">{midCtaTitle}</h2>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {settings.ctaShopUrl ? (
-            <CtaLink
-              href={settings.ctaShopUrl}
-              className="inline-flex rounded-md bg-[#0989ff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df]"
-            >
+            <CtaLink href={settings.ctaShopUrl} className="sf-btn-primary inline-flex px-5 py-2.5 text-sm no-underline">
               Shop products
             </CtaLink>
           ) : null}
           {settings.ctaFollowUrl ? (
-            <CtaLink
-              href={settings.ctaFollowUrl}
-              className="inline-flex rounded-md border border-[#d7e4f6] bg-white px-5 py-2.5 text-sm font-semibold text-[#0f1f40] hover:border-[#0989ff]"
-            >
+            <CtaLink href={settings.ctaFollowUrl} className="sf-btn-secondary inline-flex px-5 py-2.5 text-sm no-underline">
               Follow us
             </CtaLink>
           ) : null}
           {settings.ctaCommunityUrl ? (
-            <CtaLink
-              href={settings.ctaCommunityUrl}
-              className="inline-flex rounded-md border border-[#d7e4f6] bg-white px-5 py-2.5 text-sm font-semibold text-[#0f1f40] hover:border-[#0989ff]"
-            >
+            <CtaLink href={settings.ctaCommunityUrl} className="sf-btn-secondary inline-flex px-5 py-2.5 text-sm no-underline">
               Join community
             </CtaLink>
           ) : null}

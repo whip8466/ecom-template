@@ -6,8 +6,7 @@ import { withAuth } from '@/components/auth';
 import { apiRequest } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
 
-const inputClass =
-  'mt-1 w-full rounded-md border border-[#d7e4f6] bg-white px-3 py-2 text-sm text-[#0f1f40] outline-none ring-[#0989ff]/30 focus:border-[#0989ff] focus:ring-2';
+const inputClass = 'sf-field mt-1';
 
 function ResetPasswordPage() {
   const token = useAuthStore((s) => s.token);
@@ -55,11 +54,11 @@ function ResetPasswordPage() {
       <div>
         <h1 className="text-4xl font-semibold text-[#0f1f40]">Reset password</h1>
         <p className="mt-2 text-sm text-[#7c8ea6]">
-          <Link href="/" className="hover:text-[#0989ff]">
+          <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">
             Home
           </Link>{' '}
           /{' '}
-          <Link href="/account/profile" className="hover:text-[#0989ff]">
+          <Link href="/account/profile" className="hover:text-[var(--sf-btn-primary-bg)]">
             Profile
           </Link>{' '}
           / Reset password
@@ -71,7 +70,7 @@ function ResetPasswordPage() {
 
         <form onSubmit={onSubmit} className="mt-6 max-w-md space-y-4">
           <div>
-            <label htmlFor="reset-current-password" className="text-sm font-medium text-[#0f1f40]">
+            <label htmlFor="reset-current-password" className="sf-label">
               Current password
             </label>
             <input
@@ -86,7 +85,7 @@ function ResetPasswordPage() {
             />
           </div>
           <div>
-            <label htmlFor="reset-new-password" className="text-sm font-medium text-[#0f1f40]">
+            <label htmlFor="reset-new-password" className="sf-label">
               New password
             </label>
             <input
@@ -102,7 +101,7 @@ function ResetPasswordPage() {
             />
           </div>
           <div>
-            <label htmlFor="reset-confirm-password" className="text-sm font-medium text-[#0f1f40]">
+            <label htmlFor="reset-confirm-password" className="sf-label">
               Confirm new password
             </label>
             <input
@@ -120,17 +119,10 @@ function ResetPasswordPage() {
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
           <div className="flex flex-wrap gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center justify-center rounded-md bg-[#0989ff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0476df] disabled:opacity-60"
-            >
+            <button type="submit" disabled={saving} className="sf-btn-primary px-4 py-2 text-sm disabled:opacity-60">
               {saving ? 'Updating…' : 'Update password'}
             </button>
-            <Link
-              href="/account/profile"
-              className="inline-flex items-center justify-center rounded-md border border-[#d7e4f6] bg-white px-4 py-2 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc]"
-            >
+            <Link href="/account/profile" className="sf-btn-secondary inline-flex items-center justify-center px-4 py-2 text-sm no-underline">
               Back to profile
             </Link>
           </div>

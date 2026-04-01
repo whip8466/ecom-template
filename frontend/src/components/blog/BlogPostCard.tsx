@@ -41,7 +41,7 @@ export function BlogPostCard({
       <div className="flex flex-1 flex-col p-4">
         {dateLabel ? <p className="text-xs text-[#7c8ea6]">{dateLabel}</p> : null}
         <h3 className="mt-2 text-base font-semibold leading-snug text-[#1b2a4e]">
-          <Link href={`/blog/${slug}`} className="hover:text-[#0989ff]">
+          <Link href={`/blog/${slug}`} className="hover:text-[var(--sf-btn-primary-bg)]">
             {title}
           </Link>
         </h3>

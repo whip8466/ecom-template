@@ -17,7 +17,7 @@ function ProfilePage() {
       <div>
         <h1 className="text-4xl font-semibold text-[#0f1f40]">Profile</h1>
         <p className="mt-2 text-sm text-[#7c8ea6]">
-          <Link href="/" className="hover:text-[#0989ff]">
+          <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">
             Home
           </Link>{' '}
           / Profile
@@ -44,15 +44,12 @@ function ProfilePage() {
         </dl>
 
         <div className="mt-8 flex flex-col gap-3 border-t border-[#edf2f8] pt-6 sm:flex-row sm:flex-wrap">
-          <Link
-            href="/account/profile/edit"
-            className="inline-flex items-center justify-center rounded-md bg-[#0989ff] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0476df]"
-          >
+          <Link href="/account/profile/edit" className="sf-btn-primary inline-flex items-center justify-center px-4 py-2.5 text-sm no-underline">
             Edit profile
           </Link>
           <Link
             href="/account/reset-password"
-            className="inline-flex items-center justify-center rounded-md border border-[#d7e4f6] bg-white px-4 py-2.5 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc]"
+            className="sf-btn-secondary inline-flex items-center justify-center px-4 py-2.5 text-sm no-underline"
           >
             Reset password
           </Link>

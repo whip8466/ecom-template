@@ -63,7 +63,7 @@ function ShipToDropdown({ address }: { address: Address }) {
 
   return (
     <details className="group relative max-w-[220px]">
-      <summary className="cursor-pointer list-none text-sm font-medium text-[#0989ff] hover:text-[#0476df] hover:underline [&::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer list-none text-sm font-medium text-[var(--sf-btn-primary-bg)] hover:text-[var(--sf-btn-primary-hover)] hover:underline [&::-webkit-details-marker]:hidden">
         <span className="inline-flex items-center gap-1">
           {address.fullName}
           <svg className="h-3.5 w-3.5 shrink-0 text-[#7c8ea6]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -135,7 +135,7 @@ function OrderLineItem({
     >
       <ProductThumb imageUrl={item.productImageUrl} />
       <div className="min-w-0 flex-1">
-        <Link href={href} className="text-[15px] font-semibold text-[#0989ff] hover:text-[#0476df] hover:underline">
+        <Link href={href} className="text-[15px] font-semibold text-[var(--sf-btn-primary-bg)] hover:text-[var(--sf-btn-primary-hover)] hover:underline">
           {item.productNameSnapshot}
         </Link>
         <p className="mt-1 text-sm text-[#64748b]">
@@ -143,17 +143,11 @@ function OrderLineItem({
           Qty: {item.quantity} · {formatMoney(item.subtotalCents)}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href={href}
-            className="inline-flex rounded-md bg-[#0989ff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0476df]"
-          >
+          <Link href={href} className="sf-btn-primary inline-flex px-4 py-2 text-sm no-underline">
             Buy it again
           </Link>
           {canReview && item.productSlug && !item.hasReview ? (
-            <Link
-              href={reviewHref}
-              className="inline-flex rounded-md border border-[#d7e4f6] bg-white px-4 py-2 text-sm font-semibold text-[#0f1f40] transition hover:bg-[#f8fafc]"
-            >
+            <Link href={reviewHref} className="sf-btn-secondary inline-flex px-4 py-2 text-sm no-underline">
               Add review
             </Link>
           ) : null}
@@ -177,7 +171,7 @@ function OrderCard({ order }: { order: Order }) {
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-[#7c8ea6]">Total</p>
-              <p className="mt-1 text-sm font-semibold text-[#0989ff]">{formatMoney(order.totalAmountCents)}</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--sf-btn-primary-bg)]">{formatMoney(order.totalAmountCents)}</p>
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-[#7c8ea6]">Ship to</p>
@@ -192,7 +186,7 @@ function OrderCard({ order }: { order: Order }) {
             </p>
             <Link
               href={detailHref}
-              className="mt-2 inline-block text-sm font-medium text-[#0989ff] hover:text-[#0476df] hover:underline"
+              className="mt-2 inline-block text-sm font-medium text-[var(--sf-btn-primary-bg)] hover:text-[var(--sf-btn-primary-hover)] hover:underline"
             >
               Invoice
             </Link>
@@ -208,10 +202,7 @@ function OrderCard({ order }: { order: Order }) {
               {orderStatusSubtext(order.status, order.paymentStatus)}
             </p>
           </div>
-          <Link
-            href={detailHref}
-            className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#0989ff] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0476df]"
-          >
+          <Link href={detailHref} className="sf-btn-primary inline-flex shrink-0 items-center justify-center px-5 py-2.5 text-sm no-underline">
             View order details
           </Link>
         </div>
@@ -257,7 +248,7 @@ function MyOrdersPage() {
       <div>
         <h1 className="text-4xl font-semibold text-[#0f1f40]">Your orders</h1>
         <p className="mt-2 text-sm text-[#7c8ea6]">
-          <Link href="/" className="hover:text-[#0989ff]">
+          <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">
             Home
           </Link>{' '}
           / Your orders
@@ -269,10 +260,7 @@ function MyOrdersPage() {
       {orders.length === 0 ? (
         <div className="rounded-md border border-dashed border-[#dce6f4] bg-white px-6 py-14 text-center">
           <p className="text-sm text-[#64748b]">You haven&apos;t placed any orders yet.</p>
-          <Link
-            href="/shop"
-            className="mt-5 inline-flex rounded-md bg-[#0989ff] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df]"
-          >
+          <Link href="/shop" className="sf-btn-primary mt-5 inline-flex px-6 py-2.5 text-sm no-underline">
             Continue shopping
           </Link>
         </div>

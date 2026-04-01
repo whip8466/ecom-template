@@ -19,16 +19,13 @@ export default function CartPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-semibold text-[#0f1f40]">Shopping Cart</h1>
       <p className="mt-2 text-sm text-[#7c8ea6]">
-        <Link href="/" className="hover:text-[#0989ff]">Home</Link> / Shopping Cart
+        <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">Home</Link> / Shopping Cart
       </p>
 
       {items.length === 0 ? (
         <div className="mt-10 rounded-md border border-dashed border-[#d5e1f1] bg-white p-10 text-center">
           <p className="text-base text-[#475467]">Your cart is currently empty.</p>
-          <Link
-            href="/shop"
-            className="mt-4 inline-flex rounded bg-[#0989ff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df]"
-          >
+          <Link href="/shop" className="sf-btn-primary mt-4 inline-flex px-5 py-2.5 text-sm">
             Continue Shopping
           </Link>
         </div>
@@ -54,7 +51,10 @@ export default function CartPage() {
                       style={{ backgroundImage: `url(${item.imageUrl || ''})` }}
                     />
                     <div>
-                      <Link href={`/products/${item.slug}`} className="font-medium text-[#0f1f40] hover:text-[#0989ff]">
+                      <Link
+                        href={`/products/${item.slug}`}
+                        className="font-medium text-[#0f1f40] hover:text-[var(--sf-btn-primary-bg)]"
+                      >
                         {item.name}
                       </Link>
                       {(item.variantLabel || item.colorName) && (
@@ -110,7 +110,7 @@ export default function CartPage() {
 
             <div className="mt-4 flex flex-wrap items-end justify-between gap-3 rounded-md border border-[#e5ecf6] bg-white p-4">
               <div className="w-full max-w-md">
-                <label htmlFor="coupon" className="mb-2 block text-sm font-medium text-[#111827]">
+                <label htmlFor="coupon" className="sf-label mb-2">
                   Coupon Code:
                 </label>
                 <div className="flex gap-2">
@@ -119,12 +119,9 @@ export default function CartPage() {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                     placeholder="Enter Coupon Code"
-                    className="h-10 flex-1 rounded border border-[#d7e4f6] px-3 text-sm text-[#344054] outline-none focus:border-[#0989ff]"
+                    className="sf-field h-10 flex-1"
                   />
-                  <button
-                    type="button"
-                    className="h-10 rounded bg-[#0f1f40] px-6 text-sm font-semibold text-white hover:bg-[#102b57]"
-                  >
+                  <button type="button" className="sf-btn-primary h-10 px-6 text-sm">
                     Apply
                   </button>
                 </div>
@@ -134,7 +131,7 @@ export default function CartPage() {
                 type="button"
                 value="Clear Cart"
                 onClick={clearCart}
-                className="h-10 rounded border border-[#d7e4f6] bg-white px-5 text-sm font-semibold text-[#0f1f40] hover:bg-[#f7f9fc]"
+                className="sf-btn-secondary h-10 cursor-pointer px-5 text-sm"
               />
             </div>
           </section>
@@ -152,24 +149,29 @@ export default function CartPage() {
                   <input
                     type="radio"
                     name="shipping"
+                    className="accent-[var(--sf-checkbox-accent)]"
                     checked={shippingMethod === 'flat'}
                     onChange={() => setShippingMethod('flat')}
                   />
-                  Flat rate: <span className="text-[#0989ff]">{formatMoney(2000)}</span>
+                  Flat rate:{' '}
+                  <span className="text-[var(--sf-btn-primary-bg)]">{formatMoney(2000)}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
                     name="shipping"
+                    className="accent-[var(--sf-checkbox-accent)]"
                     checked={shippingMethod === 'pickup'}
                     onChange={() => setShippingMethod('pickup')}
                   />
-                  Local pickup: <span className="text-[#0989ff]">{formatMoney(2500)}</span>
+                  Local pickup:{' '}
+                  <span className="text-[var(--sf-btn-primary-bg)]">{formatMoney(2500)}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
                     name="shipping"
+                    className="accent-[var(--sf-checkbox-accent)]"
                     checked={shippingMethod === 'free'}
                     onChange={() => setShippingMethod('free')}
                   />
@@ -183,10 +185,7 @@ export default function CartPage() {
               <span className="text-xl font-semibold text-[#0f1f40]">{formatMoney(total)}</span>
             </div>
 
-            <Link
-              href="/checkout"
-              className="mt-5 inline-flex w-full items-center justify-center rounded bg-[#0f1f40] px-4 py-3 text-sm font-semibold text-white hover:bg-[#102b57]"
-            >
+            <Link href="/checkout" className="sf-btn-primary mt-5 inline-flex w-full justify-center py-3 text-sm no-underline">
               Proceed to Checkout
             </Link>
           </aside>

@@ -55,7 +55,7 @@ export default function RegisterPage() {
       <div className="mb-8 text-center">
         <h1 className="text-5xl font-semibold text-[#0f1f40]">My account</h1>
         <p className="mt-2 text-sm text-[#7c8ea6]">
-          <Link href="/" className="hover:text-[#0989ff]">Home</Link> / My account
+          <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">Home</Link> / My account
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export default function RegisterPage() {
         <h2 className="text-4xl font-semibold text-[#0f1f40]">Sign Up Dhidi.</h2>
         <p className="mt-2 text-sm text-[#667085]">
           Already have an account?{' '}
-          <Link href="/login" className="font-medium text-[#0989ff] hover:underline">
+          <Link href="/login" className="font-medium text-[var(--sf-btn-primary-bg)] hover:underline">
             Sign in
           </Link>
         </p>
@@ -131,11 +131,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#111827]">Password</label>
+            <label className="sf-label">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
-                className="h-11 w-full rounded border border-[#d7e4f6] px-3 pr-10 text-sm outline-none focus:border-[#0989ff]"
+                className="sf-field h-11 pr-10"
                 placeholder="Min. 6 character"
                 {...register('password')}
               />

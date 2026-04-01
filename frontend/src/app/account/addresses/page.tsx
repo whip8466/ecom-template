@@ -143,18 +143,14 @@ function AddressesPage() {
         <div>
           <h1 className="text-4xl font-semibold text-[#0f1f40]">My addresses</h1>
           <p className="mt-2 text-sm text-[#7c8ea6]">
-            <Link href="/" className="hover:text-[#0989ff]">
+            <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">
               Home
             </Link>{' '}
             / My addresses
           </p>
         </div>
         {!showForm && (
-          <button
-            type="button"
-            className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#0989ff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df]"
-            onClick={openAddForm}
-          >
+          <button type="button" className="sf-btn-primary shrink-0 px-5 py-2.5 text-sm" onClick={openAddForm}>
             Add address
           </button>
         )}
@@ -198,14 +194,14 @@ function AddressesPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 type="button"
-                className="rounded border border-[#d7e4f6] px-3 py-1.5 text-sm font-medium text-[#344054] hover:bg-[#f8fafc]"
+                className="sf-btn-secondary px-3 py-1.5 text-sm font-medium"
                 onClick={() => openEditForm(address)}
               >
                 Edit
               </button>
               <button
                 type="button"
-                className="rounded border border-[#d7e4f6] px-3 py-1.5 text-sm font-medium text-[#344054] hover:bg-[#f8fafc]"
+                className="sf-btn-secondary px-3 py-1.5 text-sm font-medium"
                 onClick={() => deleteAddress(address.id)}
               >
                 Delete
@@ -213,7 +209,7 @@ function AddressesPage() {
               {!address.isDefault && (
                 <button
                   type="button"
-                  className="rounded border border-[#d7e4f6] px-3 py-1.5 text-sm font-medium text-[#344054] hover:bg-[#f8fafc]"
+                  className="sf-btn-secondary px-3 py-1.5 text-sm font-medium"
                   onClick={() => markDefault(address.id)}
                 >
                   Make default
@@ -237,7 +233,7 @@ function AddressesPage() {
             </div>
             <button
               type="button"
-              className="text-sm font-medium text-[#64748b] hover:text-[#0989ff] sm:shrink-0"
+              className="text-sm font-medium text-[#64748b] hover:text-[var(--sf-btn-primary-bg)] sm:shrink-0"
               onClick={resetFormState}
             >
               Close
@@ -251,18 +247,10 @@ function AddressesPage() {
           {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="rounded-md bg-[#0989ff] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df]"
-              onClick={saveAddress}
-            >
+            <button type="button" className="sf-btn-primary px-6 py-2.5 text-sm" onClick={saveAddress}>
               {editingId ? 'Update address' : 'Save address'}
             </button>
-            <button
-              type="button"
-              className="rounded-md border border-[#d0d7e2] bg-white px-6 py-2.5 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc]"
-              onClick={resetFormState}
-            >
+            <button type="button" className="sf-btn-secondary px-6 py-2.5 text-sm" onClick={resetFormState}>
               Cancel
             </button>
           </div>

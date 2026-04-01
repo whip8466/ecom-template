@@ -58,11 +58,11 @@ function EditProfilePage() {
       <div>
         <h1 className="text-4xl font-semibold text-[#0f1f40]">Edit profile</h1>
         <p className="mt-2 text-sm text-[#7c8ea6]">
-          <Link href="/" className="hover:text-[#0989ff]">
+          <Link href="/" className="hover:text-[var(--sf-btn-primary-bg)]">
             Home
           </Link>{' '}
           /{' '}
-          <Link href="/account/profile" className="hover:text-[#0989ff]">
+          <Link href="/account/profile" className="hover:text-[var(--sf-btn-primary-bg)]">
             Profile
           </Link>{' '}
           / Edit

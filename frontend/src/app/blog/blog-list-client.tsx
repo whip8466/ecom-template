@@ -71,7 +71,7 @@ export function BlogListClient() {
               <p className="mt-2 text-sm text-[#64748b]">
                 Category:{' '}
                 <span className="font-medium text-[#1b2a4e]">{categoryLabel || categorySlug}</span>{' '}
-                <Link href="/blog" className="font-semibold text-[#0989ff] hover:underline">
+                <Link href="/blog" className="font-semibold text-[var(--sf-btn-primary-bg)] hover:underline">
                   All posts
                 </Link>
               </p>
