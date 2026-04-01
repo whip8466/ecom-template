@@ -255,7 +255,7 @@ function CheckoutPage() {
                   type="button"
                   disabled={savingAddress}
                   onClick={saveNewAddress}
-                  className="rounded-md bg-[#0989ff] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0476df] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="sf-btn-primary rounded-md px-6 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {savingAddress ? 'Saving…' : 'Save address'}
                 </button>
@@ -311,7 +311,7 @@ function CheckoutPage() {
           <button
             disabled={placing || items.length === 0}
             onClick={placeOrder}
-            className="mt-4 w-full rounded bg-[#0989ff] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0476df] disabled:cursor-not-allowed disabled:opacity-60"
+            className="sf-btn-primary mt-4 w-full py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             {placing ? 'Placing order...' : 'Place Order'}
           </button>

@@ -7,8 +7,7 @@ import { apiRequest } from '@/lib/api';
 import type { User } from '@/lib/types';
 import { useAuthStore } from '@/store/auth-store';
 
-const inputClass =
-  'mt-1 w-full rounded-md border border-[#d7e4f6] bg-white px-3 py-2 text-sm text-[#0f1f40] outline-none ring-[#0989ff]/30 focus:border-[#0989ff] focus:ring-2';
+const inputClass = 'sf-field mt-1';
 
 function EditProfilePage() {
   const user = useAuthStore((s) => s.user);
@@ -76,7 +75,7 @@ function EditProfilePage() {
         <form onSubmit={onSubmit} className="mt-6 max-w-xl">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="edit-first-name" className="text-sm font-medium text-[#0f1f40]">
+              <label htmlFor="edit-first-name" className="sf-label">
                 First name
               </label>
               <input
@@ -91,7 +90,7 @@ function EditProfilePage() {
               />
             </div>
             <div>
-              <label htmlFor="edit-last-name" className="text-sm font-medium text-[#0f1f40]">
+              <label htmlFor="edit-last-name" className="sf-label">
                 Last name
               </label>
               <input
@@ -112,13 +111,13 @@ function EditProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center rounded-md bg-[#0989ff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0476df] disabled:opacity-60"
+              className="sf-btn-primary inline-flex items-center justify-center px-4 py-2 text-sm disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>
             <Link
               href="/account/profile"
-              className="inline-flex items-center justify-center rounded-md border border-[#d7e4f6] bg-white px-4 py-2 text-sm font-semibold text-[#0f1f40] hover:bg-[#f8fafc]"
+              className="sf-btn-secondary inline-flex items-center justify-center px-4 py-2 text-sm no-underline"
             >
               Back to profile
             </Link>

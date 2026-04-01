@@ -64,17 +64,17 @@ export default function LoginPage() {
         </p>
 
         <div className="mt-5 grid grid-cols-3 gap-2">
-          <button type="button" className="flex items-center justify-center gap-2 rounded border border-[#dce5f2] px-3 py-2 text-xs font-medium text-[#344054] hover:bg-[#f7fbff]">
+          <button type="button" className="sf-btn-secondary flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium">
             <span className="text-[#ea4335]">G</span>
             Google
           </button>
-          <button type="button" className="flex items-center justify-center gap-2 rounded border border-[#dce5f2] px-3 py-2 text-xs font-medium text-[#344054] hover:bg-[#f7fbff]">
+          <button type="button" className="sf-btn-secondary flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium">
             <svg className="h-4 w-4 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.5 1.6-1.5h1.7V4.9c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.2V11H8v3h2.8v8h2.7z" />
             </svg>
             Facebook
           </button>
-          <button type="button" className="flex items-center justify-center gap-2 rounded border border-[#dce5f2] px-3 py-2 text-xs font-medium text-[#344054] hover:bg-[#f7fbff]">
+          <button type="button" className="sf-btn-secondary flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium">
             <svg className="h-4 w-4 text-[#111827]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path d="M16.37 12.24c.02 2.1 1.84 2.8 1.86 2.8-.02.05-.29 1-.95 1.97-.57.84-1.16 1.68-2.1 1.7-.92.02-1.22-.55-2.28-.55-1.06 0-1.39.53-2.26.57-.9.03-1.58-.9-2.16-1.73-1.18-1.7-2.08-4.78-.87-6.88.6-1.04 1.66-1.7 2.82-1.72.88-.02 1.71.6 2.25.6.53 0 1.53-.73 2.58-.62.44.02 1.68.18 2.47 1.34-.06.04-1.47.86-1.45 2.52zM14.67 6.17c.47-.57.79-1.36.7-2.17-.68.03-1.5.45-1.99 1.02-.43.5-.8 1.3-.7 2.07.76.06 1.53-.39 1.99-.92z" />
             </svg>
@@ -86,9 +86,9 @@ export default function LoginPage() {
 
         <form className="mt-4 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#111827]">Your Email</label>
+            <label className="sf-label">Your Email</label>
             <input
-              className="h-11 w-full rounded border border-[#d7e4f6] px-3 text-sm outline-none focus:border-[#0989ff]"
+              className="sf-field h-11"
               placeholder="shofy@mail.com"
               {...register('email')}
             />
@@ -96,11 +96,11 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#111827]">Password</label>
+            <label className="sf-label">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
-                className="h-11 w-full rounded border border-[#d7e4f6] px-3 pr-10 text-sm outline-none focus:border-[#0989ff]"
+                className="sf-field h-11 pr-10"
                 placeholder="Min. 6 character"
                 {...register('password')}
               />
@@ -131,6 +131,7 @@ export default function LoginPage() {
             <label className="flex items-center gap-2 text-[#475467]">
               <input
                 type="checkbox"
+                className="sf-checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
@@ -145,7 +146,7 @@ export default function LoginPage() {
 
           <button
             disabled={isSubmitting}
-            className="h-11 w-full rounded bg-[#0f1f40] px-4 text-sm font-semibold text-white hover:bg-[#102b57] disabled:cursor-not-allowed disabled:opacity-60"
+            className="sf-btn-primary h-11 w-full px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? 'Please wait...' : 'Login'}
           </button>

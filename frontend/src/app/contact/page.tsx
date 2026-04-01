@@ -5,12 +5,9 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { apiRequest } from '@/lib/api';
 import type { ContactSettings } from '@/lib/contact-settings';
 
-/** Match checkout `Billing Details` field styles (see `app/checkout/page.tsx`). */
-const billingLabel = 'mb-1 block text-sm font-medium text-[#111827]';
-const billingInput =
-  'h-11 w-full rounded border border-[#d7e4f6] px-3 text-sm text-[#111827] outline-none focus:border-[#0989ff] disabled:cursor-not-allowed disabled:opacity-60';
-const billingTextarea =
-  'w-full rounded border border-[#d7e4f6] px-3 py-2 text-sm text-[#111827] outline-none focus:border-[#0989ff] disabled:cursor-not-allowed disabled:opacity-60';
+/** Shared storefront form styles — tokens from Theme → Inputs (`sf-*` in `globals.css`). */
+const fieldClass = 'sf-field h-11 disabled:cursor-not-allowed';
+const textareaClass = 'sf-field disabled:cursor-not-allowed';
 
 export default function ContactPage() {
   const [settings, setSettings] = useState<ContactSettings | null>(null);
@@ -114,7 +111,7 @@ export default function ContactPage() {
             <p className="mt-2 text-sm text-[#7c8ea6]">We typically reply within one business day.</p>
             <form onSubmit={onSubmit} className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="contact-name" className={billingLabel}>
+                <label htmlFor="contact-name" className="sf-label">
                   Your name *
                 </label>
                 <input
@@ -126,12 +123,12 @@ export default function ContactPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={submitting}
-                  className={billingInput}
+                  className={fieldClass}
                   placeholder="Your name"
                 />
               </div>
               <div>
-                <label htmlFor="contact-email" className={billingLabel}>
+                <label htmlFor="contact-email" className="sf-label">
                   Your email *
                 </label>
                 <input
@@ -143,12 +140,12 @@ export default function ContactPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={submitting}
-                  className={billingInput}
+                  className={fieldClass}
                   placeholder="you@example.com"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="contact-subject" className={billingLabel}>
+                <label htmlFor="contact-subject" className="sf-label">
                   Subject *
                 </label>
                 <input
@@ -159,12 +156,12 @@ export default function ContactPage() {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   disabled={submitting}
-                  className={billingInput}
+                  className={fieldClass}
                   placeholder="How can we help?"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="contact-message" className={billingLabel}>
+                <label htmlFor="contact-message" className="sf-label">
                   Your message *
                 </label>
                 <textarea
@@ -175,7 +172,7 @@ export default function ContactPage() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   disabled={submitting}
-                  className={`${billingTextarea} resize-y`}
+                  className={`${textareaClass} resize-y`}
                   placeholder="Write your message here…"
                 />
               </div>
@@ -185,6 +182,7 @@ export default function ContactPage() {
                   checked={saveInfo}
                   onChange={(e) => setSaveInfo(e.target.checked)}
                   disabled={submitting}
+                  className="sf-checkbox"
                 />
                 <span>Save my name and email in this browser for the next time I send a message.</span>
               </label>
@@ -199,7 +197,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-1 w-full rounded bg-[#0989ff] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0476df] disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2"
+                className="sf-btn-primary mt-1 w-full py-3 text-sm sm:col-span-2"
               >
                 {submitting ? 'Sending…' : 'Send message'}
               </button>

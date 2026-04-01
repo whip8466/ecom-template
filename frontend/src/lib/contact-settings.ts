@@ -18,6 +18,8 @@ export type ContactSettings = {
   pinterestUrl: string | null;
   twitterUrl: string | null;
   youtubeUrl: string | null;
+  /** Storefront button/input styling; merged with defaults in `mergeStorefrontTheme`. */
+  themeJson?: Record<string, unknown> | null;
   updatedAt: string;
 };
 

@@ -34,9 +34,8 @@ function splitFullName(fullName: string): { first: string; last: string } {
   return { first: t.slice(0, i), last: t.slice(i + 1).trim() };
 }
 
-const inputClass =
-  'h-11 w-full rounded border border-[#d7e4f6] px-3 text-sm outline-none focus:border-[#0989ff]';
-const labelClass = 'mb-1 block text-sm font-medium text-[#111827]';
+const inputClass = 'sf-field h-11';
+const labelClass = 'sf-label';
 
 type Props = {
   value: AddressFormValues;
@@ -176,7 +175,7 @@ export function AddressFormFields({ value, onChange, variant = 'account', userEm
             <label className={labelClass}>Order notes (optional)</label>
             <textarea
               rows={5}
-              className="w-full rounded border border-[#d7e4f6] px-3 py-2 text-sm outline-none focus:border-[#0989ff]"
+              className="sf-field"
               placeholder="Notes about your order"
               value={orderNotes}
               onChange={(e) => setOrderNotes(e.target.value)}
@@ -188,6 +187,7 @@ export function AddressFormFields({ value, onChange, variant = 'account', userEm
       <label className="sm:col-span-2 flex items-center gap-2 text-sm text-[#475467]">
         <input
           type="checkbox"
+          className="sf-checkbox"
           checked={value.isDefault}
           onChange={(e) => onChange((prev) => ({ ...prev, isDefault: e.target.checked }))}
         />

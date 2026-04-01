@@ -98,6 +98,28 @@ export const ADMIN_SIDEBAR_MENU: AdminSidebarItem[] = [
   },
   {
     kind: 'group',
+    label: 'Theme',
+    icon:
+      'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+    children: [
+      {
+        href: '/admin/theme',
+        label: 'Overview',
+        icon:
+          'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+        matchPathname: (p) => p === '/admin/theme',
+      },
+      {
+        href: '/admin/theme/inputs',
+        label: 'Inputs',
+        icon:
+          'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+        matchPathname: (p) => p === '/admin/theme/inputs' || p.startsWith('/admin/theme/inputs/'),
+      },
+    ],
+  },
+  {
+    kind: 'group',
     label: 'Banners',
     icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
     children: [

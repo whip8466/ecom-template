@@ -40,12 +40,12 @@ export function NewsletterSignup() {
             placeholder="Enter your email"
             required
             disabled={status === 'loading'}
-            className="flex-1 rounded-full border-2 border-[var(--border)] bg-[var(--background)] px-5 py-4 text-[var(--navy)] placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 disabled:opacity-50"
+            className="sf-field flex-1 rounded-full border-2 py-4 disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="rounded-full bg-[var(--accent)] px-8 py-4 font-semibold text-white transition-premium hover:bg-[var(--accent-hover)] hover:-translate-y-0.5 disabled:opacity-50"
+            className="sf-btn-primary rounded-full px-8 py-4 font-semibold transition-premium hover:-translate-y-0.5 disabled:opacity-50"
           >
             {status === 'loading' ? 'Signing up…' : status === 'success' ? 'Subscribed!' : 'Sign Up'}
           </button>

@@ -321,6 +321,8 @@ model ContactSettings {
   pinterestUrl   String?  @map("pinterest_url") @db.VarChar(500)
   twitterUrl     String?  @map("twitter_url") @db.VarChar(500)
   youtubeUrl     String?  @map("youtube_url") @db.VarChar(500)
+  /// Storefront-only: button colors, radii, form field styles (see `StorefrontThemeTokens` on frontend).
+  themeJson      Json?    @map("theme_json")
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("contact_settings")

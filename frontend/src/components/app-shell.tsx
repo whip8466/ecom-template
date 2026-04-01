@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { NewsletterFooterForm } from '@/components/newsletter-footer-form';
+import { StorefrontThemeInjector } from '@/components/storefront-theme-injector';
 import { apiAssetUrl } from '@/lib/api-asset-url';
 import { brandVisibilityFromSettings } from '@/lib/brand-visibility';
 import type { ContactSettings } from '@/lib/contact-settings';
@@ -819,6 +820,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      <StorefrontThemeInjector themeJson={contactSettings?.themeJson} />
       <StorefrontHeader
         cartCount={cartCount}
         user={user}

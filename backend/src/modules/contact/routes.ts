@@ -48,9 +48,42 @@ function mapSettings(row: ContactSettings | null) {
     pinterestUrl: row.pinterestUrl,
     twitterUrl: row.twitterUrl,
     youtubeUrl: row.youtubeUrl,
+    themeJson: row.themeJson ?? null,
     updatedAt: row.updatedAt.toISOString(),
   };
 }
+
+/** Hex or future CSS color; keep flexible so admins are not blocked while typing. */
+const colorTokenSchema = z.string().min(1).max(32);
+
+const cssTokenSchema = z.string().max(32);
+
+const themeJsonSchema = z
+  .object({
+    buttonPrimaryBg: colorTokenSchema.optional(),
+    buttonPrimaryHover: colorTokenSchema.optional(),
+    buttonSecondaryBg: colorTokenSchema.optional(),
+    buttonSecondaryBorder: colorTokenSchema.optional(),
+    buttonSecondaryText: colorTokenSchema.optional(),
+    buttonInfoBg: colorTokenSchema.optional(),
+    buttonInfoHover: colorTokenSchema.optional(),
+    buttonRadius: cssTokenSchema.optional(),
+    inputRadius: cssTokenSchema.optional(),
+    inputBorder: colorTokenSchema.optional(),
+    inputBackground: colorTokenSchema.optional(),
+    inputText: colorTokenSchema.optional(),
+    inputPlaceholder: colorTokenSchema.optional(),
+    inputFocusRing: colorTokenSchema.optional(),
+    textareaMinHeight: cssTokenSchema.optional(),
+    selectBackground: colorTokenSchema.optional(),
+    labelText: colorTokenSchema.optional(),
+    checkboxAccent: colorTokenSchema.optional(),
+  })
+  .strict();
+
+const themeSettingsPatchSchema = z.object({
+  themeJson: themeJsonSchema,
+});
 
 const settingsPutSchema = z.object({
   headline: z.string().min(1).max(200),
@@ -189,6 +222,35 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
           showBrandLogo: body.showBrandLogo,
           showBrandName: body.showBrandName,
         },
+      });
+      return { data: mapSettings(row) };
+    },
+  );
+
+  fastify.patch(
+    '/admin/theme-settings',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      if (!isStaff(request.authUser)) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+      const prisma = fastify.prisma;
+      if (!prisma.contactSettings) {
+        return reply.code(503).send({ message: 'Database client is out of date.' });
+      }
+      let body: z.infer<typeof themeSettingsPatchSchema>;
+      try {
+        body = themeSettingsPatchSchema.parse(request.body);
+      } catch {
+        return reply.code(400).send({ message: 'Invalid theme settings payload.' });
+      }
+      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      if (!existing) {
+        return reply.code(404).send({ message: 'Contact settings not found' });
+      }
+      const row = await prisma.contactSettings.update({
+        where: { id: 1 },
+        data: { themeJson: body.themeJson },
       });
       return { data: mapSettings(row) };
     },

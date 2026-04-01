@@ -54,12 +54,12 @@ export function NewsletterFooterForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
-          className="w-full min-w-0 flex-1 rounded-md border border-[var(--border)] bg-white px-3 py-2.5 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted-light)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] disabled:opacity-60 sm:border-0 sm:py-2"
+          className="sf-field min-w-0 flex-1 py-2.5 sm:border-0 sm:py-2"
         />
         <button
           type="submit"
           disabled={loading}
-          className="shrink-0 rounded-md bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition-premium hover:bg-[var(--accent-hover)] disabled:opacity-60 sm:rounded-none sm:py-2"
+          className="sf-btn-primary shrink-0 py-2.5 text-sm sm:rounded-none sm:py-2"
         >
           {loading ? '…' : 'Subscribe'}
         </button>
