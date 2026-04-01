@@ -50,7 +50,7 @@ export function FeaturedCategories() {
             <Link
               key={cat.slug}
               href={`/?category=${cat.slug}`}
-              className="group flex flex-col items-center rounded-2xl p-6 transition-premium hover:bg-[var(--cream)] hover:shadow-[var(--shadow)]"
+              className="group flex flex-col items-center rounded-[var(--radius-lg)] p-6 transition-premium hover:bg-[var(--cream)] hover:shadow-[var(--shadow)]"
             >
               <div className="relative h-24 w-24 overflow-hidden rounded-full bg-[var(--cream)] sm:h-28 sm:w-28">
                 <div

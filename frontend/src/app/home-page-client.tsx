@@ -94,8 +94,8 @@ function ProductCard({ product }: { product: ProductCardData }) {
   };
 
   return (
-    <article className="group relative rounded-md border border-[#e4ebf4] bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="relative overflow-hidden rounded-md bg-[#f3f7ff]">
+    <article className="group relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3 transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative overflow-hidden rounded-[var(--radius)] bg-[var(--cream)]">
         <Link href={`/products/${product.slug}`} className="block">
           <div
             className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105"

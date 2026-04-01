@@ -58,6 +58,8 @@ const colorTokenSchema = z.string().min(1).max(32);
 
 const cssTokenSchema = z.string().max(32);
 
+const shadowTokenSchema = z.string().max(400);
+
 const themeJsonSchema = z
   .object({
     buttonPrimaryBg: colorTokenSchema.optional(),
@@ -76,8 +78,21 @@ const themeJsonSchema = z
     inputFocusRing: colorTokenSchema.optional(),
     textareaMinHeight: cssTokenSchema.optional(),
     selectBackground: colorTokenSchema.optional(),
+    selectBorder: colorTokenSchema.optional(),
+    selectText: colorTokenSchema.optional(),
+    selectOptionBackground: colorTokenSchema.optional(),
+    selectOptionText: colorTokenSchema.optional(),
     labelText: colorTokenSchema.optional(),
     checkboxAccent: colorTokenSchema.optional(),
+    layoutPageBackground: colorTokenSchema.optional(),
+    layoutCardBackground: colorTokenSchema.optional(),
+    layoutSectionMutedBackground: colorTokenSchema.optional(),
+    layoutBorder: colorTokenSchema.optional(),
+    layoutRadius: cssTokenSchema.optional(),
+    layoutRadiusLarge: cssTokenSchema.optional(),
+    layoutShadowSm: shadowTokenSchema.optional(),
+    layoutShadow: shadowTokenSchema.optional(),
+    layoutShadowLg: shadowTokenSchema.optional(),
   })
   .strict();
 

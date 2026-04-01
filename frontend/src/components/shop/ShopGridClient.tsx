@@ -488,7 +488,7 @@ export function ShopGridClient() {
                 const inCart = cartItems.some((item) => item.productId === product.id);
                 const inWishlist = wishlistItems.some((item) => item.productId === product.id);
                 return (
-                  <article key={product.id} className="group relative rounded-md border border-[#e5ecf6] bg-white p-3">
+                  <article key={product.id} className="group relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3">
                     <div className="relative overflow-hidden rounded bg-[#f4f8ff]">
                       <Link href={`/products/${product.slug}`} className="block">
                         <div className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105" style={{ backgroundImage: `url(${imageUrl})` }} />

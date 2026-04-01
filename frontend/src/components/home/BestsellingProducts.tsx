@@ -70,7 +70,7 @@ export function BestsellingProducts() {
         {loading ? (
           <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--cream)]">
+              <div key={i} className="animate-pulse rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--cream)]">
                 <div className="aspect-[4/5] rounded-t-2xl bg-[var(--border)]" />
                 <div className="space-y-3 p-5">
                   <div className="h-3 w-1/4 rounded bg-[var(--border)]" />
@@ -81,7 +81,7 @@ export function BestsellingProducts() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="mt-12 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--cream)] py-16 text-center text-[var(--muted)]">
+          <div className="mt-12 rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-[var(--cream)] py-16 text-center text-[var(--muted)]">
             <p>No products available right now.</p>
             <p className="mt-1 text-sm">Start the backend to load products.</p>
           </div>

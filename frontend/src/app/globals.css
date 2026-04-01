@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  /* Layout — overridden from `theme_json` via StorefrontThemeInjector (see `layout*` in storefront-theme.ts) */
   --background: #f4f7ff;
   --foreground: #152238;
   --navy: #1d2e4b;
@@ -38,6 +39,10 @@
   --sf-input-focus: #0989ff;
   --sf-textarea-min-h: 8rem;
   --sf-select-bg: #ffffff;
+  --sf-select-border: #d7e4f6;
+  --sf-select-text: #111827;
+  --sf-select-option-bg: #ffffff;
+  --sf-select-option-text: #111827;
   --sf-label-text: #111827;
   --sf-checkbox-accent: #0989ff;
 }
@@ -87,8 +92,16 @@ textarea.sf-field {
 }
 
 select.sf-field {
+  border-radius: var(--sf-input-radius);
+  border-color: var(--sf-select-border);
   background-color: var(--sf-select-bg);
+  color: var(--sf-select-text);
   cursor: pointer;
+}
+
+select.sf-field option {
+  background-color: var(--sf-select-option-bg);
+  color: var(--sf-select-option-text);
 }
 
 input[type='checkbox'].sf-checkbox {

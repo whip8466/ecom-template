@@ -50,7 +50,7 @@ export function Testimonials() {
           {testimonials.map((t, i) => (
             <blockquote
               key={i}
-              className="flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--cream)] p-8 transition-premium hover:shadow-[var(--shadow)]"
+              className="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--cream)] p-8 transition-premium hover:shadow-[var(--shadow)]"
             >
               <StarRating count={t.rating} />
               <p className="mt-4 flex-1 text-[var(--navy)]">&ldquo;{t.quote}&rdquo;</p>

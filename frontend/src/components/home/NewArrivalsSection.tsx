@@ -33,7 +33,7 @@ export function NewArrivalsSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="font-display text-3xl font-semibold text-[var(--navy)] sm:text-4xl">New Arrivals</h2>
         {products.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--cream)] p-8 text-center text-sm text-[var(--muted)]">
+          <div className="mt-8 rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-[var(--cream)] p-8 text-center text-sm text-[var(--muted)]">
             No arrivals available. Start backend to load products.
           </div>
         ) : (

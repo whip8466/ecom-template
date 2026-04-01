@@ -56,7 +56,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
   };
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)] transition-premium hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
+    <article className="group relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)] transition-premium hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]">
       <div className="relative block aspect-[4/5] overflow-hidden bg-[var(--cream)]">
         <Link href={`/products/${product.slug}`} className="absolute inset-0 z-0">
           <span className="sr-only">View {product.name}</span>

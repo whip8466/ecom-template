@@ -22,7 +22,7 @@ export function SplitPromoCards() {
         {promoCards.map((card) => (
           <article
             key={card.title}
-            className="group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[#edf4ff] p-8 shadow-[var(--shadow-sm)] transition-premium hover:shadow-[var(--shadow)]"
+            className="group relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[#edf4ff] p-8 shadow-[var(--shadow-sm)] transition-premium hover:shadow-[var(--shadow)]"
           >
             <div
               className="absolute inset-0 bg-cover bg-center opacity-20 transition-premium group-hover:scale-105"

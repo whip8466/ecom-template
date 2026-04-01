@@ -1,6 +1,6 @@
 /**
- * Storefront form + button tokens persisted in `contact_settings.theme_json`.
- * Applied on the public site via CSS variables (`--sf-*` and synced `--accent`).
+ * Storefront theme tokens persisted in `contact_settings.theme_json`.
+ * Applied on the public site via CSS variables (`--sf-*`, layout `--background` / `--card-bg` / …, and synced `--accent`).
  */
 
 export type StorefrontThemeTokens = {
@@ -13,7 +13,7 @@ export type StorefrontThemeTokens = {
   buttonInfoHover: string;
   /** Border radius for primary / secondary / info buttons */
   buttonRadius: string;
-  /** Border radius for text inputs, textarea, select */
+  /** Border radius for text inputs, textarea, and `select`. */
   inputRadius: string;
   inputBorder: string;
   inputBackground: string;
@@ -21,9 +21,29 @@ export type StorefrontThemeTokens = {
   inputPlaceholder: string;
   inputFocusRing: string;
   textareaMinHeight: string;
+  /** `<select>` / dropdown-specific (falls back visually to input tokens if unset in DB). */
   selectBackground: string;
+  selectBorder: string;
+  selectText: string;
+  /** `<option>` rows in the open list (supported in many browsers; OS may override). */
+  selectOptionBackground: string;
+  selectOptionText: string;
   labelText: string;
   checkboxAccent: string;
+  /** Page canvas behind content */
+  layoutPageBackground: string;
+  /** Cards and section bands that use `var(--card-bg)` */
+  layoutCardBackground: string;
+  /** Softer alternate sections (`var(--cream)`) */
+  layoutSectionMutedBackground: string;
+  layoutBorder: string;
+  /** Default radius for cards / medium surfaces */
+  layoutRadius: string;
+  /** Larger radius (hero cards, promos) */
+  layoutRadiusLarge: string;
+  layoutShadowSm: string;
+  layoutShadow: string;
+  layoutShadowLg: string;
 };
 
 export const DEFAULT_STOREFRONT_THEME: StorefrontThemeTokens = {
@@ -43,8 +63,21 @@ export const DEFAULT_STOREFRONT_THEME: StorefrontThemeTokens = {
   inputFocusRing: '#0989ff',
   textareaMinHeight: '8rem',
   selectBackground: '#ffffff',
+  selectBorder: '#d7e4f6',
+  selectText: '#111827',
+  selectOptionBackground: '#ffffff',
+  selectOptionText: '#111827',
   labelText: '#111827',
   checkboxAccent: '#0989ff',
+  layoutPageBackground: '#f4f7ff',
+  layoutCardBackground: '#ffffff',
+  layoutSectionMutedBackground: '#f8faff',
+  layoutBorder: '#dce5f2',
+  layoutRadius: '0.75rem',
+  layoutRadiusLarge: '1rem',
+  layoutShadowSm: '0 1px 2px 0 rgb(0 0 0 / 0.04)',
+  layoutShadow: '0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04)',
+  layoutShadowLg: '0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.04)',
 };
 
 function pickStr(v: unknown): string | undefined {
@@ -72,8 +105,21 @@ export function mergeStorefrontTheme(raw: unknown): StorefrontThemeTokens {
     inputFocusRing: pickStr(o.inputFocusRing) ?? d.inputFocusRing,
     textareaMinHeight: pickStr(o.textareaMinHeight) ?? d.textareaMinHeight,
     selectBackground: pickStr(o.selectBackground) ?? d.selectBackground,
+    selectBorder: pickStr(o.selectBorder) ?? d.selectBorder,
+    selectText: pickStr(o.selectText) ?? d.selectText,
+    selectOptionBackground: pickStr(o.selectOptionBackground) ?? d.selectOptionBackground,
+    selectOptionText: pickStr(o.selectOptionText) ?? d.selectOptionText,
     labelText: pickStr(o.labelText) ?? d.labelText,
     checkboxAccent: pickStr(o.checkboxAccent) ?? d.checkboxAccent,
+    layoutPageBackground: pickStr(o.layoutPageBackground) ?? d.layoutPageBackground,
+    layoutCardBackground: pickStr(o.layoutCardBackground) ?? d.layoutCardBackground,
+    layoutSectionMutedBackground: pickStr(o.layoutSectionMutedBackground) ?? d.layoutSectionMutedBackground,
+    layoutBorder: pickStr(o.layoutBorder) ?? d.layoutBorder,
+    layoutRadius: pickStr(o.layoutRadius) ?? d.layoutRadius,
+    layoutRadiusLarge: pickStr(o.layoutRadiusLarge) ?? d.layoutRadiusLarge,
+    layoutShadowSm: pickStr(o.layoutShadowSm) ?? d.layoutShadowSm,
+    layoutShadow: pickStr(o.layoutShadow) ?? d.layoutShadow,
+    layoutShadowLg: pickStr(o.layoutShadowLg) ?? d.layoutShadowLg,
   };
 }
 
@@ -99,8 +145,21 @@ export const STOREFRONT_THEME_CSS_VAR_MAP: { key: keyof StorefrontThemeTokens; c
   { key: 'inputFocusRing', cssVar: '--sf-input-focus' },
   { key: 'textareaMinHeight', cssVar: '--sf-textarea-min-h' },
   { key: 'selectBackground', cssVar: '--sf-select-bg' },
+  { key: 'selectBorder', cssVar: '--sf-select-border' },
+  { key: 'selectText', cssVar: '--sf-select-text' },
+  { key: 'selectOptionBackground', cssVar: '--sf-select-option-bg' },
+  { key: 'selectOptionText', cssVar: '--sf-select-option-text' },
   { key: 'labelText', cssVar: '--sf-label-text' },
   { key: 'checkboxAccent', cssVar: '--sf-checkbox-accent' },
+  { key: 'layoutPageBackground', cssVar: '--background' },
+  { key: 'layoutCardBackground', cssVar: '--card-bg' },
+  { key: 'layoutSectionMutedBackground', cssVar: '--cream' },
+  { key: 'layoutBorder', cssVar: '--border' },
+  { key: 'layoutRadius', cssVar: '--radius' },
+  { key: 'layoutRadiusLarge', cssVar: '--radius-lg' },
+  { key: 'layoutShadowSm', cssVar: '--shadow-sm' },
+  { key: 'layoutShadow', cssVar: '--shadow' },
+  { key: 'layoutShadowLg', cssVar: '--shadow-lg' },
 ];
 
 /** Apply tokens to `document.documentElement` for storefront (client-only). */

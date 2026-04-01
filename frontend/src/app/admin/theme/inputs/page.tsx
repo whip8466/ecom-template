@@ -227,7 +227,9 @@ export default function AdminThemeInputsPage() {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(280px,36%)] lg:items-start xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-w-0 rounded-admin border border-[#e3e6ed] bg-white p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-[#1c2740]">Inputs & fields</h2>
-            <p className="mt-1 text-xs text-[#94a3b8]">Text inputs, textareas, and selects share these tokens.</p>
+            <p className="mt-1 text-xs text-[#94a3b8]">
+              Text inputs and textareas use these tokens. Focus ring applies to inputs and selects.
+            </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <TextField label="Input radius" value={t.inputRadius} onChange={(v) => patch({ inputRadius: v })} />
               <ColorField label="Border" value={t.inputBorder} onChange={(v) => patch({ inputBorder: v })} />
@@ -236,9 +238,34 @@ export default function AdminThemeInputsPage() {
               <ColorField label="Placeholder" value={t.inputPlaceholder} onChange={(v) => patch({ inputPlaceholder: v })} />
               <ColorField label="Focus ring" value={t.inputFocusRing} onChange={(v) => patch({ inputFocusRing: v })} />
               <TextField label="Textarea min height" hint="e.g. 8rem" value={t.textareaMinHeight} onChange={(v) => patch({ textareaMinHeight: v })} />
-              <ColorField label="Select background" value={t.selectBackground} onChange={(v) => patch({ selectBackground: v })} />
               <ColorField label="Label text" value={t.labelText} onChange={(v) => patch({ labelText: v })} />
               <ColorField label="Checkbox accent" value={t.checkboxAccent} onChange={(v) => patch({ checkboxAccent: v })} />
+            </div>
+
+            <div className="mt-8 border-t border-[#e8ecf4] pt-6">
+              <h3 className="text-sm font-semibold text-[#1c2740]">Dropdown (select)</h3>
+              <p className="mt-1 text-xs text-[#94a3b8]">
+                <code className="rounded bg-[#f1f5f9] px-1 font-mono text-[11px] text-[#475467]">select</code>{' '}
+                elements use these tokens for border, fill, and text. Corner radius matches the Input radius control above.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <ColorField label="Background" value={t.selectBackground} onChange={(v) => patch({ selectBackground: v })} />
+                <ColorField label="Border" value={t.selectBorder} onChange={(v) => patch({ selectBorder: v })} />
+                <ColorField label="Text" value={t.selectText} onChange={(v) => patch({ selectText: v })} />
+              </div>
+              <h4 className="mt-6 text-xs font-semibold uppercase tracking-wide text-[#64748b]">Options list</h4>
+              <p className="mt-1 text-xs text-[#94a3b8]">
+                Styling for <code className="font-mono text-[11px]">option</code> rows when the menu is open. Some
+                browsers or OS themes may ignore these.
+              </p>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                <ColorField
+                  label="Option background"
+                  value={t.selectOptionBackground}
+                  onChange={(v) => patch({ selectOptionBackground: v })}
+                />
+                <ColorField label="Option text" value={t.selectOptionText} onChange={(v) => patch({ selectOptionText: v })} />
+              </div>
             </div>
           </div>
 
@@ -252,6 +279,10 @@ export default function AdminThemeInputsPage() {
               >
                 <label className="sf-label">Sample label</label>
                 <input type="text" className="sf-field h-11 w-full" placeholder="Placeholder" readOnly />
+                <select className="sf-field h-11 w-full" aria-label="Sample dropdown" defaultValue="a">
+                  <option value="a">Option one</option>
+                  <option value="b">Option two</option>
+                </select>
                 <textarea className="sf-field w-full" rows={3} readOnly placeholder="Textarea" />
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-[#475467]">
                   <input type="checkbox" className="sf-checkbox" defaultChecked />
