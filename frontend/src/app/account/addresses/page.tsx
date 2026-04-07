@@ -163,7 +163,7 @@ function AddressesPage() {
           <h2 className="text-lg font-semibold text-[#0f1f40]">Saved addresses</h2>
         )}
         {addresses.length === 0 && !showForm && (
-          <div className="rounded-md border border-dashed border-[#dce6f4] bg-white p-10 text-center">
+          <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--card-bg)] p-10 text-center">
             <p className="text-sm text-[#64748b]">You don&apos;t have any saved addresses yet.</p>
           </div>
         )}
@@ -171,7 +171,7 @@ function AddressesPage() {
         {addresses.map((address) => (
           <div
             key={address.id}
-            className="rounded-md border border-[#e5ecf6] bg-white p-5 shadow-sm"
+            className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-5 shadow-sm"
           >
             <p className="font-semibold text-[#0f1f40]">
               {address.fullName}{' '}
@@ -221,7 +221,7 @@ function AddressesPage() {
       </div>
 
       {showForm && (
-        <section className="rounded-md border border-[#e5ecf6] bg-white p-6 sm:p-8">
+        <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-6 sm:p-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="text-2xl font-semibold text-[#0f1f40] sm:text-3xl">

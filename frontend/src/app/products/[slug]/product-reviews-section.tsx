@@ -131,7 +131,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
       )}
 
       {!user && (
-        <p className="rounded-md border border-[#e4ebf5] bg-[#f8fbff] px-4 py-3 text-sm text-[#475467]">
+        <p className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--cream)] px-4 py-3 text-sm text-[#475467]">
           <Link href={loginHref} className="font-medium text-[var(--sf-btn-primary-bg)] hover:underline">
             Sign in
           </Link>{' '}
@@ -144,7 +144,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
           {loadingEligibility ? (
             <p className="text-sm text-[#7b8aa3]">Checking your purchases…</p>
           ) : eligible.length > 0 ? (
-            <form onSubmit={handleSubmit} className="rounded-md border border-[#e4ebf5] bg-[#fafcff] p-4">
+            <form onSubmit={handleSubmit} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--cream)] p-4">
               <h3 className="text-sm font-semibold text-[#0f1f40]">Write a review</h3>
               <p className="mt-1 text-xs text-[#7b8aa3]">
                 Delivered orders only — one review per order line. Your name will appear as on your account.
@@ -219,7 +219,7 @@ export function ProductReviewsSection({ productId, initial }: Props) {
         ) : (
           <ul className="mt-4 space-y-5">
             {reviews.map((r) => (
-              <li key={r.id} className="border-b border-[#edf2f8] pb-5 last:border-0 last:pb-0">
+              <li key={r.id} className="border-b border-[var(--border)] pb-5 last:border-0 last:pb-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <StarRating rating={r.rating} />
                   <span className="text-sm font-medium text-[#0f1f40]">{r.authorLabel}</span>

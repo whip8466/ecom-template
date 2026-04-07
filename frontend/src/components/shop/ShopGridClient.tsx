@@ -235,7 +235,7 @@ export function ShopGridClient() {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="space-y-6">
-          <section className="rounded-md border border-[#e5ecf6] bg-white p-4">
+          <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-4">
             <h2 className="text-sm font-semibold text-[#12213f]">Price Filter</h2>
             <div className="mt-3 relative h-10">
               <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded bg-[#dbe2ec]" />
@@ -285,7 +285,7 @@ export function ShopGridClient() {
             </div>
           </section>
 
-          <section className="rounded-md border border-[#e5ecf6] bg-white p-4">
+          <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-4">
             <h2 className="text-sm font-semibold text-[#12213f]">Product Status</h2>
             <label className="mt-3 flex items-center gap-2 text-sm text-[#475467]">
               <input
@@ -307,7 +307,7 @@ export function ShopGridClient() {
             </label>
           </section>
 
-          <section className="rounded-md border border-[#e5ecf6] bg-white p-4">
+          <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-4">
             <h2 className="text-sm font-semibold text-[#12213f]">Categories</h2>
             <div className="mt-3 space-y-2 text-sm">
               <button
@@ -343,16 +343,16 @@ export function ShopGridClient() {
             </div>
           </section>
 
-          <section className="rounded-md border border-[#e5ecf6] bg-white p-4">
+          <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-4">
             <h2 className="text-sm font-semibold text-[#12213f]">Top Rated Products</h2>
             <div className="mt-3 space-y-3">
               {topRated.length === 0 ? (
                 <p className="text-sm text-[#67748a]">No products found.</p>
               ) : (
                 topRated.map((product) => (
-                  <Link key={product.id} href={`/products/${product.slug}`} className="flex gap-3 rounded p-1 hover:bg-[#f8fbff]">
+                  <Link key={product.id} href={`/products/${product.slug}`} className="flex gap-3 rounded p-1 hover:bg-[var(--cream)]">
                     <div
-                      className="h-14 w-14 rounded bg-[#f4f8ff] bg-cover bg-center"
+                      className="h-14 w-14 rounded bg-[var(--cream)] bg-cover bg-center"
                       style={{ backgroundImage: `url(${product.images?.[0]?.imageUrl || ''})` }}
                     />
                     <div>
@@ -369,7 +369,7 @@ export function ShopGridClient() {
 
         <section>
           {hasActiveFilters && (
-            <div className="mb-4 rounded-md border border-[#e5ecf6] bg-white px-4 py-3">
+            <div className="mb-4 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] px-4 py-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wide text-[#667085]">
                   Selected filters:
@@ -447,7 +447,7 @@ export function ShopGridClient() {
             </div>
           )}
 
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#e5ecf6] bg-white px-4 py-2.5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] px-4 py-2.5">
             <p className="text-sm text-[#67748a]">
               Showing {showingStart}-{showingEnd} of {total} results
             </p>
@@ -467,7 +467,7 @@ export function ShopGridClient() {
           {loading ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="animate-pulse rounded-md border border-[#e5ecf6] bg-white p-3">
+                <div key={i} className="animate-pulse rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3">
                   <div className="aspect-square rounded bg-[#edf3ff]" />
                   <div className="mt-3 h-3 w-1/3 rounded bg-[#edf3ff]" />
                   <div className="mt-2 h-4 w-2/3 rounded bg-[#edf3ff]" />
@@ -476,7 +476,7 @@ export function ShopGridClient() {
               ))}
             </div>
           ) : products.length === 0 ? (
-            <div className="rounded-md border border-dashed border-[#cdd9eb] bg-white p-10 text-center text-sm text-[#67748a]">
+            <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--card-bg)] p-10 text-center text-sm text-[#67748a]">
               No products found for your current filters.
             </div>
           ) : (
@@ -489,12 +489,12 @@ export function ShopGridClient() {
                 const inWishlist = wishlistItems.some((item) => item.productId === product.id);
                 return (
                   <article key={product.id} className="group relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3">
-                    <div className="relative overflow-hidden rounded bg-[#f4f8ff]">
+                    <div className="relative overflow-hidden rounded bg-[var(--cream)]">
                       <Link href={`/products/${product.slug}`} className="block">
                         <div className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105" style={{ backgroundImage: `url(${imageUrl})` }} />
                       </Link>
 
-                      <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+                      <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] opacity-0 shadow-[var(--shadow)] transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
                       <button
                         type="button"
                         title={inCart ? 'View Cart' : 'Add To Cart'}
@@ -515,7 +515,7 @@ export function ShopGridClient() {
                             availableStock: cardAvailable,
                           });
                         }}
-                        className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${
+                        className={`group/item relative grid h-12 w-12 place-items-center border-b border-[var(--border)] transition ${
                           inCart ? 'bg-[var(--sf-btn-primary-bg)] text-white' : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
                         }`}
                       >
@@ -530,7 +530,7 @@ export function ShopGridClient() {
                         type="button"
                         title="Quick View"
                         onClick={() => router.push(`/products/${product.slug}`)}
-                        className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
+                        className="group/item relative grid h-12 w-12 place-items-center border-b border-[var(--border)] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
                       >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -574,7 +574,7 @@ export function ShopGridClient() {
                   type="button"
                   onClick={() => pushParams({ page: String(Math.max(1, currentPage - 1)) })}
                   disabled={currentPage === 1}
-                  className="rounded border border-[#d7e4f6] px-3 py-1.5 text-sm text-[#344054] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded border border-[var(--border)] px-3 py-1.5 text-sm text-[#344054] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Prev
                 </button>
@@ -586,7 +586,7 @@ export function ShopGridClient() {
                     className={`rounded px-3 py-1.5 text-sm ${
                       page === currentPage
                         ? 'bg-[var(--sf-btn-primary-bg)] font-semibold text-white'
-                        : 'border border-[#d7e4f6] text-[#344054] hover:bg-[#f5f9ff]'
+                        : 'border border-[var(--border)] text-[#344054] hover:bg-[#f5f9ff]'
                     }`}
                   >
                     {page}
@@ -596,7 +596,7 @@ export function ShopGridClient() {
                   type="button"
                   onClick={() => pushParams({ page: String(Math.min(totalPages, currentPage + 1)) })}
                   disabled={currentPage === totalPages}
-                  className="rounded border border-[#d7e4f6] px-3 py-1.5 text-sm text-[#344054] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded border border-[var(--border)] px-3 py-1.5 text-sm text-[#344054] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next
                 </button>

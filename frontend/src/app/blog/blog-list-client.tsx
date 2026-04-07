@@ -62,7 +62,7 @@ export function BlogListClient() {
   }, [categorySlug]);
 
   return (
-    <section className="border-b border-[#e8eef5] bg-white py-10 sm:py-12">
+    <section className="border-b border-[var(--border)] bg-[var(--card-bg)] py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -87,7 +87,7 @@ export function BlogListClient() {
         {error ? <p className="py-8 text-center text-sm text-red-600">{error}</p> : null}
 
         {!loading && !error && posts.length === 0 ? (
-          <p className="rounded-md border border-dashed border-[#cdd9eb] bg-[#f8fafc] py-12 text-center text-sm text-[#64748b]">
+          <p className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--cream)] py-12 text-center text-sm text-[#64748b]">
             No articles yet. Check back soon.
           </p>
         ) : null}

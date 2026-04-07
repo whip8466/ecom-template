@@ -75,7 +75,7 @@ export function DealOfTheDay() {
         </div>
 
         {products.length === 0 ? (
-          <div className="mt-8 rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-white p-8 text-center text-sm text-[var(--muted)]">
+          <div className="mt-8 rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-[var(--card-bg)] p-8 text-center text-sm text-[var(--muted)]">
             No deal products found. Start backend to load live deals.
           </div>
         ) : (
@@ -91,7 +91,7 @@ export function DealOfTheDay() {
               return (
                 <article
                   key={product.id}
-                  className="group overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-4 shadow-[var(--shadow-sm)] transition-premium hover:shadow-[var(--shadow)]"
+                  className="group overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card-bg)] p-4 shadow-[var(--shadow-sm)] transition-premium hover:shadow-[var(--shadow)]"
                 >
                   <div className="relative aspect-square overflow-hidden rounded-xl bg-[var(--cream)]">
                     <div

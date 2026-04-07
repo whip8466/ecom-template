@@ -61,7 +61,7 @@ function PlatformIcon({ platform, className }: { platform: SocialFeedPlatform; c
 
 function PostCard({ post }: { post: SocialFeedPost }) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-md border border-[#e5ecf6] bg-white shadow-[var(--shadow-sm)] transition-premium hover:border-[color-mix(in_srgb,var(--sf-btn-primary-bg)_40%,transparent)]">
+    <article className="group flex flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)] transition-premium hover:border-[color-mix(in_srgb,var(--sf-btn-primary-bg)_40%,transparent)]">
       <div className="relative aspect-[16/10] overflow-hidden bg-[#f1f5f9]">
         {post.thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -166,7 +166,7 @@ export function SocialFeedClient() {
       </header>
 
       {featured ? (
-        <section className="mb-10 overflow-hidden rounded-md border border-[#e5ecf6] bg-white shadow-[var(--shadow-sm)]">
+        <section className="mb-10 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)]">
           <div className="grid gap-0 lg:grid-cols-[1.1fr_1fr]">
             <div className="relative aspect-[16/10] min-h-[200px] bg-[#f1f5f9] lg:aspect-auto lg:min-h-[280px]">
               {featured.thumbnailUrl ? (
@@ -213,7 +213,7 @@ export function SocialFeedClient() {
               className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-premium ${
                 filter === tab.key
                   ? 'border-[var(--sf-btn-primary-bg)] bg-[var(--sf-btn-primary-bg)] text-white'
-                  : 'border-[#e5ecf6] bg-white text-[#475467] hover:border-[color-mix(in_srgb,var(--sf-btn-primary-bg)_50%,transparent)]'
+                  : 'border-[var(--border)] bg-[var(--card-bg)] text-[#475467] hover:border-[color-mix(in_srgb,var(--sf-btn-primary-bg)_50%,transparent)]'
               }`}
             >
               {tab.label}
@@ -224,7 +224,7 @@ export function SocialFeedClient() {
 
       <section className="mb-12">
         {filteredPosts.length === 0 ? (
-          <p className="rounded-md border border-dashed border-[#e5ecf6] bg-[#f8fafc] py-12 text-center text-sm text-[#64748b]">
+          <p className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--cream)] py-12 text-center text-sm text-[#64748b]">
             No posts in this category yet.
           </p>
         ) : (
@@ -236,7 +236,7 @@ export function SocialFeedClient() {
         )}
       </section>
 
-      <section className="mb-12 rounded-md border border-[#e5ecf6] bg-white p-8 text-center shadow-[var(--shadow-sm)] sm:p-10">
+      <section className="mb-12 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-8 text-center shadow-[var(--shadow-sm)] sm:p-10">
         <h2 className="font-display text-xl font-semibold text-[#0f1f40]">{midCtaTitle}</h2>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {settings.ctaShopUrl ? (

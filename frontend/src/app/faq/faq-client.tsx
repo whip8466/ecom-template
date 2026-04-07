@@ -127,15 +127,15 @@ export function FaqClient() {
                       setActiveSlug(cat.slug);
                       router.replace(`${pathname}?c=${encodeURIComponent(cat.slug)}`, { scroll: false });
                     }}
-                    className={`flex w-full items-center gap-3 rounded-md border px-3 py-3 text-left text-sm font-medium transition-premium ${
+                    className={`flex w-full items-center gap-3 rounded-[var(--radius)] border px-3 py-3 text-left text-sm font-medium transition-premium ${
                       isActive
-                        ? 'border-[var(--accent)] bg-white text-[var(--navy)] shadow-[var(--shadow-sm)]'
-                        : 'border-[#e5ecf6] bg-white text-[#475467] hover:border-[#d7e4f6] hover:bg-[#f8fafc]'
+                        ? 'border-[var(--accent)] bg-[var(--card-bg)] text-[var(--navy)] shadow-[var(--shadow-sm)]'
+                        : 'border-[var(--border)] bg-[var(--card-bg)] text-[#475467] hover:border-[var(--border)] hover:bg-[var(--cream)]'
                     }`}
                   >
                     <span
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-white ${
-                        isActive ? 'border-[#d7e4f6] text-[var(--accent)]' : 'border-[#e5ecf6] text-[#7c8ea6]'
+                        isActive ? 'border-[var(--border)] text-[var(--accent)]' : 'border-[var(--border)] text-[#7c8ea6]'
                       }`}
                     >
                       <FaqCategoryIcon iconKey={cat.iconKey} className="h-4 w-4" />
@@ -153,7 +153,7 @@ export function FaqClient() {
             active.items.map((item) => (
               <article
                 key={item.id}
-                className="rounded-md border border-[#e5ecf6] bg-white p-5 shadow-[var(--shadow-sm)] sm:p-6"
+                className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-5 shadow-[var(--shadow-sm)] sm:p-6"
               >
                 <h2 className="font-display text-lg font-semibold text-[#0f1f40] sm:text-xl">
                   {item.question}

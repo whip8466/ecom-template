@@ -223,7 +223,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
               type="button"
               onClick={() => setActiveImageIndex(index)}
               className={`overflow-hidden rounded border ${
-                index === activeImageIndex ? 'border-[var(--sf-btn-primary-bg)]' : 'border-[#dbe5f3]'
+                index === activeImageIndex ? 'border-[var(--sf-btn-primary-bg)]' : 'border-[var(--border)]'
               }`}
             >
               <div
@@ -234,9 +234,9 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
           ))}
         </div>
 
-        <div className="order-1 rounded-md bg-white lg:order-2">
+        <div className="order-1 rounded-[var(--radius)] bg-[var(--card-bg)] lg:order-2">
           <div
-            className="aspect-square rounded-md border border-[#e4ebf5] bg-[#f4f8ff] bg-cover bg-center"
+            className="aspect-square rounded-[var(--radius)] border border-[var(--border)] bg-[var(--cream)] bg-cover bg-center"
             style={{ backgroundImage: `url(${mainImage.imageUrl})` }}
           />
         </div>
@@ -275,7 +275,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
             )}
           </div>
           {dealOn && product.activeDeal && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-[#fecaca] bg-[#fff1f2] px-3 py-2 text-sm text-[#9f1239]">
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-[var(--radius)] border border-[#fecaca] bg-[#fff1f2] px-3 py-2 text-sm text-[#9f1239]">
               <span className="font-semibold">Deal ends in</span>
               <DealCountdown
                 endsAt={product.activeDeal.endsAt}
@@ -431,7 +431,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
               className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition ${
                 isCurrentProductInWishlist
                   ? 'border-[var(--sf-btn-primary-bg)] bg-[var(--sf-btn-primary-bg)]/10 text-[var(--sf-btn-primary-bg)]'
-                  : 'border-[#e6edf6] bg-white text-[#0f1f40] hover:border-[var(--sf-btn-primary-bg)] hover:text-[var(--sf-btn-primary-bg)]'
+                  : 'border-[var(--border)] bg-[var(--card-bg)] text-[#0f1f40] hover:border-[var(--sf-btn-primary-bg)] hover:text-[var(--sf-btn-primary-bg)]'
               }`}
             >
               {isCurrentProductInWishlist ? (
@@ -460,8 +460,8 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
         </div>
       </div>
 
-      <section id="product-reviews-panel" className="mt-12 scroll-mt-24 rounded-md border border-[#e4ebf5] bg-white p-6">
-        <div className="flex flex-wrap items-center justify-center gap-8 border-b border-[#ebf0f7] pb-3 text-sm">
+      <section id="product-reviews-panel" className="mt-12 scroll-mt-24 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-6">
+        <div className="flex flex-wrap items-center justify-center gap-8 border-b border-[var(--border)] pb-3 text-sm">
           <button
             type="button"
             onClick={() => setActiveTab('description')}
@@ -508,15 +508,15 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
           ))}
 
         {activeTab === 'additional' && (
-          <div className="mt-5 overflow-hidden rounded-md border border-[#e8eef7]">
+          <div className="mt-5 overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
             <table className="w-full text-sm">
               <tbody>
                 {additionalRows.map((row, idx) => (
                   <tr
                     key={`${row.label}-${idx}`}
-                    className={idx < additionalRows.length - 1 ? 'border-b border-[#edf2f8]' : ''}
+                    className={idx < additionalRows.length - 1 ? 'border-b border-[var(--border)]' : ''}
                   >
-                    <th className="w-1/3 bg-[#f8fbff] px-4 py-3 text-left font-medium text-[#344054]">
+                    <th className="w-1/3 bg-[var(--cream)] px-4 py-3 text-left font-medium text-[#344054]">
                       {row.label}
                     </th>
                     <td className="px-4 py-3 text-[#475467]">{row.value}</td>
@@ -547,15 +547,15 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
               const relVariant = pickInitialVariant(relVariants);
               const relAvailable = effectiveAvailableStockForLine(item, relVariant);
               return (
-                <article key={item.id} className="group relative rounded-md border border-[#e4ebf5] bg-white p-3">
-                  <div className="relative overflow-hidden rounded bg-[#f4f8ff]">
+                <article key={item.id} className="group relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3">
+                  <div className="relative overflow-hidden rounded-[var(--radius)] bg-[var(--cream)]">
                     <Link href={`/products/${item.slug}`} className="block">
                       <div
                         className="aspect-square bg-cover bg-center transition duration-300 group-hover:scale-105"
                         style={{ backgroundImage: `url(${item.images?.[0]?.imageUrl || ''})` }}
                       />
                     </Link>
-                    <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+                    <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] opacity-0 shadow-[var(--shadow)] transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
                       <button
                         type="button"
                         title={
@@ -585,7 +585,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                             availableStock: relAvailable,
                           });
                         }}
-                        className={`group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] transition ${
+                        className={`group/item relative grid h-11 w-11 place-items-center border-b border-[var(--border)] transition ${
                           cartItems.some((cartItem) => cartItem.productId === item.id)
                             ? 'bg-[var(--sf-btn-primary-bg)] text-white'
                             : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
@@ -609,7 +609,7 @@ export function ProductDetailClient({ product, relatedProducts, slug, reviewSumm
                         type="button"
                         title="Quick View"
                         onClick={() => router.push(`/products/${item.slug}`)}
-                        className="group/item relative grid h-11 w-11 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
+                        className="group/item relative grid h-11 w-11 place-items-center border-b border-[var(--border)] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path

@@ -65,7 +65,7 @@ function ResetPasswordPage() {
         </p>
       </div>
 
-      <section className="rounded-md border border-[#e5ecf6] bg-white p-6 sm:p-8">
+      <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-6 sm:p-8">
         <p className="text-sm text-[#64748b]">Enter your current password, then choose a new one.</p>
 
         <form onSubmit={onSubmit} className="mt-6 max-w-md space-y-4">

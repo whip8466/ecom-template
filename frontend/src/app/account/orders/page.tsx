@@ -71,7 +71,7 @@ function ShipToDropdown({ address }: { address: Address }) {
           </svg>
         </span>
       </summary>
-      <div className="absolute left-0 top-full z-20 mt-1 min-w-[260px] rounded-md border border-[#e5ecf6] bg-white p-3 text-xs leading-relaxed text-[#475467] shadow-md">
+      <div className="absolute left-0 top-full z-20 mt-1 min-w-[260px] rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3 text-xs leading-relaxed text-[#475467] shadow-[var(--shadow-lg)]">
         {lines.map((line, i) => (
           <p key={i}>{line}</p>
         ))}
@@ -86,7 +86,7 @@ function ProductThumb({ imageUrl }: { imageUrl: string | null | undefined }) {
 
   if (!resolved || broken) {
     return (
-      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-md border border-[#e5ecf6] bg-[#f4f8ff] text-[#94a3b8] sm:h-24 sm:w-24">
+      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--cream)] text-[#94a3b8] sm:h-24 sm:w-24">
         <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
           <path
             strokeLinecap="round"
@@ -100,7 +100,7 @@ function ProductThumb({ imageUrl }: { imageUrl: string | null | undefined }) {
   }
 
   return (
-    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-[#e5ecf6] bg-white sm:h-24 sm:w-24">
+    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] sm:h-24 sm:w-24">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={resolved}
@@ -130,7 +130,7 @@ function OrderLineItem({
   return (
     <div
       className={`flex flex-col gap-4 sm:flex-row sm:items-start ${
-        showDivider ? 'mt-6 border-t border-[#e5ecf6] pt-6' : ''
+        showDivider ? 'mt-6 border-t border-[var(--border)] pt-6' : ''
       }`}
     >
       <ProductThumb imageUrl={item.productImageUrl} />
@@ -161,8 +161,8 @@ function OrderCard({ order }: { order: Order }) {
   const detailHref = `/account/orders/${order.id}`;
 
   return (
-    <article className="overflow-hidden rounded-md border border-[#e5ecf6] bg-white">
-      <div className="border-b border-[#e5ecf6] bg-[#f8fafc] px-5 py-4 sm:px-6">
+    <article className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)]">
+      <div className="border-b border-[var(--border)] bg-[var(--cream)] px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex flex-wrap gap-x-10 gap-y-4">
             <div>
@@ -195,7 +195,7 @@ function OrderCard({ order }: { order: Order }) {
       </div>
 
       <div className="px-5 py-6 sm:px-6">
-        <div className="flex flex-col gap-4 border-b border-[#edf2f8] pb-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4 border-b border-[var(--border)] pb-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-lg font-semibold text-[#0f1f40]">{orderStatusHeadline(order.status)}</p>
             <p className="mt-1 text-sm leading-relaxed text-[#64748b]">
@@ -258,7 +258,7 @@ function MyOrdersPage() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {orders.length === 0 ? (
-        <div className="rounded-md border border-dashed border-[#dce6f4] bg-white px-6 py-14 text-center">
+        <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--card-bg)] px-6 py-14 text-center">
           <p className="text-sm text-[#64748b]">You haven&apos;t placed any orders yet.</p>
           <Link href="/shop" className="sf-btn-primary mt-5 inline-flex px-6 py-2.5 text-sm no-underline">
             Continue shopping

@@ -142,7 +142,7 @@ function EditorToolbar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1 border-b border-[#e3e6ed] bg-[#f8fafc] px-2 py-1.5">
+    <div className="flex flex-wrap items-center gap-1 border-b border-[#e3e6ed] bg-[var(--cream)] px-2 py-1.5">
       <ToolbarButton
         title="Bold"
         disabled={disabled}

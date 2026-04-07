@@ -94,7 +94,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
   };
 
   return (
-    <article className="group relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3 transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="group relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow)]">
       <div className="relative overflow-hidden rounded-[var(--radius)] bg-[var(--cream)]">
         <Link href={`/products/${product.slug}`} className="block">
           <div
@@ -114,7 +114,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
             </span>
           )}
         </Link>
-        <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+        <div className="absolute bottom-2 right-2 z-20 flex translate-x-2 flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] opacity-0 shadow-[var(--shadow)] transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
           <button
             type="button"
             title={inCart ? 'View Cart' : 'Add To Cart'}
@@ -135,7 +135,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
                 availableStock: cap,
               });
             }}
-            className={`group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] transition ${inCart ? 'bg-[var(--sf-btn-primary-bg)] text-white' : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
+            className={`group/item relative grid h-12 w-12 place-items-center border-b border-[var(--border)] transition ${inCart ? 'bg-[var(--sf-btn-primary-bg)] text-white' : 'text-[#0f1f40] hover:bg-[var(--sf-btn-primary-bg)] hover:text-white'
               }`}
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@ function ProductCard({ product }: { product: ProductCardData }) {
             type="button"
             title="Quick View"
             onClick={() => router.push(`/products/${product.slug}`)}
-            className="group/item relative grid h-12 w-12 place-items-center border-b border-[#edf2f8] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
+            className="group/item relative grid h-12 w-12 place-items-center border-b border-[var(--border)] text-[#0f1f40] transition hover:bg-[var(--sf-btn-primary-bg)] hover:text-white"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -371,7 +371,7 @@ export function HomePageClient({
     <div className="bg-white">
       <HomeBanner />
 
-      <section className="border-b border-[#e8eef5] bg-white py-8 sm:py-10">
+      <section className="border-b border-[var(--border)] bg-[var(--card-bg)] py-8 sm:py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {categoriesLoading ? (
             <p className="py-4 text-center text-sm text-[#64748b]">Loading categories…</p>
@@ -481,7 +481,7 @@ export function HomePageClient({
           {blogPreviewLoading ? (
             <p className="py-8 text-center text-sm text-[#64748b]">Loading articles…</p>
           ) : blogPreview.length === 0 ? (
-            <p className="rounded-md border border-dashed border-[#cdd9eb] bg-[#f8fafc] py-10 text-center text-sm text-[#64748b]">
+            <p className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--cream)] py-10 text-center text-sm text-[#64748b]">
               No articles yet. Check back soon.
             </p>
           ) : (

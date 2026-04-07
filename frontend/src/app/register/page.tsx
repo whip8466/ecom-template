@@ -59,7 +59,7 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <div className="relative mx-auto max-w-md rounded-md border border-[#e5ecf6] bg-white p-8 shadow-[0_12px_30px_rgba(16,24,40,0.08)]">
+      <div className="relative mx-auto max-w-md rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-8 shadow-[var(--shadow)]">
         <h2 className="text-4xl font-semibold text-[#0f1f40]">Sign Up Dhidi.</h2>
         <p className="mt-2 text-sm text-[#667085]">
           Already have an account?{' '}

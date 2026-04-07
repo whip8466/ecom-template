@@ -35,7 +35,7 @@ export function ProductColumnsStrip() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-6 md:grid-cols-3">
           {sections.map((section) => (
-            <article key={section.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5">
+            <article key={section.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card-bg)] p-5">
               <h3 className="font-display text-xl font-semibold text-[var(--navy)]">{section.title}</h3>
               <div className="mt-4 space-y-3">
                 {section.items.map((item) => (

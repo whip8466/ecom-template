@@ -249,14 +249,14 @@ function StorefrontHeader({
                 </button>
 
                 {isSearchCategoryOpen && (
-                  <div className="absolute left-0 top-full z-70 mt-1 max-h-64 w-full overflow-y-auto rounded-sm border border-[#e6edf6] bg-white shadow-[0_10px_20px_rgba(16,24,40,0.12)]">
+                  <div className="absolute left-0 top-full z-70 mt-1 max-h-64 w-full overflow-y-auto rounded-sm border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-lg)]">
                     <button
                       type="button"
                       onClick={() => {
                         setSearchCategorySlug(null);
                         setIsSearchCategoryOpen(false);
                       }}
-                      className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-[#111827] transition hover:bg-[#f8fbff] hover:text-[var(--sf-btn-primary-bg)]"
+                      className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-[#111827] transition hover:bg-[var(--cream)] hover:text-[var(--sf-btn-primary-bg)]"
                     >
                       All Categories
                     </button>
@@ -268,7 +268,7 @@ function StorefrontHeader({
                           setSearchCategorySlug(c.slug);
                           setIsSearchCategoryOpen(false);
                         }}
-                        className="block w-full px-4 py-2.5 text-left text-sm text-[#344054] transition hover:bg-[#f8fbff] hover:text-[var(--sf-btn-primary-bg)]"
+                        className="block w-full px-4 py-2.5 text-left text-sm text-[#344054] transition hover:bg-[var(--cream)] hover:text-[var(--sf-btn-primary-bg)]"
                       >
                         {c.name}
                       </button>
@@ -351,7 +351,7 @@ function StorefrontHeader({
                 {userMenuOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 top-full z-[100] mt-1 min-w-[200px] rounded-none border border-[var(--border)] bg-[var(--card-bg)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
+                    className="absolute right-0 top-full z-[100] mt-1 min-w-[200px] rounded-none border border-[var(--border)] bg-[var(--card-bg)] py-1 shadow-[var(--shadow-lg)]"
                   >
                     <Link
                       href="/account/profile"
@@ -399,7 +399,7 @@ function StorefrontHeader({
         {/* Secondary nav strip with hover submenus; megaNavRef includes dropdown panels for outside-click close */}
         <div
           ref={megaNavRef}
-          className="relative border-t border-[var(--border)] bg-white"
+          className="relative border-t border-[var(--border)] bg-[var(--card-bg)]"
           onMouseLeave={() => setActiveMenu('none')}
         >
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-0 sm:px-6 lg:px-8">
@@ -443,7 +443,7 @@ function StorefrontHeader({
                       </svg>
                     </button>
                     {activeMenu === 'blog' && (
-                      <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-none border border-[#e6edf6] bg-white p-4 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                      <div className="absolute left-0 top-full z-[80] min-w-[220px] rounded-none border border-[var(--border)] bg-[var(--card-bg)] p-4 shadow-[var(--shadow-lg)]">
                         <ul className="space-y-3 text-sm text-[#475467]">
                           <li>
                             <Link href="/blog" className="hover:text-[var(--sf-btn-primary-bg)]" onClick={() => setActiveMenu('none')}>
@@ -508,7 +508,7 @@ function StorefrontHeader({
           {activeMenu === 'categories' && (
             <div className="absolute left-0 right-0 top-full z-[70] pointer-events-none">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="relative w-[300px] rounded-b-md bg-white shadow-[0_12px_24px_rgba(16,24,40,0.12)] pointer-events-auto">
+                <div className="relative w-[300px] rounded-b-[var(--radius)] bg-[var(--card-bg)] shadow-[var(--shadow-lg)] pointer-events-auto">
                   {rootCategories.length === 0 ? (
                     <div className="px-4 py-6 text-sm text-[#667085]">
                       {categories.length === 0 ? 'Loading categories…' : 'No top-level categories.'}
@@ -517,8 +517,8 @@ function StorefrontHeader({
                     rootCategories.map((item) => {
                       const hasChildren = categoryIdsWithChildren.has(item.id);
                       const isActive = activeCategorySlug === item.slug;
-                      const rowClass = `flex h-[74px] w-full items-center gap-3 border-b border-[#edf2f7] px-4 text-left transition ${
-                        isActive ? 'bg-[#f8fbff] text-[var(--sf-btn-primary-bg)]' : 'text-[#344054] hover:bg-[#f8fbff]'
+                      const rowClass = `flex h-[74px] w-full items-center gap-3 border-b border-[var(--border)] px-4 text-left transition ${
+                        isActive ? 'bg-[var(--cream)] text-[var(--sf-btn-primary-bg)]' : 'text-[#344054] hover:bg-[var(--cream)]'
                       }`;
                       const rowInner = (
                         <>
@@ -572,7 +572,7 @@ function StorefrontHeader({
 
                   {activeCategoryItem && subcategoriesForActive.length > 0 ? (
                     <div
-                      className="pointer-events-auto absolute left-full min-w-[200px] max-w-sm max-h-[min(320px,70vh)] overflow-y-auto bg-white px-3 py-2 shadow-[0_12px_24px_rgba(16,24,40,0.12)]"
+                      className="pointer-events-auto absolute left-full min-w-[200px] max-w-sm max-h-[min(320px,70vh)] overflow-y-auto bg-[var(--card-bg)] px-3 py-2 shadow-[var(--shadow-lg)]"
                       style={{ top: `${submenuTop}px` }}
                     >
                       <ul className="space-y-0.5">
@@ -580,7 +580,7 @@ function StorefrontHeader({
                           <li key={sub.id}>
                             <Link
                               href={`/shop?category=${encodeURIComponent(sub.slug)}`}
-                              className="block rounded-sm px-1 py-1.5 text-sm font-medium text-[#344054] hover:bg-[#f8fbff] hover:text-[var(--sf-btn-primary-bg)]"
+                              className="block rounded-sm px-1 py-1.5 text-sm font-medium text-[#344054] hover:bg-[var(--cream)] hover:text-[var(--sf-btn-primary-bg)]"
                             >
                               {sub.name}
                             </Link>
@@ -597,7 +597,7 @@ function StorefrontHeader({
           {activeMenu === 'shop' && (
             <div className="absolute left-0 right-0 top-full z-[70] pointer-events-none">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="pointer-events-auto grid grid-cols-5 gap-4 bg-white px-6 py-5 shadow-[0_12px_24px_rgba(16,24,40,0.12)]">
+                <div className="pointer-events-auto grid grid-cols-5 gap-4 bg-[var(--card-bg)] px-6 py-5 shadow-[var(--shadow-lg)]">
                   <div>
                     <h4 className="mb-3 text-lg font-semibold text-[#101828]">Categories</h4>
                     <ul className="max-h-52 space-y-2 overflow-y-auto text-sm text-[#475467]">

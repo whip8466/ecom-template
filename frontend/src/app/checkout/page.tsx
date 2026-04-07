@@ -178,7 +178,7 @@ function CheckoutPage() {
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-md border border-[#e5ecf6] bg-white p-6">
+        <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-6">
           <h2 className="text-3xl font-semibold text-[#0f1f40]">Billing Details</h2>
 
           <div className="mt-5 space-y-3">
@@ -188,7 +188,7 @@ function CheckoutPage() {
                 className={`flex cursor-pointer gap-3 rounded border p-4 text-sm transition ${
                   selectedAddressId === address.id
                     ? 'border-[var(--sf-input-focus)] bg-[#f0f9ff]'
-                    : 'border-[#dce6f4] hover:border-[#b8d4f0]'
+                    : 'border-[var(--border)] hover:border-[#b8d4f0]'
                 }`}
               >
                 <input
@@ -240,7 +240,7 @@ function CheckoutPage() {
           )}
 
           {addingAddress && (
-            <div className="mt-6 border-t border-[#edf2f8] pt-6">
+            <div className="mt-6 border-t border-[var(--border)] pt-6">
               <p className="text-sm font-medium text-[#0f1f40]">New address</p>
               <div className="mt-4">
                 <AddressFormFields
@@ -272,10 +272,10 @@ function CheckoutPage() {
           )}
         </section>
 
-        <aside className="h-fit rounded-md border border-[#e5ecf6] bg-white p-5">
+        <aside className="h-fit rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-5">
           <h2 className="text-3xl font-semibold text-[#0f1f40]">Your Order</h2>
 
-          <div className="mt-4 border-b border-[#edf2f8] pb-3 text-sm">
+          <div className="mt-4 border-b border-[var(--border)] pb-3 text-sm">
             <div className="flex items-center justify-between font-semibold text-[#111827]">
               <span>Product</span>
               <span>Total</span>
@@ -296,7 +296,7 @@ function CheckoutPage() {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between border-t border-[#edf2f8] pt-4 text-xl font-semibold text-[#0f1f40]">
+          <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-4 text-xl font-semibold text-[#0f1f40]">
             <span>Total</span>
             <span className="text-[var(--sf-btn-primary-bg)]">{formatMoney(subtotal)}</span>
           </div>

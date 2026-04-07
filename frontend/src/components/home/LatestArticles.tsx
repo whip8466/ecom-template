@@ -37,7 +37,7 @@ export function LatestArticles() {
           {posts.map((post) => (
             <article
               key={post.title}
-              className="group overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)] transition-premium hover:shadow-[var(--shadow)]"
+              className="group overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)] transition-premium hover:shadow-[var(--shadow)]"
             >
               <div className="aspect-[16/10] overflow-hidden bg-[var(--cream)]">
                 <div

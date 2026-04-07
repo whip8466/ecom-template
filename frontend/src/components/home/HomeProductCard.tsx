@@ -91,7 +91,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
           </button>
         </div>
 
-        <div className="absolute bottom-2 right-2 flex translate-x-2 flex-col overflow-hidden rounded border border-[#e6edf6] bg-white opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+        <div className="absolute bottom-2 right-2 flex translate-x-2 flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] opacity-0 shadow-[var(--shadow)] transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
           <button
             type="button"
             aria-label={inCart ? 'View cart' : 'Add to cart'}
@@ -112,7 +112,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
                 availableStock: cardAvailable,
               });
             }}
-            className={`relative h-11 w-11 border-b border-[#edf2f8] transition-premium ${
+            className={`relative h-11 w-11 border-b border-[var(--border)] transition-premium ${
               inCart ? 'bg-[var(--accent)] text-white' : 'bg-white text-[var(--navy)] hover:bg-[var(--accent)] hover:text-white'
             }`}
           >
@@ -127,7 +127,7 @@ export function HomeProductCard({ product, badge, discountPercent }: HomeProduct
             type="button"
             aria-label="Quick view"
             onClick={() => router.push(`/products/${product.slug}`)}
-            className="relative h-11 w-11 border-b border-[#edf2f8] bg-white text-[var(--navy)] transition-premium hover:bg-[var(--accent)] hover:text-white"
+            className="relative h-11 w-11 border-b border-[var(--border)] bg-[var(--card-bg)] text-[var(--navy)] transition-premium hover:bg-[var(--accent)] hover:text-white"
           >
             <svg className="mx-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

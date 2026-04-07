@@ -67,7 +67,7 @@ export function BlogPostClient() {
       ) : null}
       {post.coverImageUrl ? (
         <div
-          className="mt-6 aspect-[2/1] w-full rounded-md bg-[#f3f7ff] bg-cover bg-center"
+          className="mt-6 aspect-[2/1] w-full rounded-[var(--radius)] bg-[var(--cream)] bg-cover bg-center"
           style={{ backgroundImage: `url(${post.coverImageUrl})` }}
           role="img"
           aria-hidden

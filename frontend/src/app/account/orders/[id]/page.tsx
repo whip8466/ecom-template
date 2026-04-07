@@ -63,7 +63,7 @@ function ItemThumb({ item }: { item: OrderItem }) {
 
   if (!src || broken) {
     return (
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded border border-[#e5ecf6] bg-[#f4f8ff] text-[#94a3b8]">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded border border-[var(--border)] bg-[var(--cream)] text-[#94a3b8]">
         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
@@ -72,7 +72,7 @@ function ItemThumb({ item }: { item: OrderItem }) {
   }
 
   return (
-    <Link href={href} className="relative block h-12 w-12 shrink-0 overflow-hidden rounded border border-[#e5ecf6] bg-white">
+    <Link href={href} className="relative block h-12 w-12 shrink-0 overflow-hidden rounded border border-[var(--border)] bg-[var(--card-bg)]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" className="h-full w-full object-contain p-0.5" onError={() => setBroken(true)} loading="lazy" />
     </Link>
@@ -128,7 +128,7 @@ function MyOrderDetailsPage() {
         <button
           type="button"
           onClick={() => window.print()}
-          className="inline-flex items-center justify-center gap-2 self-start rounded-md border border-[#d7e4f6] bg-white px-4 py-2.5 text-sm font-semibold text-[#0f1f40] shadow-sm transition hover:bg-[#f8fafc] print:hidden"
+          className="inline-flex items-center justify-center gap-2 self-start rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] px-4 py-2.5 text-sm font-semibold text-[#0f1f40] shadow-sm transition hover:bg-[var(--cream)] print:hidden"
         >
           <svg className="h-4 w-4 text-[var(--sf-btn-primary-bg)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -141,11 +141,11 @@ function MyOrderDetailsPage() {
         {/* Main column */}
         <div className="space-y-6 lg:col-span-2">
           {/* Items table */}
-          <section className="overflow-hidden rounded-md border border-[#e5ecf6] bg-white">
+          <section className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)]">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#e5ecf6] bg-[#f8fafc] text-[11px] font-semibold uppercase tracking-wide text-[#64748b]">
+                  <tr className="border-b border-[var(--border)] bg-[var(--cream)] text-[11px] font-semibold uppercase tracking-wide text-[#64748b]">
                     <th className="px-4 py-3">Products</th>
                     <th className="px-3 py-3">Color</th>
                     <th className="px-3 py-3">Size</th>
@@ -159,7 +159,7 @@ function MyOrderDetailsPage() {
                     const { color, size } = splitColorSize(item.colorName);
                     const href = item.productSlug ? `/products/${item.productSlug}` : '/shop';
                     return (
-                      <tr key={item.id} className="border-b border-[#edf2f8] last:border-0">
+                      <tr key={item.id} className="border-b border-[var(--border)] last:border-0">
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-3">
                             <ItemThumb item={item} />
@@ -179,14 +179,14 @@ function MyOrderDetailsPage() {
                 </tbody>
               </table>
             </div>
-            <div className="flex justify-end border-t border-[#e5ecf6] bg-[#f8fafc] px-4 py-3 text-sm">
+            <div className="flex justify-end border-t border-[var(--border)] bg-[var(--cream)] px-4 py-3 text-sm">
               <span className="text-[#64748b]">Items subtotal</span>
               <span className="ml-4 font-semibold text-[#0f1f40]">{formatMoney(itemsSubtotalCents)}</span>
             </div>
           </section>
 
           {/* Billing / Shipping / Other */}
-          <section className="rounded-md border border-[#e5ecf6] bg-white p-5 sm:p-6">
+          <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-5 sm:p-6">
             <div className="grid gap-8 md:grid-cols-3">
               <div>
                 <h3 className="text-sm font-semibold text-[#0f1f40]">Billing details</h3>
@@ -279,7 +279,7 @@ function MyOrderDetailsPage() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <section className="rounded-md border border-[#e5ecf6] bg-white p-5 sm:p-6">
+          <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-5 sm:p-6">
             <h3 className="text-base font-semibold text-[#0f1f40]">Summary</h3>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between gap-4 text-[#475467]">
@@ -298,14 +298,14 @@ function MyOrderDetailsPage() {
                 <dt>Shipping</dt>
                 <dd className="text-[#0f1f40]">{shippingCents === 0 ? 'Free' : formatMoney(shippingCents)}</dd>
               </div>
-              <div className="flex justify-between gap-4 border-t border-[#e5ecf6] pt-4 text-base font-semibold text-[#0f1f40]">
+              <div className="flex justify-between gap-4 border-t border-[var(--border)] pt-4 text-base font-semibold text-[#0f1f40]">
                 <dt>Total</dt>
                 <dd className="text-[var(--sf-btn-primary-bg)]">{formatMoney(order.totalAmountCents)}</dd>
               </div>
             </dl>
           </section>
 
-          <section className="rounded-md border border-[#e5ecf6] bg-white p-5 sm:p-6">
+          <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-5 sm:p-6">
             <h3 className="text-base font-semibold text-[#0f1f40]">Order status</h3>
             <dl className="mt-4 space-y-4 text-sm">
               <div>

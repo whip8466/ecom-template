@@ -18,7 +18,7 @@ function WishlistPage() {
       </p>
 
       {items.length === 0 ? (
-        <div className="mt-8 rounded-md border border-dashed border-[#d5e1f1] bg-white p-10 text-center">
+        <div className="mt-8 rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--card-bg)] p-10 text-center">
           <p className="text-base text-[#475467]">Your wishlist is empty.</p>
           <Link
             href="/shop"
@@ -30,8 +30,8 @@ function WishlistPage() {
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((item) => (
-            <article key={item.productId} className="rounded-md border border-[#e5ecf6] bg-white p-3">
-              <Link href={`/products/${item.slug}`} className="block overflow-hidden rounded bg-[#f4f8ff]">
+            <article key={item.productId} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-3">
+              <Link href={`/products/${item.slug}`} className="block overflow-hidden rounded-[var(--radius)] bg-[var(--cream)]">
                 <div
                   className="aspect-square bg-cover bg-center"
                   style={{ backgroundImage: `url(${item.imageUrl || ''})` }}

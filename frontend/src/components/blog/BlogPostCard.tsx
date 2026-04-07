@@ -31,7 +31,7 @@ export function BlogPostCard({
   const dateLabel = formatBlogDate(publishedAt);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-md border border-[#e4ebf4] bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <article className="group flex h-full flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] shadow-[var(--shadow-sm)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow)]">
       <Link href={`/blog/${slug}`} className="block shrink-0 overflow-hidden">
         <div
           className="aspect-16/10 bg-cover bg-center transition duration-300 group-hover:scale-105"

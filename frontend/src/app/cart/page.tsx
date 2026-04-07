@@ -23,7 +23,7 @@ export default function CartPage() {
       </p>
 
       {items.length === 0 ? (
-        <div className="mt-10 rounded-md border border-dashed border-[#d5e1f1] bg-white p-10 text-center">
+        <div className="mt-10 rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--card-bg)] p-10 text-center">
           <p className="text-base text-[#475467]">Your cart is currently empty.</p>
           <Link href="/shop" className="sf-btn-primary mt-4 inline-flex px-5 py-2.5 text-sm">
             Continue Shopping
@@ -32,8 +32,8 @@ export default function CartPage() {
       ) : (
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <section>
-            <div className="overflow-hidden rounded-md border border-[#e5ecf6] bg-white">
-              <div className="grid grid-cols-[minmax(0,1fr)_120px_160px_120px] bg-[#f7f8fa] px-5 py-3 text-sm font-semibold text-[#111827]">
+            <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)]">
+              <div className="grid grid-cols-[minmax(0,1fr)_120px_160px_120px] bg-[var(--cream)] px-5 py-3 text-sm font-semibold text-[#111827]">
                 <p>Product</p>
                 <p>Price</p>
                 <p>Quantity</p>
@@ -43,11 +43,11 @@ export default function CartPage() {
               {items.map((item, index) => (
                 <div
                   key={`${item.productId}-${item.variantId ?? item.colorName ?? 'default'}-${index}`}
-                  className="grid grid-cols-[minmax(0,1fr)_120px_160px_120px] items-center gap-2 border-t border-[#edf2f8] px-5 py-5"
+                  className="grid grid-cols-[minmax(0,1fr)_120px_160px_120px] items-center gap-2 border-t border-[var(--border)] px-5 py-5"
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className="h-16 w-16 rounded bg-[#f4f8ff] bg-cover bg-center"
+                      className="h-16 w-16 rounded bg-[var(--cream)] bg-cover bg-center"
                       style={{ backgroundImage: `url(${item.imageUrl || ''})` }}
                     />
                     <div>
@@ -69,7 +69,7 @@ export default function CartPage() {
                   <p className="text-sm font-medium text-[#0f1f40]">{formatMoney(item.priceCents)}</p>
 
                   <div className="flex flex-col gap-1">
-                    <div className="flex h-9 w-fit items-center rounded-full border border-[#d7e4f6]">
+                    <div className="flex h-9 w-fit items-center rounded-full border border-[var(--border)]">
                       <button
                         type="button"
                         onClick={() => updateQuantity(index, item.quantity - 1)}
@@ -108,7 +108,7 @@ export default function CartPage() {
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-end justify-between gap-3 rounded-md border border-[#e5ecf6] bg-white p-4">
+            <div className="mt-4 flex flex-wrap items-end justify-between gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-4">
               <div className="w-full max-w-md">
                 <label htmlFor="coupon" className="sf-label mb-2">
                   Coupon Code:
@@ -136,8 +136,8 @@ export default function CartPage() {
             </div>
           </section>
 
-          <aside className="h-fit rounded-md border border-[#e5ecf6] bg-white p-5 shadow-[0_10px_30px_rgba(16,24,40,0.08)]">
-            <div className="flex items-center justify-between border-b border-[#edf2f8] pb-3">
+          <aside className="h-fit rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card-bg)] p-5 shadow-[var(--shadow)]">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
               <span className="text-lg font-semibold text-[#0f1f40]">Subtotal</span>
               <span className="text-lg font-semibold text-[#0f1f40]">{formatMoney(subTotal)}</span>
             </div>
@@ -180,7 +180,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-between border-t border-[#edf2f8] pt-4">
+            <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4">
               <span className="text-xl font-semibold text-[#0f1f40]">Total</span>
               <span className="text-xl font-semibold text-[#0f1f40]">{formatMoney(total)}</span>
             </div>
