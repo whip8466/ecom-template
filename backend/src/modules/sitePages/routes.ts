@@ -1,13 +1,13 @@
 import type { SitePage } from '@prisma/client';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { UserRole } from '../../constants/enums';
+import { isStaffFromAuth } from '../../utils/staff';
 
 const ALLOWED_SLUGS = ['privacy-policy', 'terms-of-service'] as const;
 
 function isStaff(authUser: { role: string } | undefined): boolean {
   if (!authUser) return false;
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 function mapPage(row: SitePage | null) {

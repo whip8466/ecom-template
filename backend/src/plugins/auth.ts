@@ -16,6 +16,7 @@ module.exports = fp(async function authPlugin(fastify) {
         userId: Number(payload.userId),
         role: payload.role,
         email: payload.email,
+        brandId: payload.brandId != null && payload.brandId !== '' ? Number(payload.brandId) : null,
       };
     } catch (error) {
       return reply.code(401).send({ message: 'Invalid token' });

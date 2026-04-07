@@ -2,9 +2,10 @@ const crypto = require('crypto');
 const { z } = require('zod');
 const { PaymentStatus, UserRole, OrderStatus } = require('../../constants/enums');
 const { hashPassword } = require('../../utils/password');
+const { isStaffFromAuth } = require('../../utils/staff');
 
 function isStaff(authUser: { role: string }) {
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 function displayName(user: {

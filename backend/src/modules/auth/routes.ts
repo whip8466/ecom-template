@@ -35,7 +35,17 @@ function userDto(user) {
     email: user.email,
     phone: user.phone,
     role: user.role,
+    brandId: user.brandId ?? null,
     isActive: user.isActive,
+  };
+}
+
+function tokenPayload(user) {
+  return {
+    userId: user.id,
+    role: user.role,
+    email: user.email,
+    brandId: user.brandId ?? null,
   };
 }
 
@@ -61,11 +71,7 @@ async function authRoutes(fastify) {
       },
     });
 
-    const token = await signAccessToken({
-      userId: user.id,
-      role: user.role,
-      email: user.email,
-    });
+    const token = await signAccessToken(tokenPayload(user));
 
     return reply.code(201).send({ token, user: userDto(user) });
   });
@@ -84,11 +90,7 @@ async function authRoutes(fastify) {
       return reply.code(401).send({ message: 'Invalid credentials' });
     }
 
-    const token = await signAccessToken({
-      userId: user.id,
-      role: user.role,
-      email: user.email,
-    });
+    const token = await signAccessToken(tokenPayload(user));
 
     return { token, user: userDto(user) };
   });

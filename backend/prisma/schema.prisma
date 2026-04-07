@@ -7,6 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Brand {
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(200)
+  slug            String           @unique @db.VarChar(64)
+  isBlocked       Boolean          @default(false) @map("is_blocked")
+  users           User[]
+  contactSettings ContactSettings?
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("brands")
+}
+
 model User {
   id            Int            @id @default(autoincrement())
   firstName     String         @map("first_name") @db.VarChar(120)
@@ -16,6 +29,8 @@ model User {
   phone         String?
   passwordHash  String         @map("password_hash")
   role          String         @default("CUSTOMER") @db.VarChar(30)
+  brandId       Int?           @map("brand_id")
+  brand         Brand?         @relation(fields: [brandId], references: [id], onDelete: SetNull)
   isActive      Boolean        @default(true) @map("is_active")
   addresses     Address[]
   orders         Order[]
@@ -25,6 +40,7 @@ model User {
   createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  @@index([brandId])
   @@map("users")
 }
 
@@ -215,7 +231,7 @@ model DealOfDayProduct {
   sortOrder       Int       @map("sort_order")
   productId       Int       @unique @map("product_id")
   product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  dealPriceCents  Int       @map("deal_price_cents")
+  dealPriceCents  Int       @default(0) @map("deal_price_cents")
   durationMinutes Int       @default(60) @map("duration_minutes")
   activatedAt     DateTime? @map("activated_at") @db.Timestamptz(6)
   endsAt          DateTime? @map("ends_at") @db.Timestamptz(6)
@@ -299,9 +315,11 @@ model NewsletterSubscription {
   @@map("newsletter_subscriptions")
 }
 
-/** Singleton row (id = 1): storefront contact page + footer copy. */
+/** One row per brand: storefront contact page + footer + theme tokens. */
 model ContactSettings {
-  id             Int      @id @default(1)
+  id             Int      @id @default(autoincrement())
+  brandId        Int      @unique @map("brand_id")
+  brand          Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   headline       String   @default("Keep In Touch with Us") @db.VarChar(200)
   brandName      String   @default("Dhidi") @map("brand_name") @db.VarChar(120)
   /// Public URL path served by the API, e.g. `/uploads/brand/{uuid}.png`

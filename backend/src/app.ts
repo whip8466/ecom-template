@@ -22,6 +22,7 @@ const reviewsRoutes = require('./modules/reviews/routes');
 const sitePagesRoutes = require('./modules/sitePages/routes');
 const faqRoutes = require('./modules/faq/routes');
 const socialFeedRoutes = require('./modules/socialFeed/routes');
+const superAdminBrandRoutes = require('./modules/superAdminBrands/routes');
 const { env } = require('./config/env');
 
 async function buildApp(prisma) {
@@ -91,6 +92,7 @@ async function buildApp(prisma) {
     await api.register(sitePagesRoutes);
     await api.register(faqRoutes);
     await api.register(socialFeedRoutes);
+    await api.register(superAdminBrandRoutes, { prefix: '/super-admin' });
   }, { prefix: '/api' });
 
   return fastify;

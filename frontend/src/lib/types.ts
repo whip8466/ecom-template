@@ -1,4 +1,4 @@
-export type UserRole = "CUSTOMER" | "MANAGER" | "ADMIN";
+export type UserRole = "CUSTOMER" | "MANAGER" | "ADMIN" | "SUPER_ADMIN";
 
 export type User = {
   id: number;
@@ -8,6 +8,8 @@ export type User = {
   email: string;
   phone?: string;
   role: UserRole;
+  /** Set for brand-scoped staff; super admin has no brand. */
+  brandId?: number | null;
   isActive: boolean;
 };
 

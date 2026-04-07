@@ -4,7 +4,11 @@ import path from 'path';
 import type { ContactSettings } from '@prisma/client';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { UserRole } from '../../constants/enums';
+
+const { verifyAccessToken } = require('../../utils/jwt');
+import { isStaffFromAuth } from '../../utils/staff';
+import type { AuthUserLike } from '../../utils/staff';
+import { resolveStaffBrandId } from '../../utils/brand-scope';
 
 const BRAND_MIME_TO_EXT: Record<string, string> = {
   'image/png': '.png',
@@ -24,9 +28,9 @@ async function unlinkStoredBrandLogo(brandLogoUrl: string | null | undefined) {
   }
 }
 
-function isStaff(authUser: { role: string } | undefined): boolean {
+function isStaff(authUser: AuthUserLike | undefined): boolean {
   if (!authUser) return false;
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 function mapSettings(row: ContactSettings | null) {
@@ -135,12 +139,42 @@ const contactPostSchema = z.object({
 });
 
 async function contactRoutes(fastify: FastifyInstance): Promise<void> {
-  fastify.get('/contact-settings', async (_request, reply) => {
+  fastify.get('/contact-settings', async (request, reply) => {
     const prisma = fastify.prisma;
-    if (!prisma.contactSettings) {
+    if (!prisma.contactSettings || !prisma.brand) {
       return reply.code(503).send({ message: 'Database client is out of date. Run prisma generate and restart the API.' });
     }
-    const row = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+
+    const authHeader = request.headers.authorization || '';
+    const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (bearer) {
+      try {
+        const payload = await verifyAccessToken(bearer);
+        const staffUser: AuthUserLike = {
+          role: String(payload.role ?? ''),
+          brandId:
+            payload.brandId != null && payload.brandId !== '' ? Number(payload.brandId) : null,
+        };
+        if (isStaffFromAuth(staffUser)) {
+          const targetBrandId = resolveStaffBrandId(staffUser, request.query as { brandId?: string });
+          const row = await prisma.contactSettings.findUnique({ where: { brandId: targetBrandId } });
+          if (!row) {
+            return reply.code(404).send({ message: 'Contact settings not found' });
+          }
+          return { data: mapSettings(row) };
+        }
+      } catch {
+        /* invalid token — try public resolution below */
+      }
+    }
+
+    const q = z.object({ brandSlug: z.string().optional() }).parse(request.query || {});
+    const slug = (q.brandSlug?.trim() || 'dhidi').toLowerCase();
+    const brand = await prisma.brand.findUnique({ where: { slug } });
+    if (!brand || brand.isBlocked) {
+      return reply.code(404).send({ message: 'Store not found' });
+    }
+    const row = await prisma.contactSettings.findUnique({ where: { brandId: brand.id } });
     if (!row) {
       return reply.code(404).send({ message: 'Contact settings not found' });
     }
@@ -164,10 +198,11 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
       } catch {
         return reply.code(400).send({ message: 'Invalid contact settings payload.' });
       }
+      const targetBrandId = resolveStaffBrandId(request.authUser, request.query as { brandId?: string });
       const row = await prisma.contactSettings.upsert({
-        where: { id: 1 },
+        where: { brandId: targetBrandId },
         create: {
-          id: 1,
+          brandId: targetBrandId,
           headline: body.headline,
           brandName: body.brandName.trim(),
           footerTagline: body.footerTagline,
@@ -225,12 +260,13 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
       } catch {
         return reply.code(400).send({ message: 'Invalid brand settings payload.' });
       }
-      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      const targetBrandId = resolveStaffBrandId(request.authUser, request.query as { brandId?: string });
+      const existing = await prisma.contactSettings.findUnique({ where: { brandId: targetBrandId } });
       if (!existing) {
         return reply.code(404).send({ message: 'Contact settings not found' });
       }
       const row = await prisma.contactSettings.update({
-        where: { id: 1 },
+        where: { brandId: targetBrandId },
         data: {
           brandName: body.brandName.trim(),
           footerTagline: body.footerTagline,
@@ -259,12 +295,13 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
       } catch {
         return reply.code(400).send({ message: 'Invalid theme settings payload.' });
       }
-      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      const targetBrandId = resolveStaffBrandId(request.authUser, request.query as { brandId?: string });
+      const existing = await prisma.contactSettings.findUnique({ where: { brandId: targetBrandId } });
       if (!existing) {
         return reply.code(404).send({ message: 'Contact settings not found' });
       }
       const row = await prisma.contactSettings.update({
-        where: { id: 1 },
+        where: { brandId: targetBrandId },
         data: { themeJson: body.themeJson },
       });
       return { data: mapSettings(row) };
@@ -282,7 +319,8 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
       if (!prisma.contactSettings) {
         return reply.code(503).send({ message: 'Database client is out of date.' });
       }
-      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      const targetBrandId = resolveStaffBrandId(request.authUser, request.query as { brandId?: string });
+      const existing = await prisma.contactSettings.findUnique({ where: { brandId: targetBrandId } });
       if (!existing) {
         return reply.code(404).send({ message: 'Contact settings not found' });
       }
@@ -311,7 +349,7 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
       await unlinkStoredBrandLogo(existing.brandLogoUrl);
 
       const row = await prisma.contactSettings.update({
-        where: { id: 1 },
+        where: { brandId: targetBrandId },
         data: { brandLogoUrl: publicPath },
       });
       return { data: mapSettings(row) };
@@ -329,13 +367,14 @@ async function contactRoutes(fastify: FastifyInstance): Promise<void> {
       if (!prisma.contactSettings) {
         return reply.code(503).send({ message: 'Database client is out of date.' });
       }
-      const existing = await prisma.contactSettings.findUnique({ where: { id: 1 } });
+      const targetBrandId = resolveStaffBrandId(request.authUser, request.query as { brandId?: string });
+      const existing = await prisma.contactSettings.findUnique({ where: { brandId: targetBrandId } });
       if (!existing) {
         return reply.code(404).send({ message: 'Contact settings not found' });
       }
       await unlinkStoredBrandLogo(existing.brandLogoUrl);
       const row = await prisma.contactSettings.update({
-        where: { id: 1 },
+        where: { brandId: targetBrandId },
         data: { brandLogoUrl: null },
       });
       return { data: mapSettings(row) };

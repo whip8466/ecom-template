@@ -1,5 +1,6 @@
 const { z } = require('zod');
-const { OrderStatus, PaymentStatus, UserRole } = require('../../constants/enums');
+const { OrderStatus, PaymentStatus } = require('../../constants/enums');
+const { isStaffFromAuth } = require('../../utils/staff');
 
 const checkoutSchema = z.object({
   addressId: z.number().int().positive().optional(),
@@ -76,7 +77,7 @@ function toOrderDto(order) {
 }
 
 function isStaff(authUser) {
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 function toAdminOrderListDto(order) {

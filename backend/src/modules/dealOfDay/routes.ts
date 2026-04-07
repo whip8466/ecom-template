@@ -2,7 +2,7 @@ import type { Prisma } from '@prisma/client';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import type { DealOfDayDealJson } from '@shared/deal-of-day';
-import { UserRole } from '../../constants/enums';
+import { isStaffFromAuth } from '../../utils/staff';
 
 const PRODUCT_STATUS = { PUBLISHED: 'PUBLISHED' } as const;
 
@@ -160,7 +160,7 @@ async function archiveExpiredDeals(tx: Prisma.TransactionClient) {
 
 function isStaff(authUser: { role: string } | undefined) {
   if (!authUser) return false;
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 function repo(fastify: FastifyInstance) {

@@ -2,6 +2,7 @@ export const UserRole = Object.freeze({
   CUSTOMER: 'CUSTOMER',
   MANAGER: 'MANAGER',
   ADMIN: 'ADMIN',
+  SUPER_ADMIN: 'SUPER_ADMIN',
 });
 
 export const OrderStatus = Object.freeze({

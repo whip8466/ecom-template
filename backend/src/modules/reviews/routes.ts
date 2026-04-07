@@ -1,5 +1,6 @@
 const { z } = require('zod');
-const { PaymentStatus, OrderStatus, UserRole } = require('../../constants/enums');
+const { PaymentStatus, OrderStatus } = require('../../constants/enums');
+const { isStaffFromAuth } = require('../../utils/staff');
 
 const PRODUCT_PUBLISHED = 'PUBLISHED';
 const REVIEW_PENDING = 'PENDING';
@@ -31,7 +32,7 @@ function customerInitial(user) {
 }
 
 function isStaff(authUser) {
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 async function reviewsRoutes(fastify) {

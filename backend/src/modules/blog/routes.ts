@@ -3,11 +3,11 @@ import type { BlogPost } from '@prisma/client';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import slugify from 'slugify';
 import { z } from 'zod';
-import { UserRole } from '../../constants/enums';
+import { isStaffFromAuth } from '../../utils/staff';
 
 function isStaff(authUser: { role: string } | undefined) {
   if (!authUser) return false;
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 function repo(fastify: FastifyInstance) {

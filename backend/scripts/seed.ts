@@ -3,6 +3,42 @@ const { initORM } = require('../src/db/orm');
 const { hashPassword } = require('../src/utils/password');
 const { UserRole, OrderStatus, PaymentStatus } = require('../src/constants/enums');
 
+/** Ensures default tenant brand + storefront/contact row (required for ADMIN/MANAGER brandId). */
+async function ensureDefaultBrandAndContactSettings(prisma) {
+  const brand = await prisma.brand.upsert({
+    where: { slug: 'dhidi' },
+    create: { name: 'Dhidi', slug: 'dhidi', isBlocked: false },
+    update: {},
+  });
+
+  await prisma.contactSettings.upsert({
+    where: { brandId: brand.id },
+    create: {
+      brandId: brand.id,
+      headline: 'Keep In Touch with Us',
+      brandName: 'Dhidi',
+      footerTagline:
+        'Curated fashion, beauty, and home decor for modern living. Quality you can trust, style that lasts.',
+      primaryEmail: 'contact@dhidi.com',
+      supportEmail: 'support@dhidi.com',
+      phone: '+1 (402) 763 282 46',
+      addressLine: '84 Sleepy Hollow St, Jamaica, New York 1432',
+      mapEmbedUrl:
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.15830869428!2d-74.11976397304903!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sus!4v1710000000000!5m2!1sen!2sus',
+      facebookUrl: 'https://facebook.com',
+      instagramUrl: null,
+      pinterestUrl: null,
+      twitterUrl: 'https://twitter.com',
+      youtubeUrl: null,
+      showBrandLogo: true,
+      showBrandName: true,
+    },
+    update: {},
+  });
+
+  return brand;
+}
+
 async function seed() {
   const prisma = await initORM();
 
@@ -25,6 +61,8 @@ async function seed() {
   await prisma.address.deleteMany();
   await prisma.user.deleteMany();
 
+  const defaultBrand = await ensureDefaultBrandAndContactSettings(prisma);
+
   const customer = await prisma.user.create({
     data: {
       firstName: 'Customer',
@@ -39,6 +77,19 @@ async function seed() {
 
   await prisma.user.create({
     data: {
+      firstName: 'Super',
+      lastName: 'Admin',
+      name: 'Super Admin',
+      email: 'superadmin@example.com',
+      phone: null,
+      passwordHash: await hashPassword('password123'),
+      role: UserRole.SUPER_ADMIN,
+      brandId: null,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
       firstName: 'Admin',
       lastName: 'User',
       name: 'Admin User',
@@ -46,6 +97,7 @@ async function seed() {
       phone: null,
       passwordHash: await hashPassword('password123'),
       role: UserRole.ADMIN,
+      brandId: defaultBrand.id,
     },
   });
 
@@ -58,6 +110,7 @@ async function seed() {
       phone: null,
       passwordHash: await hashPassword('password123'),
       role: UserRole.MANAGER,
+      brandId: defaultBrand.id,
     },
   });
 

@@ -32,6 +32,7 @@ export function AdminSidebar({ brand }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
 
   function handleLogout() {
     logout();
@@ -53,7 +54,12 @@ export function AdminSidebar({ brand }: AdminSidebarProps) {
       </div>
       <nav className="min-h-0 flex-1 overflow-y-auto py-3">
         <ul className="space-y-0.5 px-2">
-          {ADMIN_SIDEBAR_MENU.map((item) => {
+          {ADMIN_SIDEBAR_MENU.filter((item) => {
+            if (item.kind === 'link' && item.superAdminOnly) {
+              return user?.role === 'SUPER_ADMIN';
+            }
+            return true;
+          }).map((item) => {
             if (item.kind === 'link') {
               const isAddProduct = item.href === '/admin/product/new';
               const active = linkActive(pathname, item.href, isAddProduct);

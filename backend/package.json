@@ -13,6 +13,7 @@
     "db:migrate:down": "prisma migrate reset --force",
     "db:migration:create": "prisma migrate dev --create-only",
     "db:seed": "tsx scripts/seed.ts",
+    "db:reset": "prisma migrate reset --force",
     "test": "echo \"No tests configured\""
   },
   "keywords": [],

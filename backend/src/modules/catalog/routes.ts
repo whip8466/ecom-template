@@ -1,6 +1,6 @@
 const { z } = require('zod');
 const { verifyAccessToken } = require('../../utils/jwt');
-const { UserRole } = require('../../constants/enums');
+const { isStaffFromAuth } = require('../../utils/staff');
 
 const PRODUCT_STATUS = { DRAFT: 'DRAFT', PUBLISHED: 'PUBLISHED' };
 
@@ -117,7 +117,7 @@ function slugFromName(name) {
 }
 
 function requireAdminOrManager(user, reply) {
-  if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+  if (!isStaffFromAuth(user)) {
     reply.code(403).send({ message: 'Forbidden' });
     return false;
   }
@@ -225,8 +225,7 @@ async function catalogRoutes(fastify) {
     const where = {} as Record<string, any>;
 
     const user = await optionalAuthUser(request);
-    const isStaff =
-      user && (user.role === UserRole.ADMIN || user.role === UserRole.MANAGER);
+    const isStaff = user && isStaffFromAuth(user);
     if (!isStaff) {
       where.status = PRODUCT_STATUS.PUBLISHED;
     } else if (query.status === 'draft') {
@@ -388,7 +387,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
       const id = Number(request.params.id);
@@ -678,7 +677,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
       const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
@@ -765,7 +764,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
       const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
@@ -817,7 +816,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
       const body = z.object({ name: z.string().min(1).max(120) }).parse(request.body);
@@ -1099,7 +1098,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
 
@@ -1192,7 +1191,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
 
@@ -1245,7 +1244,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
 
@@ -1347,7 +1346,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
       const id = Number(request.params.id);
@@ -1409,7 +1408,7 @@ async function catalogRoutes(fastify) {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const user = request.authUser;
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MANAGER) {
+      if (!isStaffFromAuth(user)) {
         return reply.code(403).send({ message: 'Forbidden' });
       }
       const id = Number(request.params.id);

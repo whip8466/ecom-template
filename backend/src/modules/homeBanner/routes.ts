@@ -1,8 +1,8 @@
 const { z } = require('zod');
-const { UserRole } = require('../../constants/enums');
+const { isStaffFromAuth } = require('../../utils/staff');
 
 function isStaff(authUser) {
-  return authUser.role === UserRole.ADMIN || authUser.role === UserRole.MANAGER;
+  return isStaffFromAuth(authUser);
 }
 
 function bannerRepo(fastify) {

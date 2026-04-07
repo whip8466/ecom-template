@@ -22,7 +22,10 @@ export default function ContactPage() {
 
   useEffect(() => {
     let cancelled = false;
-    apiRequest<{ data: ContactSettings }>('/api/contact-settings')
+    const slug = process.env.NEXT_PUBLIC_DEFAULT_BRAND_SLUG || 'dhidi';
+    apiRequest<{ data: ContactSettings }>(
+      `/api/contact-settings?brandSlug=${encodeURIComponent(slug)}`,
+    )
       .then((res) => {
         if (!cancelled) setSettings(res.data ?? null);
       })

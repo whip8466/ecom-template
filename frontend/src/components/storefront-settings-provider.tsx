@@ -31,7 +31,10 @@ export function StorefrontSettingsProvider({ children }: { children: ReactNode }
 
   const loadContactSettings = useCallback(async () => {
     try {
-      const res = await apiRequest<{ data: ContactSettings }>('/api/contact-settings');
+      const slug = process.env.NEXT_PUBLIC_DEFAULT_BRAND_SLUG || 'dhidi';
+      const res = await apiRequest<{ data: ContactSettings }>(
+        `/api/contact-settings?brandSlug=${encodeURIComponent(slug)}`,
+      );
       setContactSettings(res.data ?? null);
     } catch {
       setContactSettings(null);

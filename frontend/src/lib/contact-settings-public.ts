@@ -6,8 +6,11 @@ import { mergeStorefrontTheme, themeTokensToCssProperties } from '@/lib/storefro
 /** One fetch per request (shared with metadata + root layout) for public contact/theme settings. */
 export const getContactSettingsPublic = cache(async (): Promise<ContactSettings | null> => {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+  const slug = process.env.NEXT_PUBLIC_DEFAULT_BRAND_SLUG || 'dhidi';
   try {
-    const res = await fetch(`${base}/api/contact-settings`, { next: { revalidate: 60 } });
+    const res = await fetch(`${base}/api/contact-settings?brandSlug=${encodeURIComponent(slug)}`, {
+      next: { revalidate: 60 },
+    });
     if (!res.ok) return null;
     const json = (await res.json()) as { data?: ContactSettings };
     return json.data ?? null;

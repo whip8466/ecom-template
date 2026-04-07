@@ -11,7 +11,7 @@ import { AdminSidebar } from './admin-sidebar';
 import { AdminTopBar } from './admin-top-bar';
 
 function isAdminRole(role: string | undefined): boolean {
-  return role === 'ADMIN' || role === 'MANAGER';
+  return role === 'ADMIN' || role === 'MANAGER' || role === 'SUPER_ADMIN';
 }
 
 type AdminShellProps = {
@@ -22,7 +22,7 @@ type AdminShellProps = {
 
 export function AdminShell({ children, mainClassName }: AdminShellProps) {
   const router = useRouter();
-  const { user, _hasHydrated } = useAuthStore();
+  const { user, token, _hasHydrated } = useAuthStore();
   const [clientReady, setClientReady] = useState(false);
   const [brand, setBrand] = useState<AdminBrand | null>(null);
 
@@ -33,7 +33,13 @@ export function AdminShell({ children, mainClassName }: AdminShellProps) {
 
   useEffect(() => {
     let cancelled = false;
-    apiRequest<{ data: ContactSettings }>('/api/contact-settings')
+    const slug = process.env.NEXT_PUBLIC_DEFAULT_BRAND_SLUG || 'dhidi';
+    const path =
+      token != null
+        ? '/api/contact-settings'
+        : `/api/contact-settings?brandSlug=${encodeURIComponent(slug)}`;
+    const opts = token != null ? { token } : {};
+    apiRequest<{ data: ContactSettings }>(path, opts)
       .then((res) => {
         if (cancelled || !res.data) return;
         setBrand({
@@ -49,7 +55,7 @@ export function AdminShell({ children, mainClassName }: AdminShellProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [token]);
 
   const isReady = _hasHydrated || clientReady;
 
